@@ -1,0 +1,69 @@
+# Compiled output
+/dist
+/tmp
+/out-tsc
+/bazel-out
+
+# Node
+/node_modules
+npm-debug.log
+yarn-error.log
+.pnpm-debug.log
+
+# Angular
+.angular/cache
+/.angular
+/connect.lock
+/coverage
+/libpeerconnection.log
+testem.log
+/typings
+
+# Vitest
+/.vitest
+/vitest-report
+
+# Playwright
+/test-results
+/playwright-report
+/playwright/.cache
+/blob-report
+
+# Environment / secrets
+# Nothing secret should ever reach the client bundle — see docs/standards/security.md#secrets.
+# These are ignored so a local .env cannot be committed by accident.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# IDEs and editors
+.idea/
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/
+
+# macOS / Windows / Linux
+.DS_Store
+Thumbs.db
+desktop.ini
+*~
+
+# Agent tooling
+# Local, machine-specific agent settings. AGENTS.local.md is NOT ignored — it is the
+# project's override file and belongs in version control (see AGENTS.md).
+.claude/settings.local.json
+
+# Spartan
+# Generated Helm source IS committed — it is our code (docs/standards/spartan-ui.md).
+# Nothing to ignore here; this note exists so nobody adds an ignore for it later.

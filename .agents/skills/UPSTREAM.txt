@@ -1,0 +1,16 @@
+# Vendored agent skills. Do not edit these files by hand — see AGENTS.md.
+# Regenerate with ./scripts/sync-skills.sh
+
+source: angular
+repo: angular/angular
+path: skills/dev-skills
+commit: 840f071566a0c5e44048051135da329e4e3ecaef
+skills: angular-developer angular-new-app
+
+source: spartan
+repo: mofirojean/angular-ui-skills
+path: skills/spartan-ng-developer
+commit: 784a630f3cc2a0811cb4b588b94a7d36fff34424
+skills: spartan-ng-developer
+
+synced: 2026-08-06T20:34:23Z
