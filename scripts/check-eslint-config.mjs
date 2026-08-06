@@ -1,12 +1,17 @@
 #!/usr/bin/env node
 //
-// Guards against the flat-config footgun described at the top of eslint.config.js:
-// a later block that sets `no-restricted-imports` / `no-restricted-syntax` REPLACES the
-// earlier definition instead of extending it. Forgetting to spread the shared constants
-// silently removes the global bans for that layer — the config still lints clean, it just
-// stops enforcing what docs/standards/longevity.md promises.
+// Two guards on eslint.config.js. Both exist because a flat-config mistake fails SILENTLY:
+// the config still lints clean, it just stops enforcing what docs/standards/ promises.
 //
-// Run: node scripts/check-eslint-config.mjs   (also wired into `npm run lint`)
+//   1. Composition — a later block that sets `no-restricted-imports` / `no-restricted-syntax`
+//      REPLACES the earlier definition instead of extending it. Forgetting to spread the shared
+//      constants removes the global bans for that layer.
+//
+//   2. Effective resolution — asserts what the rules actually come out as for representative
+//      files, after all block overlaps and `ignores` are applied. This is the check that catches
+//      "the spec files quietly lost their layer restrictions".
+//
+// Run: node scripts/check-eslint-config.mjs   (wired into `npm run lint`)
 
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
@@ -14,6 +19,11 @@ import path from 'node:path';
 
 const require = createRequire(import.meta.url);
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const config = require(path.join(root, 'eslint.config.js'));
+
+const failures = [];
+
+// ── 1. Composition ─────────────────────────────────────────────────────────────────────────────
 
 /** Must appear in EVERY block that defines no-restricted-imports. */
 const GLOBAL_PACKAGES = [
@@ -25,11 +35,8 @@ const GLOBAL_PACKAGES = [
   'axios',
 ];
 
-/** Minimum number of selectors in EVERY block that defines no-restricted-syntax. */
+/** Minimum selector count in EVERY block that defines no-restricted-syntax. */
 const GLOBAL_SYNTAX_COUNT = 6;
-
-const config = require(path.join(root, 'eslint.config.js'));
-const failures = [];
 
 for (const block of config) {
   if (!block?.rules) continue;
@@ -42,7 +49,7 @@ for (const block of config) {
     if (missing.length) {
       failures.push(
         `${where}: no-restricted-imports drops global bans: ${missing.join(', ')}\n` +
-          `  Fix: build the value with restrictImports(...) so BANNED_PACKAGES is spread in.`,
+          `    Fix: build the value with restrictImports(...) so BANNED_PACKAGES is spread in.`,
       );
     }
   }
@@ -52,17 +59,112 @@ for (const block of config) {
     const count = syntax.length - 1; // first element is the severity
     if (count < GLOBAL_SYNTAX_COUNT) {
       failures.push(
-        `${where}: no-restricted-syntax has ${count} selectors, expected at least ${GLOBAL_SYNTAX_COUNT}\n` +
-          `  Fix: build the value with restrictSyntax(...) so BANNED_SYNTAX is spread in.`,
+        `${where}: no-restricted-syntax has ${count} selectors, expected >= ${GLOBAL_SYNTAX_COUNT}\n` +
+          `    Fix: build the value with restrictSyntax(...) so BANNED_SYNTAX is spread in.`,
       );
     }
   }
 }
 
+// ── 2. Effective resolution ────────────────────────────────────────────────────────────────────
+
+/** Minimal glob matcher. Tokenised in one pass so substitutions cannot corrupt each other. */
+function globToRegExp(glob) {
+  let out = '';
+  let i = 0;
+  while (i < glob.length) {
+    const c = glob[i];
+    if (c === '*') {
+      if (glob[i + 1] === '*') {
+        if (glob[i + 2] === '/') { out += '(?:[^/]*/)*'; i += 3; } else { out += '.*'; i += 2; }
+      } else { out += '[^/]*'; i += 1; }
+    } else if (c === '?') { out += '[^/]'; i += 1; }
+    else if ('.+^${}()|[]\\'.includes(c)) { out += `\\${c}`; i += 1; }
+    else { out += c; i += 1; }
+  }
+  return new RegExp(`^${out}$`);
+}
+const matches = (glob, file) => globToRegExp(glob).test(file);
+
+// Self-test the matcher; a broken matcher would make every assertion below meaningless.
+for (const [glob, file, expected] of [
+  ['**/*.spec.ts', 'src/app/ui/card/card.spec.ts', true],
+  ['**/*.spec.ts', 'src/app/ui/card/card.ts', false],
+  ['src/app/ui/**/*.ts', 'src/app/ui/card/card.ts', true],
+  ['src/app/ui/helm/**', 'src/app/ui/helm/button/button.ts', true],
+  ['src/app/ui/helm/**', 'src/app/ui/card/card.ts', false],
+]) {
+  if (matches(glob, file) !== expected) {
+    failures.push(`internal: glob matcher wrong for ${glob} vs ${file}`);
+  }
+}
+
+function resolve(file) {
+  let imports = null;
+  let syntax = null;
+  for (const block of config) {
+    if (!block?.rules || !block.files) continue;
+    if (!block.files.some((g) => matches(g, file))) continue;
+    if (block.ignores?.some((g) => matches(g, file))) continue;
+    if (block.rules['no-restricted-imports']) imports = block.rules['no-restricted-imports'];
+    if (block.rules['no-restricted-syntax']) syntax = block.rules['no-restricted-syntax'];
+  }
+  const groups = (imports?.[1]?.patterns ?? []).flatMap((p) => p.group);
+  const paths = (imports?.[1]?.paths ?? []).map((p) => p.name);
+  return {
+    globals: GLOBAL_PACKAGES.every((p) => paths.includes(p)),
+    banInject: (syntax ?? []).some((s) => s.selector?.includes('"inject"')),
+    banFeatures: groups.some((g) => g.includes('features')),
+    banApiSvc: groups.some((g) => g.includes('-api.service')),
+    banFakeAsync: (syntax ?? []).some((s) => s.selector?.includes('fakeAsync')),
+  };
+}
+
+/** What each representative file MUST resolve to. Update deliberately, never to make CI pass. */
+const EXPECTATIONS = {
+  // ui/ components: full layer boundaries, no injection, no I/O.
+  'src/app/ui/card/card.ts': { globals: true, banInject: true, banFeatures: true, banApiSvc: true },
+  // ui/ specs: keep the layer boundaries, lose the inject ban (TestBed.inject is legitimate).
+  'src/app/ui/card/card.spec.ts': {
+    globals: true, banInject: false, banFeatures: true, banApiSvc: true, banFakeAsync: true,
+  },
+  // Generated Helm code: globals only — we did not author it and it legitimately injects.
+  'src/app/ui/helm/button/button.ts': {
+    globals: true, banInject: false, banFeatures: false, banApiSvc: false,
+  },
+  // Feature components: no cross-feature imports, no direct API service.
+  'src/app/features/inv/list.ts': {
+    globals: true, banInject: false, banFeatures: true, banApiSvc: true,
+  },
+  // Feature services/stores: may use an API service; still no cross-feature imports.
+  'src/app/features/inv/inv.service.ts': {
+    globals: true, banInject: false, banFeatures: true, banApiSvc: false,
+  },
+  // Feature specs: layer boundaries kept, zone-era helpers banned.
+  'src/app/features/inv/list.spec.ts': {
+    globals: true, banFeatures: true, banApiSvc: false, banFakeAsync: true,
+  },
+  // util/ is pure.
+  'src/app/util/money.ts': { globals: true, banFeatures: true },
+};
+
+for (const [file, expected] of Object.entries(EXPECTATIONS)) {
+  const actual = resolve(file);
+  for (const [key, want] of Object.entries(expected)) {
+    if (actual[key] !== want) {
+      failures.push(`${file}: expected ${key}=${want}, got ${actual[key]}`);
+    }
+  }
+}
+
+// ── Report ─────────────────────────────────────────────────────────────────────────────────────
+
 if (failures.length) {
-  console.error('eslint.config.js composition check FAILED:\n');
+  console.error('eslint.config.js check FAILED:\n');
   for (const f of failures) console.error(`  - ${f}\n`);
   process.exit(1);
 }
 
-console.log('eslint.config.js: all blocks retain the global restrictions.');
+console.log(
+  `eslint.config.js: composition intact, ${Object.keys(EXPECTATIONS).length} resolution cases pass.`,
+);

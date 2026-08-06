@@ -237,14 +237,26 @@ module.exports = tseslint.config(
   },
 
   {
-    // ui/ is presentational: injects nothing, performs no I/O.
+    // ui/ layer boundaries. These apply to specs too — a test in ui/ importing from features/
+    // is the same coupling as the component doing it, and would leak past the rule below.
     //
-    // Generated Spartan Helm code is EXCLUDED: it legitimately injects (it composes Brain
-    // primitives via hostDirectives and uses CDK services), and we did not author it.
+    // Generated Spartan Helm code is EXCLUDED throughout: it legitimately injects (it composes
+    // Brain primitives via hostDirectives and uses CDK services), and we did not author it.
     // Keep this glob in step with `componentsPath` in components.json — see
     // docs/standards/spartan-ui.md#where-helm-code-lives
     files: ['src/app/ui/**/*.ts'],
-    ignores: ['**/*.spec.ts', 'src/app/ui/helm/**'],
+    ignores: ['src/app/ui/helm/**'],
+    rules: {
+      'no-restricted-imports': restrictImports([...LAYER_PATTERNS.ui, ...IO_PATTERNS], IO_PATHS),
+      'no-restricted-syntax': restrictSyntax(),
+    },
+  },
+
+  {
+    // ui/ components inject nothing. Specs are exempt: a test legitimately calls
+    // TestBed.inject() to get the thing under test.
+    files: ['src/app/ui/**/*.ts'],
+    ignores: ['src/app/ui/helm/**', '**/*.spec.ts'],
     rules: {
       'no-restricted-imports': restrictImports([...LAYER_PATTERNS.ui, ...IO_PATTERNS], IO_PATHS),
       'no-restricted-syntax': restrictSyntax([

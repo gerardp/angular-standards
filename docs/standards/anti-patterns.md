@@ -36,6 +36,7 @@ Ordered by how expensive each one is to unwind later.
 | 20 | DTO type or ISO date string leaking out of `data-access/` | Map to the domain model at the boundary | [data-access](data-access.md#map-dtos-at-the-boundary) |
 | 21 | Money as a float or a formatted string | Integer minor units | [data-access](data-access.md#map-dtos-at-the-boundary) |
 | 22 | Each 401 triggering its own token refresh | One shared in-flight refresh | [security](security.md#token-refresh) |
+| 22b | `finalize` placed *after* `shareReplay` in a shared request | Put `finalize` upstream — otherwise one unsubscribe clears the cache mid-flight | [security](security.md#token-refresh) |
 
 ## Structure
 

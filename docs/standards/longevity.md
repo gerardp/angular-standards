@@ -35,7 +35,7 @@ Do not write these. If you find them, migrate them.
 | `@ViewChild` / `@ViewChildren` / `@ContentChild` / `@ContentChildren` | `viewChild()`, `viewChildren()`, `contentChild()`, `contentChildren()` | Superseded |
 | `@HostBinding` / `@HostListener` | `host: {}` in the component decorator | Superseded |
 | Constructor parameter injection | `inject()` in field initialisers | Superseded |
-| Zone.js / `provideZoneChangeDetection()` | zoneless (the v22 default) | Being removed from the framework |
+| Zone.js / `provideZoneChangeDetection()` | zoneless (the default since v21) | **Project policy**, not deprecated — the API is still stable |
 | Karma + Jasmine | Vitest (the v22 CLI default) | Replaced |
 | Protractor | Playwright | Removed years ago |
 | `signal.mutate()` | `.set()` / `.update()` with a new reference | Never shipped as stable; does not exist |
@@ -122,14 +122,19 @@ issue linked in `AGENTS.local.md`.
 ### Upgrade procedure
 
 ```bash
-ng update                                        # lists what is out of date, changes nothing
-ng update @angular/core@23 @angular/cli@23 --dry-run   # preview against a CONCRETE major
-ng update @angular/core@23 @angular/cli@23             # apply
+ng update                                              # lists what is out of date, changes nothing
+git switch -c chore/angular-23                         # upgrade on its own branch, always
+ng update @angular/core@23 @angular/cli@23 --create-commits
 ng build && ng test                                    # must be green before merging
 ```
 
-**Never use `@next` here.** `@next` is the prerelease channel, not a preview mechanism — running it
-installs a prerelease into the app. Use a concrete major and `--dry-run` to inspect the plan.
+Two things to know about this command:
+
+- **`ng update` has no `--dry-run`.** The way to inspect what it did is `--create-commits` (`-C`),
+  which puts the update and each migration in its own commit so you can read them individually and
+  revert selectively. Run it on a branch.
+- **Never use `@next`.** It is the prerelease channel, not a preview mechanism — it installs a beta
+  or RC into the app. Always name a concrete major.
 
 Then, in the same PR:
 

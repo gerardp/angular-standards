@@ -61,12 +61,22 @@ export class InvoiceDetail {
 export class InvoiceDetailService {
   private readonly api = inject(InvoiceApiService);
 
-  /** Tracks `id`: re-fetches on navigation and cancels the superseded request. */
-  byId(id: Signal<string>) {
+  /** Tracks `rawId`: re-fetches on navigation and cancels the superseded request. */
+  byId(rawId: Signal<string>) {
+    // A URL segment is untrusted input. Validate and brand it before it reaches the API,
+    // and return null for a malformed id so the resource simply does not fetch.
+    const id = computed(() => toInvoiceId(rawId()));   // string -> InvoiceId | null
     return this.api.invoice(id);
   }
 }
 ```
+
+Note the `computed`: the route param arrives as a plain `string`, and `InvoiceApiService.invoice()`
+takes `Signal<InvoiceId | null>`. Branded ids are not assignable from `string`, which is the point —
+the conversion has to be explicit, and it is the natural place to validate. `toInvoiceId` lives in
+`data-access/` next to the model, and returns `null` for anything malformed, which the resource
+already treats as "do not fetch". See
+[data-access.md](data-access.md#validate-what-the-server-sends).
 
 The component injects a **feature service**, never `InvoiceApiService`. Injecting the API service
 directly would violate [architecture.md](architecture.md#the-one-rule) and is blocked by
@@ -106,8 +116,8 @@ enforced independently by the server — a guard is trivially bypassed by anyone
 
 ## Route-scoped providers
 
-Provide feature state on the route, so its lifetime matches the feature and it is destroyed on
-navigation away:
+Provide feature state on the route to scope its visibility to that feature. Note that this scopes
+**visibility, not lifetime** — see the warning below the example:
 
 ```ts
 // features/invoices/invoices.routes.ts

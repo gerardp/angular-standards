@@ -29,10 +29,14 @@ Most of the standards are enforced by tooling. Run it before reading anything; d
 what a tool already reports.
 
 ```bash
-ng lint     # architecture layer rules, banned APIs, a11y — see eslint.config.js
-ng build    # template type checking
+npm run lint   # runs scripts/check-eslint-config.mjs, then ng lint
+ng build       # template type checking
 ng test
 ```
+
+Use `npm run lint`, not `ng lint` directly: the npm script also runs the ESLint composition check,
+which verifies the layer rules are still actually wired up (see the note at the top of
+`eslint.config.js`).
 
 Anything these catch is the author's to fix before review is worth doing. Say so and stop.
 

@@ -136,7 +136,10 @@ export class InvoicesStore {
 }
 ```
 
-Provided on the route, so its lifetime matches the feature:
+Provided on the route, so it is scoped to the feature rather than the whole app. This limits
+visibility, **not lifetime** — route injectors persist after navigating away, so never rely on
+navigation to reset state. See
+[routing.md](routing.md#route-injectors-are-not-destroyed-on-navigation).
 
 ```ts
 // invoices.routes.ts

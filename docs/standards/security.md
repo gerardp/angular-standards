@@ -40,12 +40,24 @@ private refresh$?: Observable<void>;
 
 refreshOnce(): Observable<void> {
   this.refresh$ ??= this.http.post<void>('/api/auth/refresh', {}).pipe(
+    finalize(() => (this.refresh$ = undefined)),   // MUST come before shareReplay
     shareReplay({ bufferSize: 1, refCount: false }),
-    finalize(() => (this.refresh$ = undefined)),
   );
   return this.refresh$;
 }
 ```
+
+**Operator order is load-bearing here.** `finalize` must sit *upstream* of `shareReplay`:
+
+- **Correct (above):** `finalize` is part of the shared pipeline, so exactly one instance exists and
+  it fires when the refresh actually completes or errors. The cached `refresh$` is cleared once, at
+  the right moment.
+- **Wrong (`shareReplay` then `finalize`):** each subscriber gets its own `finalize`, and `finalize`
+  fires on **unsubscribe** as well as on complete. One waiter abandoning its request — a cancelled
+  navigation, a destroyed component — clears `refresh$` while the shared request is still in flight
+  (`refCount: false` keeps it alive). The next 401 sees an empty cache and starts a *second*
+  refresh. That is exactly the burst this section exists to prevent, reintroduced by two operators
+  in the wrong order.
 
 Rules:
 
@@ -53,6 +65,8 @@ Rules:
 - A failed refresh clears the session and redirects to login. **Never retry a failed refresh** —
   that is an infinite loop against your own auth server.
 - The refresh request itself must never be intercepted into another refresh.
+
+**Audit:** Flag `finalize` placed after `shareReplay` in any shared-request pipeline.
 
 ## HTTP configuration
 
