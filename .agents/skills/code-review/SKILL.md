@@ -82,7 +82,7 @@ not a finding. Ask it as a question.
 | Level | Meaning | Examples |
 | --- | --- | --- |
 | **Blocking** | Merging causes a bug, a vulnerability, or scheduled future work | Anti-patterns 1–10: layer violation, banned API, token in `localStorage`, secret in the bundle, cross-feature import |
-| **Should fix** | Correctness or maintainability problem, not urgent | Missing `track`, `effect()` writing state, derived value stored in a signal |
+| **Should fix** | Correctness or maintainability problem, not urgent | Missing `track`, `effect()` writing state, derived value stored in a signal, behaviour change with no test |
 | **Consider** | Preference with a reason | Naming, splitting a component, test coverage of an edge case |
 
 Nothing outside these three. If it does not fit, it is not a review comment.

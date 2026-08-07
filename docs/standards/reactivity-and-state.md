@@ -144,7 +144,11 @@ navigation to reset state. See
 ```ts
 // invoices.routes.ts
 export const routes: Routes = [
-  { path: '', providers: [InvoicesStore], loadComponent: () => import('./invoice-list') },
+  {
+    path: '',
+    providers: [InvoicesStore],
+    loadComponent: () => import('./invoice-list/invoice-list').then((m) => m.InvoiceList),
+  },
 ];
 ```
 

@@ -55,7 +55,7 @@ docs/standards/
   routing.md                 Lazy loading, guards, route-scoped state, SSR.
   security.md                Tokens, XSS, CSP, secrets.
   testing.md                 Vitest, zoneless testing, what to test.
-  anti-patterns.md           57-item review checklist, ordered by cost.
+  anti-patterns.md           59-item review checklist, ordered by cost.
 
 .agents/skills/
   angular-developer/         Vendored from angular/angular. Do not edit.

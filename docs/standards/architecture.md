@@ -43,8 +43,9 @@ src/app/
 ├── data-access/     API services and domain models. One *-api.service.ts per backend area.
 │                    Owns DTO → domain mapping. Imported by features and core only.
 │
-├── features/        Route-level areas. One folder per route tree.
-│   └── <feature>/   Components, feature-local services/stores, <feature>.routes.ts.
+├── features/        Route-level areas. One folder per feature.
+│   └── <feature>/   Code grouped by screen or cohesive flow when needed.
+│                    Components and feature-local logic stay with their narrowest consumer.
 │                    ⚠ A feature NEVER imports from another feature.
 │
 ├── ui/              Presentational components. No injected services, no I/O.
@@ -83,30 +84,54 @@ That last rule is the one that decays first and costs the most. It is enforced m
 
 Answer in order; the first match wins.
 
-1. Is it a pure function with no Angular imports? → `util/`
+1. Is it a pure function with no Angular imports, used by more than one feature? → `util/`
 2. Does it render, take `input()`s, and inject nothing? → `ui/`
 3. Does it perform HTTP or map a DTO? → `data-access/`
 4. Is it needed by more than one feature, app-wide, and provided once? → `core/`
 5. Otherwise → `features/<feature>/`, colocated with what uses it.
 
-**Default to colocation.** A component used by one feature belongs in that feature, not in `ui/`.
-Promote it to `ui/` on the second consumer, not in anticipation of one. Premature sharing creates
-the coupling that the layer rules exist to prevent.
+**Default to colocation.** A component or pure helper used by one feature belongs in that feature,
+not in `ui/` or `util/`. Promote it on the second consumer, not in anticipation of one. Premature
+sharing creates the coupling that the layer rules exist to prevent.
 
 ## Feature-local structure
 
+Group first by feature, then by screen or cohesive flow — never by technical type. A feature with
+one screen keeps that screen's component, template, styles, spec, and service directly in the
+feature root; do not create a redundant `<feature>/<feature>/` directory. Introduce per-screen or
+per-flow directories when the feature gains a second screen or independently changing flow:
+
 ```
-features/invoices/
-├── invoices.routes.ts          Lazy route definitions for this feature
-├── invoice-list/
-│   ├── invoice-list.ts         Component
-│   └── invoice-list.html
-├── invoice-detail/
-├── invoices-store.ts           Feature state, IF the feature needs one (see below)
-└── invoice-filters.ts          Feature-local pure helpers
+features/<feature>/
+├── <feature>.routes.ts                  Lazy route definitions for this feature
+├── <screen-or-flow>/
+│   ├── <screen-or-flow>.ts              Component
+│   ├── <screen-or-flow>.html            Template
+│   ├── <screen-or-flow>.css             If Tailwind utilities cannot express the styles
+│   ├── <screen-or-flow>.spec.ts         Tests
+│   └── <screen-or-flow>-service.ts      Orchestration used only by this screen, if needed
+├── <feature-local-widget>/
+│   ├── <feature-local-widget>.ts
+│   ├── <feature-local-widget>.html
+│   └── <feature-local-widget>.spec.ts
+├── <feature>-store.ts                   State shared across the feature, if needed
+└── <feature>-<purpose>.ts               Pure logic shared across the feature, if needed
 ```
 
-Every feature is lazy-loaded via `loadChildren`. See [routing.md](routing.md).
+Keep a service, store, helper, template, stylesheet, and spec beside the narrowest screen or flow
+that owns it. In a multi-screen feature, put one at the feature root only when several screens use
+it. Do not create feature-wide `components/`, `services/`, or `stores/` buckets: those names
+describe file types, not domain boundaries. Name pure-logic files after what they do
+(`invoice-filters.ts`), never after their technical category (`invoice-helpers.ts`).
+
+**Audit:** Flag feature-wide `components/`, `services/`, or `stores/` directories that group
+unrelated files by technical type. In a multi-screen feature, flag screen-specific files placed at
+the feature root when only one screen or flow uses them. Do not flag root placement in a
+single-screen feature. Flag generic `helpers.ts` or `*-helpers.ts` filenames; the name must state
+what the file does.
+
+Every feature is lazy-loaded: use `loadComponent` for a single-screen feature and `loadChildren`
+for a feature with its own route tree. See [routing.md](routing.md).
 
 ## Does this feature need a store?
 

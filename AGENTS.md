@@ -25,8 +25,9 @@ These six apply to every change. Everything else is in the topic files.
    [data-access.md](docs/standards/data-access.md).
 2. **Check the Angular version before you write code.** Run `ng version`. APIs move fast; guidance
    for v20 is wrong for v22. See [longevity.md](docs/standards/longevity.md).
-3. **Run `ng build` and `ng test` when you finish.** Fix what they report before you report done.
-   Do not skip this.
+3. **Test every behaviour change.** Add or update the smallest test that proves it. Every bug fix
+   needs a regression test that fails without the fix. Run `ng build` and `ng test` when you finish,
+   and fix what they report before you report done. Do not skip this.
 4. **Never use an API on the banned list.** [longevity.md](docs/standards/longevity.md) holds the
    list of deprecated and removal-scheduled APIs. This is a 10-year application; using a deprecated
    API is creating scheduled work for a future maintainer.

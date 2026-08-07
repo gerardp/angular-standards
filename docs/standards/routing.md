@@ -56,7 +56,7 @@ export class InvoiceDetail {
 ```
 
 ```ts
-// features/invoices/invoice-detail-service.ts
+// features/invoices/invoice-detail/invoice-detail-service.ts
 @Injectable()
 export class InvoiceDetailService {
   private readonly api = inject(InvoiceApiService);

@@ -6,6 +6,18 @@ E2E. Karma, Jasmine, and Protractor are banned.
 Framework detail: `.agents/skills/angular-developer/references/testing-fundamentals.md`,
 `component-harnesses.md`, `router-testing.md`, `e2e-testing.md`.
 
+## Tests are part of the change
+
+Every behaviour change must add or update the smallest test that proves the new promise. Every bug
+fix needs a regression test that fails without the fix and passes with it. Use the lowest test tier
+that can prove the behaviour; most changes do not need an E2E test.
+
+A documentation-only change or behaviour-preserving refactor does not need a new test, but the
+existing suite must still pass.
+
+**Audit:** Flag behaviour changes with no added or updated test, and bug fixes with no regression
+test. Do not demand a new test for documentation-only changes or behaviour-preserving refactors.
+
 ## What to test, in priority order
 
 Over ten years, tests are the thing that lets you upgrade fearlessly. Their value is proportional
