@@ -1,6 +1,6 @@
 # Components
 
-Framework API detail lives in `.agents/skills/angular-developer/references/components.md`,
+Framework API detail lives in `angular-developer/references/components.md`,
 `inputs.md`, `outputs.md`, `host-elements.md`. This file states the house rules on top.
 
 ## Shape

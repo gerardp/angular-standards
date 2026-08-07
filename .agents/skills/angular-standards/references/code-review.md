@@ -1,16 +1,8 @@
----
-name: code-review
-description: Audits Angular changes against this repo's standards in docs/standards/. Trigger when reviewing a PR, a diff, a branch, or when asked to check whether code follows the project conventions, architecture rules, or banned-API policy.
-license: MIT
-metadata:
-  version: '1.0'
----
-
 # Code review
 
-Audit changed code against `docs/standards/`. This skill owns **process** — scope, routing,
-severity, report format. It deliberately does **not** restate rules; the standards files are the
-single source of truth. If a rule is not written down there, it is not a finding.
+Audit changed code against the standards in this skill's `references/`. This file owns **process** —
+scope, routing, severity, report format. It deliberately does **not** restate rules; the standards
+files are the single source of truth. If a rule is not written down there, it is not a finding.
 
 ## Procedure
 
@@ -38,11 +30,15 @@ Use `npm run lint`, not `ng lint` directly: the npm script also runs the ESLint 
 which verifies the layer rules are still actually wired up (see the note at the top of
 `eslint.config.js`).
 
+If the project has no `eslint.config.js` or no `check-eslint-config.mjs`, the standards are not
+being enforced mechanically at all. Say so — it is the highest-value finding you can report — and
+point at this skill's `assets/`.
+
 Anything these catch is the author's to fix before review is worth doing. Say so and stop.
 
 ### 3. Route by what changed
 
-Load only the standards relevant to the diff. Do not read all of `docs/standards/` every time.
+Load only the standards relevant to the diff. Do not read all of `references/` every time.
 
 | Changed | Read |
 | --- | --- |
@@ -50,13 +46,13 @@ Load only the standards relevant to the diff. Do not read all of `docs/standards
 | `data-access/**` | `data-access.md`, `security.md` |
 | `*.html`, `*.css` | `templates-and-styling.md`, `spartan-ui.md` |
 | Generated Helm code (see `components.json`) | `spartan-ui.md` — check for an `AGENTS.local.md` entry |
-| Spartan component usage | `spartan-ui.md`, then `.agents/skills/spartan-ng-developer/references/helm-conventions.md` |
+| Spartan component usage | `spartan-ui.md`, then `spartan-ng-developer/references/helm-conventions.md` |
 | Forms | `forms.md` |
 | `*.routes.ts`, `app.config.ts` | `routing.md` |
 | Auth, interceptors, storage | `security.md` |
 | `*.spec.ts` | `testing.md` |
 | `package.json` | `longevity.md` — the dependency policy |
-| Angular version bump | `longevity.md` — then re-run `scripts/sync-skills.sh` |
+| Angular version bump | `longevity.md` |
 
 Always also check `AGENTS.local.md`. A documented override is not a finding — flagging it as one
 wastes the author's time and teaches them to ignore reviews.
@@ -66,8 +62,8 @@ wastes the author's time and teaches them to ignore reviews.
 Work from the `Audit:` lines in the standards files you loaded. Those lines exist so that authoring
 rules and review rules cannot drift apart — each one names a specific, checkable condition.
 
-Then check the consolidated list in `docs/standards/anti-patterns.md`, which is ordered by cost to
-unwind.
+Then check the consolidated list in [anti-patterns.md](anti-patterns.md), which is ordered by cost
+to unwind.
 
 ### 5. Verify before reporting
 
@@ -95,7 +91,7 @@ Order by severity, most severe first. For each finding:
 **[Blocking]** src/app/features/invoices/invoice-list.ts:24 — Component performs I/O
 
 Injects `HttpClient` and calls it in `loadInvoices()`. Components never perform I/O
-(docs/standards/architecture.md#the-one-rule).
+(angular-standards: architecture.md#the-one-rule).
 
 Move the call into `InvoiceApiService` as an `httpResource` and read the signal here.
 ```
@@ -111,8 +107,8 @@ End with a one-line verdict: what blocks the merge, or that nothing does.
   is noise.
 - **Do not report the same issue at every occurrence.** Report it once with a count and one
   representative location.
-- **Do not invent rules.** If it is not in `docs/standards/` and not a genuine bug, it is at most a
-  "Consider", and you must say it is your opinion rather than project policy.
+- **Do not invent rules.** If it is not in this skill's `references/` and not a genuine bug, it is
+  at most a "Consider", and you must say it is your opinion rather than project policy.
 - **Do not rewrite the author's approach** because you would have done it differently. Review what
   is there against the standards.
 - **Do not pad.** Zero findings is a legitimate and common result. Say so plainly and stop. A review
@@ -120,7 +116,7 @@ End with a one-line verdict: what blocks the merge, or that nothing does.
 
 ## When a standard is wrong
 
-If a rule in `docs/standards/` is genuinely wrong or has been overtaken by a framework change, say
-so in the review and propose the edit to the standards file. Do not silently ignore it, and do not
-enforce something you believe is incorrect. The standards are versioned code, not scripture — but
-they change by proposal, not by drift.
+If a rule in `references/` is genuinely wrong or has been overtaken by a framework change, say so in
+the review and propose the edit to the standards file. Do not silently ignore it, and do not enforce
+something you believe is incorrect. The standards are versioned code, not scripture — but they
+change by proposal, not by drift.

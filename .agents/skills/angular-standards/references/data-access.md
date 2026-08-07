@@ -2,7 +2,7 @@
 
 Everything that crosses the network boundary. Lives in `src/app/data-access/`.
 
-Framework detail: `.agents/skills/angular-developer/references/http-client.md`, `resource.md`.
+Framework detail: `angular-developer/references/http-client.md`, `resource.md`.
 
 ## Reads use `httpResource`, mutations use `HttpClient`
 

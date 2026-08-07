@@ -3,7 +3,7 @@
 Signals are the reactivity model. RxJS is a tool for genuinely stream-shaped problems, not the
 default.
 
-Framework detail: `.agents/skills/angular-developer/references/signals-overview.md`,
+Framework detail: `angular-developer/references/signals-overview.md`,
 `linked-signal.md`, `resource.md`, `effects.md`.
 
 ## Decision table

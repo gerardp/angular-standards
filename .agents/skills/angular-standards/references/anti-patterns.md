@@ -96,5 +96,5 @@ Ordered by how expensive each one is to unwind later.
 | 55 | Angular major sitting past its active window | Upgrade within 9 months of release; never enter LTS | [longevity](longevity.md#2-upgrade-on-a-schedule-not-on-demand) |
 | 56 | `tsconfig` strictness flag weakened | Restore it, or record it in `AGENTS.local.md` | [core-engineering](core-engineering.md#typescript-configuration) |
 | 57 | Deviation from a standard with no `AGENTS.local.md` entry | Record it with a removal condition | `AGENTS.local.md` |
-| 58 | Vendored skill in `.agents/skills/` edited by hand | Edit `docs/standards/`; skills are re-synced | [AGENTS.md](../../AGENTS.md) |
+| 58 | Upstream skill (`angular-developer`, `spartan-ng-developer`) edited by hand | Edit this skill's `references/`; upstream skills are re-synced | [SKILL.md](../SKILL.md) |
 | 59 | Commented-out code | Delete it; git remembers | [core-engineering](core-engineering.md#comments) |

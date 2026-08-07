@@ -3,7 +3,7 @@
 The route tree is the application's skeleton. It determines what loads when, where features begin
 and end, and where state is scoped.
 
-Framework detail: `.agents/skills/angular-developer/references/define-routes.md`,
+Framework detail: `angular-developer/references/define-routes.md`,
 `loading-strategies.md`, `route-guards.md`, `rendering-strategies.md`.
 
 ## Configuration

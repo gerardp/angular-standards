@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 //
 // Two guards on eslint.config.js. Both exist because a flat-config mistake fails SILENTLY:
-// the config still lints clean, it just stops enforcing what docs/standards/ promises.
+// the config still lints clean, it just stops enforcing what angular-standards/references/ promises.
 //
 //   1. Composition — a later block that sets `no-restricted-imports` / `no-restricted-syntax`
 //      REPLACES the earlier definition instead of extending it. Forgetting to spread the shared
@@ -11,15 +11,33 @@
 //      files, after all block overlaps and `ignores` are applied. This is the check that catches
 //      "the spec files quietly lost their layer restrictions".
 //
-// Run: node scripts/check-eslint-config.mjs   (wired into `npm run lint`)
+// Install: copy this file to scripts/ and eslint.config.js to the project root, then wire
+//   "lint": "node scripts/check-eslint-config.mjs && ng lint"
+// Run: node scripts/check-eslint-config.mjs
 
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
+import { existsSync } from 'node:fs';
 import path from 'node:path';
 
 const require = createRequire(import.meta.url);
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const config = require(path.join(root, 'eslint.config.js'));
+
+// Normal install is scripts/check-eslint-config.mjs next to a root eslint.config.js. Fall back to
+// the working directory so the script also works when run from somewhere else.
+const candidates = [
+  path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'eslint.config.js'),
+  path.resolve(process.cwd(), 'eslint.config.js'),
+];
+const configPath = candidates.find((p) => existsSync(p));
+if (!configPath) {
+  console.error(
+    'eslint.config.js not found. Looked in:\n' +
+      candidates.map((p) => `  - ${p}`).join('\n') +
+      '\n\nCopy it from .agents/skills/angular-standards/assets/eslint.config.js to the project root.',
+  );
+  process.exit(1);
+}
+const config = require(configPath);
 
 const failures = [];
 

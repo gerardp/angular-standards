@@ -1,0 +1,145 @@
+---
+name: angular-standards
+description: House coding standards for a long-lived Angular 22+ application — layer architecture and dependency direction, signals and state, data access, Signal Forms, Tailwind v4, Spartan NG, routing, security, testing, and the banned-API list — plus the review process that audits changes against them. Use when writing, refactoring or reviewing Angular code, when deciding where a file goes, when adding a dependency, when upgrading Angular, or when asked to review a diff, branch or PR against project conventions.
+license: MIT
+metadata:
+  version: '2.0'
+---
+
+# Angular standards
+
+You are working on a long-lived Angular application. Target: **Angular 22.1+**, designed to stay on
+the upgrade path through v23, v24 and beyond for 10+ years.
+
+Read this file first. It routes you to the rule that applies.
+
+## The three sources, in precedence order
+
+1. **`AGENTS.local.md`** in the project root — that repo's exceptions. Overrides everything below.
+   May not exist yet.
+2. **`references/` in this skill** — house rules. Stricter than, or additional to, the upstream
+   Angular and Spartan skills.
+3. **The upstream skills** — `angular-developer` from `angular/angular`, and `spartan-ng-developer`
+   from `mofirojean/angular-ui-skills`.
+
+When `references/` and an upstream skill disagree, `references/` wins. It is written to be stricter,
+never contradictory on framework facts.
+
+## Non-negotiable rules
+
+These six apply to every change. Everything else is in the topic files.
+
+1. **A component never performs I/O.** No `HttpClient`, no `httpResource`, no SDK calls in a
+   component. Components call a service or store method. See
+   [data-access.md](references/data-access.md).
+2. **Check the Angular version before you write code.** Run `ng version`. APIs move fast; guidance
+   for v20 is wrong for v22. See [longevity.md](references/longevity.md).
+3. **Test every behaviour change.** Add or update the smallest test that proves it. Every bug fix
+   needs a regression test that fails without the fix. Run `ng build` and `ng test` when you finish,
+   and fix what they report before you report done. Do not skip this.
+4. **Never use an API on the banned list.** [longevity.md](references/longevity.md) holds the list
+   of deprecated and removal-scheduled APIs. This is a 10-year application; using a deprecated API
+   is creating scheduled work for a future maintainer.
+5. **Never edit generated Helm code by hand without reading**
+   [spartan-ui.md](references/spartan-ui.md). Its location comes from `components.json`
+   (`componentsPath`), not from a hard-coded path. That code is generated, owned by us, and has
+   upgrade rules.
+6. **State the tradeoff before adding a dependency.** See the dependency policy in
+   [longevity.md](references/longevity.md).
+
+## Topic index
+
+| Topic | File |
+| --- | --- |
+| Layers, folders, dependency direction | [architecture.md](references/architecture.md) |
+| **Banned APIs, upgrade cadence, dependency policy** | [longevity.md](references/longevity.md) |
+| TypeScript config, naming, accessibility baseline | [core-engineering.md](references/core-engineering.md) |
+| Components, inputs/outputs, host bindings | [components.md](references/components.md) |
+| Signals, derived state, when to add a store | [reactivity-and-state.md](references/reactivity-and-state.md) |
+| HTTP, services, DTO boundary, error handling | [data-access.md](references/data-access.md) |
+| Signal Forms | [forms.md](references/forms.md) |
+| Control flow, Tailwind v4, animations | [templates-and-styling.md](references/templates-and-styling.md) |
+| Spartan NG brain/helm (house rules) | [spartan-ui.md](references/spartan-ui.md) |
+| Routes, guards, lazy loading, SSR | [routing.md](references/routing.md) |
+| Tokens, XSS, CSP, input validation | [security.md](references/security.md) |
+| Vitest, harnesses, zoneless testing | [testing.md](references/testing.md) |
+| Review checklist | [anti-patterns.md](references/anti-patterns.md) |
+| **Reviewing a diff, branch or PR** | [code-review.md](references/code-review.md) |
+
+## Upstream framework depth
+
+The standards files cite upstream material as `<skill-name>/references/<file>.md` — for example
+`angular-developer/references/signal-forms.md`. Those live in the upstream skills, not here:
+
+```bash
+npx skills add angular/skills -s angular-developer
+npx skills add mofirojean/angular-ui-skills -s spartan-ng-developer
+```
+
+- **`angular-developer`** — component anatomy, DI resolution, router lifecycle, Signal Forms API,
+  testing, CLI. `angular/skills` is Angular's published mirror of
+  `angular/angular/skills/dev-skills/`; both work, the mirror clones in seconds.
+- **`spartan-ng-developer`** — the four Helm template patterns, per-component APIs, Brain
+  primitives, theming. Read `references/helm-conventions.md` before writing any Spartan template.
+
+**Both `-s` flags are load-bearing.** Those two repos ship seven skills between them. Four are left
+out on purpose:
+
+| Left out | Why |
+| --- | --- |
+| `angular-material-developer`, `ng-zorro-developer`, `primeng-developer` | Recommend component libraries this standard bans — [spartan-ui.md](references/spartan-ui.md), [longevity.md](references/longevity.md) |
+| `angular-new-app` | Scaffolds a new app. The app already exists by the time it is installed, and its `ng new --ai-config` step generates an `AGENTS.md` that collides with this project's. Its "generate everything with `ng generate`" step ignores [architecture.md](references/architecture.md) on file placement. |
+
+The seventh, **`ui-craft`**, is optional rather than excluded: it is library-agnostic visual-quality
+guidance (hierarchy, spacing, typography, density, empty states) and explicitly pairs with
+`spartan-ng-developer`. Nothing in it conflicts with these standards. Add it if the project has
+dashboards or data-heavy views:
+
+```bash
+npx skills add mofirojean/angular-ui-skills -s ui-craft
+```
+
+`angular-new-app` is genuinely useful **before** a project exists. Install it globally if you want
+it: `npx skills add angular/skills -s angular-new-app -g`.
+
+If a cited file is not present, the skill is not installed. Say so rather than guessing at the API,
+and fall back to `https://angular.dev` for framework questions.
+
+## Mechanical enforcement — set this up once per project
+
+Most of these rules are checkable, and a failing build beats review discipline. `assets/` holds the
+two files that do it. On a project that does not have them yet, install them:
+
+```bash
+cp .agents/skills/angular-standards/assets/eslint.config.js ./eslint.config.js
+mkdir -p scripts && cp .agents/skills/angular-standards/assets/check-eslint-config.mjs ./scripts/
+ng add @angular-eslint/schematics    # keep the eslint.config.js you just copied if prompted
+```
+
+Then wire the composition check into `package.json`, so the flat-config footgun documented at the
+top of `eslint.config.js` cannot come back silently:
+
+```jsonc
+"scripts": {
+  "lint": "node scripts/check-eslint-config.mjs && ng lint"
+}
+```
+
+`eslint.config.js` enforces: the banned-package and banned-decorator lists, the "no I/O in a
+component" rule, the layer dependency direction, the accessibility baseline as errors, and the
+zoneless test rules. `check-eslint-config.mjs` asserts that those rules survive ESLint flat-config
+composition — a mistake there fails **silently**, leaving a config that lints clean while enforcing
+nothing.
+
+## Maintaining the standards
+
+**When a decision is made that an agent could not infer, write it down.** That is the whole
+discipline.
+
+- Adding a rule? Put it in the relevant `references/` file **with an `Audit:` line**, so
+  [code-review.md](references/code-review.md) picks it up automatically. One source of truth for
+  authoring and for review.
+- Deviating from a rule? Record it in the project's `AGENTS.local.md` **with a removal condition**.
+  An override without an expiry becomes permanent by accident.
+- Angular deprecated something new? Add it to the banned table in
+  [longevity.md](references/longevity.md) during the upgrade PR, while the release notes are open.

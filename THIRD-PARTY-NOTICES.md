@@ -1,15 +1,19 @@
 # Third-party notices
 
-This repository vendors agent skills from other projects. Those files are **copied verbatim** and
-remain under their original copyright and licence. They live under `.agents/skills/` and are
-re-synced by `scripts/sync-skills.sh`; the exact commit of each is recorded in
-`.agents/skills/UPSTREAM.txt`.
+This repository keeps a pinned reference copy of agent skills from other projects. Those files are
+**copied verbatim** and remain under their original copyright and licence. They live under
+`vendor/skills/` and are re-synced by `scripts/sync-skills.sh`; the exact commit of each is recorded
+in `vendor/skills/UPSTREAM.txt`.
+
+They are deliberately **not** published as skills from this repository — `npx skills add` only sees
+`.agents/skills/`, so a consumer installs them from their own upstreams and always gets the current
+version. See the install commands in `.agents/skills/angular-standards/SKILL.md`.
 
 Nothing in this file is covered by the `LICENSE` grant at the root of this repository.
 
 ---
 
-## `.agents/skills/angular-developer/` and `.agents/skills/angular-new-app/`
+## `vendor/skills/angular-developer/` and `vendor/skills/angular-new-app/`
 
 - **Source:** [angular/angular](https://github.com/angular/angular), path `skills/dev-skills/`
 - **Licence:** MIT
@@ -41,7 +45,7 @@ SOFTWARE.
 
 ---
 
-## `.agents/skills/spartan-ng-developer/`
+## `vendor/skills/spartan-ng-developer/`
 
 - **Source:** [mofirojean/angular-ui-skills](https://github.com/mofirojean/angular-ui-skills), path `skills/spartan-ng-developer/`
 - **Licence:** MIT

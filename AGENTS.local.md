@@ -1,10 +1,10 @@
 # Local overrides
 
-Repo-specific exceptions to `docs/standards/`. This file is yours — nothing regenerates it, and
-`scripts/sync-skills.sh` never touches it.
+Repo-specific exceptions to `angular-standards/references/`. This file is yours — nothing
+regenerates it, and `npx skills update` never touches it.
 
 Use it for deviations you have decided on deliberately. Anything here **overrides**
-`docs/standards/`.
+`angular-standards/references/`.
 
 ## Format
 
@@ -14,7 +14,7 @@ override goes away. An override without an expiry condition becomes permanent by
 ```markdown
 ### Override: <rule being overridden>
 
-- **Standard:** docs/standards/<file>.md — "<the rule>"
+- **Standard:** angular-standards/references/<file>.md — "<the rule>"
 - **Deviation:** <what we do instead>
 - **Reason:** <why>
 - **Removal condition:** <what has to be true for this to go away>
@@ -34,7 +34,7 @@ guessing at things they cannot infer from the code.
 - **Backend / API base URL:**
 - **Auth model:** (e.g. httpOnly cookie session, OIDC provider, custom JWT)
 - **Deployment target:** (static host, Node SSR, edge)
-- **Rendering mode:** (CSR only / SSG / SSR — see docs/standards/routing.md)
+- **Rendering mode:** (CSR only / SSG / SSR — see angular-standards/references/routing.md)
 - **Canonical reference implementations:** point at real files once they exist, e.g.
   - Feature with store: `src/app/features/<x>/`
   - Data-access service: `src/app/data-access/<x>-api.service.ts`

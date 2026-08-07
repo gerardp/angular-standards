@@ -1,5 +1,5 @@
 // @ts-check
-// Architecture enforcement. The rules in docs/standards/ that CAN be checked mechanically are
+// Architecture enforcement. The rules in angular-standards/references/ that CAN be checked mechanically are
 // checked here — review discipline decays, a failing build does not.
 //
 // Setup:
@@ -27,65 +27,65 @@ const angular = require('angular-eslint');
 
 // ── Shared restriction sets ────────────────────────────────────────────────────────────────────
 
-/** docs/standards/longevity.md#banned-apis — applies everywhere. */
+/** angular-standards/references/longevity.md#banned-apis — applies everywhere. */
 const BANNED_PACKAGES = [
   {
     name: '@angular/animations',
     message:
-      'Deprecated. Use native CSS with animate.enter / animate.leave. docs/standards/longevity.md',
+      'Deprecated. Use native CSS with animate.enter / animate.leave. angular-standards/references/longevity.md',
   },
   {
     name: '@angular/common/http',
     importNames: ['HttpClientModule'],
-    message: 'Deprecated. Use provideHttpClient(). docs/standards/longevity.md',
+    message: 'Deprecated. Use provideHttpClient(). angular-standards/references/longevity.md',
   },
   {
     name: '@angular/platform-browser-dynamic',
-    message: 'Use bootstrapApplication(). docs/standards/longevity.md',
+    message: 'Use bootstrapApplication(). angular-standards/references/longevity.md',
   },
-  { name: 'moment', message: 'Use Intl.* / Temporal. docs/standards/longevity.md' },
+  { name: 'moment', message: 'Use Intl.* / Temporal. angular-standards/references/longevity.md' },
   {
     name: 'lodash',
-    message: 'Write the function you need into src/app/util/. docs/standards/longevity.md',
+    message: 'Write the function you need into src/app/util/. angular-standards/references/longevity.md',
   },
-  { name: 'axios', message: 'Use provideHttpClient(). docs/standards/longevity.md' },
+  { name: 'axios', message: 'Use provideHttpClient(). angular-standards/references/longevity.md' },
 ];
 
-/** docs/standards/longevity.md#banned-apis — decorators and APIs superseded by signals. */
+/** angular-standards/references/longevity.md#banned-apis — decorators and APIs superseded by signals. */
 const BANNED_SYNTAX = [
   {
     selector: 'PropertyDefinition > Decorator > CallExpression[callee.name="Input"]',
-    message: '@Input() is banned. Use input() / input.required(). docs/standards/longevity.md',
+    message: '@Input() is banned. Use input() / input.required(). angular-standards/references/longevity.md',
   },
   {
     selector: 'PropertyDefinition > Decorator > CallExpression[callee.name="Output"]',
-    message: '@Output() is banned. Use output(). docs/standards/longevity.md',
+    message: '@Output() is banned. Use output(). angular-standards/references/longevity.md',
   },
   {
     selector:
       'PropertyDefinition > Decorator > CallExpression[callee.name=/^(ViewChild|ViewChildren|ContentChild|ContentChildren)$/]',
     message:
-      'Query decorators are banned. Use viewChild() / contentChild(). docs/standards/longevity.md',
+      'Query decorators are banned. Use viewChild() / contentChild(). angular-standards/references/longevity.md',
   },
   {
     selector:
       'PropertyDefinition > Decorator > CallExpression[callee.name=/^(HostBinding|HostListener)$/]',
     message:
-      '@HostBinding/@HostListener are banned. Use the host object. docs/standards/components.md',
+      '@HostBinding/@HostListener are banned. Use the host object. angular-standards/references/components.md',
   },
   {
     selector: 'CallExpression[callee.property.name="mutate"]',
     message:
-      'signal.mutate() does not exist. Use .set() / .update(). docs/standards/reactivity-and-state.md',
+      'signal.mutate() does not exist. Use .set() / .update(). angular-standards/references/reactivity-and-state.md',
   },
   {
     selector: 'CallExpression[callee.name="provideZoneChangeDetection"]',
-    message: 'This app is zoneless. docs/standards/longevity.md',
+    message: 'This app is zoneless. angular-standards/references/longevity.md',
   },
 ];
 
 /**
- * docs/standards/architecture.md#the-one-rule — components never perform I/O.
+ * angular-standards/references/architecture.md#the-one-rule — components never perform I/O.
  * The *-api.service.ts naming convention is what makes this checkable.
  */
 const IO_PATHS = [
@@ -93,7 +93,7 @@ const IO_PATHS = [
     name: '@angular/common/http',
     importNames: ['HttpClient', 'httpResource'],
     message:
-      'Components never perform I/O. Call a service or store method. docs/standards/architecture.md#the-one-rule',
+      'Components never perform I/O. Call a service or store method. angular-standards/references/architecture.md#the-one-rule',
   },
 ];
 
@@ -101,30 +101,30 @@ const IO_PATTERNS = [
   {
     group: ['**/*-api.service'],
     message:
-      'Components never import an API service directly. Go through a feature service or store. docs/standards/architecture.md#the-one-rule',
+      'Components never import an API service directly. Go through a feature service or store. angular-standards/references/architecture.md#the-one-rule',
     allowTypeImports: true,
   },
 ];
 
-/** docs/standards/architecture.md#dependency-direction — one entry per layer. */
+/** angular-standards/references/architecture.md#dependency-direction — one entry per layer. */
 const LAYER_PATTERNS = {
   util: [
     {
       group: ['@angular/*', '**/core/**', '**/features/**', '**/data-access/**', '**/ui/**'],
       message:
-        'util/ must be pure: no Angular, no DI, no app imports. docs/standards/architecture.md',
+        'util/ must be pure: no Angular, no DI, no app imports. angular-standards/references/architecture.md',
     },
   ],
   ui: [
     {
       group: ['**/features/**', '**/core/**'],
       message:
-        'ui/ components are presentational: inputs in, outputs out. docs/standards/components.md#presentational-components-ui',
+        'ui/ components are presentational: inputs in, outputs out. angular-standards/references/components.md#presentational-components-ui',
     },
     {
       group: ['**/data-access/**'],
       message:
-        'ui/ must not depend on data-access services. Accept data via input(). docs/standards/architecture.md',
+        'ui/ must not depend on data-access services. Accept data via input(). angular-standards/references/architecture.md',
       allowTypeImports: true,
     },
   ],
@@ -132,14 +132,14 @@ const LAYER_PATTERNS = {
     {
       group: ['**/features/**', '**/ui/**'],
       message:
-        'data-access/ must not depend on features or UI. docs/standards/architecture.md#dependency-direction',
+        'data-access/ must not depend on features or UI. angular-standards/references/architecture.md#dependency-direction',
     },
   ],
   core: [
     {
       group: ['**/features/**'],
       message:
-        'core/ must not depend on features. Invert the dependency. docs/standards/architecture.md#dependency-direction',
+        'core/ must not depend on features. Invert the dependency. angular-standards/references/architecture.md#dependency-direction',
     },
   ],
   // Within-feature imports are relative ("./x", "../sibling/x") and do not contain "features/",
@@ -151,7 +151,7 @@ const LAYER_PATTERNS = {
     {
       group: ['**/features/*/**', '@app/features/**'],
       message:
-        'A feature must never import another feature. Move the shared code down into ui/, data-access/, util/ or core/. docs/standards/architecture.md#dependency-direction',
+        'A feature must never import another feature. Move the shared code down into ui/, data-access/, util/ or core/. angular-standards/references/architecture.md#dependency-direction',
     },
   ],
 };
@@ -185,7 +185,7 @@ module.exports = tseslint.config(
       '@typescript-eslint/no-non-null-assertion': 'error',
       '@typescript-eslint/consistent-type-definitions': ['error', 'interface'],
       // 'no-public': require private/protected to be explicit, but keep public members bare —
-      // which is what the examples in docs/standards/components.md do.
+      // which is what the examples in angular-standards/references/components.md do.
       '@typescript-eslint/explicit-member-accessibility': [
         'error',
         { accessibility: 'no-public' },
@@ -243,7 +243,7 @@ module.exports = tseslint.config(
     // Generated Spartan Helm code is EXCLUDED throughout: it legitimately injects (it composes
     // Brain primitives via hostDirectives and uses CDK services), and we did not author it.
     // Keep this glob in step with `componentsPath` in components.json — see
-    // docs/standards/spartan-ui.md#where-helm-code-lives
+    // angular-standards/references/spartan-ui.md#where-helm-code-lives
     files: ['src/app/ui/**/*.ts'],
     ignores: ['src/app/ui/helm/**'],
     rules: {
@@ -263,7 +263,7 @@ module.exports = tseslint.config(
         {
           selector: 'CallExpression[callee.name="inject"]',
           message:
-            'Components in ui/ must inject nothing. Move it to a feature. docs/standards/components.md#presentational-components-ui',
+            'Components in ui/ must inject nothing. Move it to a feature. angular-standards/references/components.md#presentational-components-ui',
         },
       ]),
     },
@@ -352,12 +352,12 @@ module.exports = tseslint.config(
       '@typescript-eslint/no-unsafe-assignment': 'off',
       // testing.md#zoneless-testing — Zone-era helpers do not apply to a zoneless app.
       // NOTE: .subscribe() is deliberately NOT banned here. Testing a genuinely
-      // Observable-returning API by subscribing is legitimate; see docs/standards/testing.md.
+      // Observable-returning API by subscribing is legitimate; see angular-standards/references/testing.md.
       'no-restricted-syntax': restrictSyntax([
         {
           selector: 'CallExpression[callee.name=/^(fakeAsync|tick)$/]',
           message:
-            'Zone-based test helpers. Use await fixture.whenStable(). docs/standards/testing.md#zoneless-testing',
+            'Zone-based test helpers. Use await fixture.whenStable(). angular-standards/references/testing.md#zoneless-testing',
         },
       ]),
     },

@@ -3,7 +3,7 @@
 **Signal Forms only.** Stable since v22. Reactive Forms and template-driven forms are not used in
 this codebase.
 
-Full API surface: `.agents/skills/angular-developer/references/signal-forms.md` — read it before
+Full API surface: `angular-developer/references/signal-forms.md` — read it before
 writing a form. It is the largest reference for a reason; the API has sharp edges this file only
 summarises.
 
@@ -65,11 +65,12 @@ interface UserFormModel {
 }
 ```
 
-> **Divergence from the upstream skill.** `.agents/skills/angular-developer/references/signal-forms.md`
+> **Divergence from the upstream skill.** `angular-developer/references/signal-forms.md`
 > states "NEVER use null or undefined as initial values". That overstates the rule: Angular's own
 > Signal Forms documentation permits `null` for leaf values whose control treats it as empty, and
 > bans only `undefined` and optional properties. **This file wins** — see the precedence order in
-> `AGENTS.md`. Re-check this on the next `sync-skills.sh` run in case upstream corrects it.
+> [SKILL.md](../SKILL.md). Re-check this after the next `npx skills update` in case upstream
+> corrects it.
 
 **2. Validation lives in the schema function**, never in the template and never in the submit
 handler. All of `required`, `email`, `min`, `max`, `minLength`, `maxLength`, `pattern` come from

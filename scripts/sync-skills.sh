@@ -1,17 +1,20 @@
 #!/usr/bin/env bash
 #
-# Re-sync the vendored agent skills from their upstream repositories.
+# Re-sync the vendored upstream skills under vendor/skills/.
 #
-# Skills listed in SOURCES below are a VENDORED COPY, never edited by hand. Upstream guidance
-# changes with each framework and library release; a stale copy has agents writing last year's
-# Angular, which is the failure mode docs/standards/longevity.md exists to prevent.
+# These are a pinned REFERENCE COPY, never edited by hand and never published from this repo —
+# they belong to angular/angular and mofirojean/angular-ui-skills, and consumers install them
+# from there. We keep a pinned copy so `.agents/skills/angular-standards/references/` can cite
+# specific upstream files and so an upgrade shows up as a reviewable diff. A stale copy has
+# agents writing last year's Angular, which is the failure mode
+# .agents/skills/angular-standards/references/longevity.md exists to prevent.
 #
 # Run this:
 #   - after every Angular major or minor upgrade
 #   - after every Spartan minor upgrade
 #   - quarterly, as a matter of course
 #
-# Our own skills (code-review, and anything else we author) are preserved untouched.
+# Our own skill (.agents/skills/angular-standards/) is a separate tree and is never touched here.
 #
 # Reproducibility: each source's ref is resolved to a commit SHA once, then the tree and every
 # blob are fetched by that SHA — never from the moving branch. Files are staged in a temp
@@ -26,7 +29,7 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-SKILLS_DIR="$REPO_ROOT/.agents/skills"
+SKILLS_DIR="$REPO_ROOT/vendor/skills"
 UPSTREAM_FILE="$SKILLS_DIR/UPSTREAM.txt"
 
 # ── Sources ────────────────────────────────────────────────────────────────────────────────────
@@ -141,7 +144,7 @@ if [[ -n "$ONLY_KEY" ]]; then
   echo "Synced '$ONLY_KEY' only — UPSTREAM.txt left untouched for other sources."
 else
   {
-    echo "# Vendored agent skills. Do not edit these files by hand — see AGENTS.md."
+    echo "# Pinned upstream skills. Do not edit these files by hand — see vendor/skills/README.md."
     echo "# Regenerate with ./scripts/sync-skills.sh"
     echo
     for r in "${RESULTS[@]}"; do
@@ -166,11 +169,11 @@ fi
 cat <<'EOF'
 
 Next:
-  1. git diff .agents/skills/ — read what changed upstream.
+  1. git diff vendor/skills/ — read what changed upstream.
   2. If Angular deprecated something new, add it to the banned table in
-     docs/standards/longevity.md.
+     .agents/skills/angular-standards/references/longevity.md.
   3. If a peer-dependency ceiling moved (e.g. Spartan now supports the next Angular major),
-     update the dependency-ceiling table in docs/standards/longevity.md.
-  4. If upstream guidance now contradicts docs/standards/, reconcile deliberately.
-     Known divergence to re-check: the null rule in docs/standards/forms.md.
+     update the dependency-ceiling table in .agents/skills/angular-standards/references/longevity.md.
+  4. If upstream guidance now contradicts .agents/skills/angular-standards/references/, reconcile deliberately.
+     Known divergence to re-check: the null rule in .agents/skills/angular-standards/references/forms.md.
 EOF

@@ -30,7 +30,7 @@ testem.log
 /blob-report
 
 # Environment / secrets
-# Nothing secret should ever reach the client bundle — see docs/standards/security.md#secrets.
+# Nothing secret should ever reach the client bundle — see angular-standards/references/security.md#secrets.
 # These are ignored so a local .env cannot be committed by accident.
 .env
 .env.*
@@ -65,5 +65,5 @@ desktop.ini
 .claude/settings.local.json
 
 # Spartan
-# Generated Helm source IS committed — it is our code (docs/standards/spartan-ui.md).
+# Generated Helm source IS committed — it is our code (angular-standards/references/spartan-ui.md).
 # Nothing to ignore here; this note exists so nobody adds an ignore for it later.

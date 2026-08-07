@@ -141,8 +141,8 @@ Then, in the same PR:
 1. Read the release notes for newly deprecated APIs; add them to the banned table above.
 2. Run any optional modernisation migrations: `ng generate @angular/core:<migration>`.
 3. Update the dependency-ceiling table above with the ranges you actually observed.
-4. Re-sync the vendored skills: `./scripts/sync-skills.sh` — upstream guidance changes with the
-   framework and with Spartan, and a stale skill will have agents writing last year's code.
+4. Update the agent skills: `npx skills update` — upstream guidance changes with the framework and
+   with Spartan, and a stale skill will have agents writing last year's code.
 
 **Audit:** If `package.json` pins an Angular major that is no longer in its active window, that is
 the highest-priority finding in the repo.
@@ -180,7 +180,7 @@ Before adding one, answer in the PR description:
 | Date/time library (in our code) | Deferred | Use `Intl.*` and `Temporal` when available. Do not add moment or date-fns. |
 | HTTP client library | Banned | `provideHttpClient()` is the client. Never add axios. |
 | Utility library (lodash etc.) | Banned | Write the three functions you actually need into `src/app/util/`. |
-| Component library other than Spartan | Banned | Two design systems is the most expensive mistake available here. |
+| Component library other than Spartan | Banned | Two design systems is the most expensive mistake available here. Spartan is a structural bet, not a preference: Helm source lives in our repo, so the component layer survives upstream going quiet. Swapping it is a fork of these standards, not an `AGENTS.local.md` override. |
 
 **Audit:** Flag any new entry in `package.json` `dependencies` whose PR description does not answer
 the four questions above.

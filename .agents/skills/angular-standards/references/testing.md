@@ -3,7 +3,7 @@
 **Vitest** for unit and component tests — the Angular CLI default since v22. **Playwright** for
 E2E. Karma, Jasmine, and Protractor are banned.
 
-Framework detail: `.agents/skills/angular-developer/references/testing-fundamentals.md`,
+Framework detail: `angular-developer/references/testing-fundamentals.md`,
 `component-harnesses.md`, `router-testing.md`, `e2e-testing.md`.
 
 ## Tests are part of the change
@@ -170,8 +170,11 @@ node scripts/check-eslint-config.mjs      # the layer rules are actually still c
 ng lint                                   # architecture rules from eslint.config.js
 npx playwright test
 npm audit --audit-level=high
-./scripts/sync-skills.sh --check          # vendored Angular skills are not stale
 ```
+
+Keeping the skills current is a scheduled task, not a CI gate — `npx skills update` during the
+Angular upgrade PR, and quarterly. Failing a build because upstream shipped a doc change blocks
+work that has nothing to do with it.
 
 A red build is never merged, and a flaky test is fixed or deleted — never retried into green. A
 test suite nobody trusts is worse than no suite, because it stops being read.

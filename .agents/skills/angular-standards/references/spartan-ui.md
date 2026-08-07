@@ -3,11 +3,10 @@
 Spartan is the component layer. Angular Material is not used, and neither is any other component
 library — see [longevity.md](longevity.md#3-dependency-policy).
 
-> **API detail lives in the vendored skill.** `.agents/skills/spartan-ng-developer/` covers
-> installation, the four Helm template patterns, every component category, Brain primitives, forms
-> integration, theming and accessibility — pinned to a specific Spartan version and re-synced by
-> `scripts/sync-skills.sh`. **Read it before writing Spartan code.** This file states only the
-> decisions that are ours, and wins where the two disagree.
+> **API detail lives in the upstream skill.** `spartan-ng-developer/` covers installation, the four
+> Helm template patterns, every component category, Brain primitives, forms integration, theming and
+> accessibility. **Read it before writing Spartan code.** This file states only the decisions that
+> are ours, and wins where the two disagree.
 
 ## The two layers
 
@@ -49,7 +48,7 @@ ng g @spartan-ng/cli:ui-theme      # emits the CSS custom properties for light/d
 ng g @spartan-ng/cli:ui button     # add a component
 ```
 
-In an Nx workspace it is `npx nx g @spartan-ng/cli:ui <name>`. The vendored skill's `setup.md` has
+In an Nx workspace it is `npx nx g @spartan-ng/cli:ui <name>`. The upstream skill's `setup.md` has
 the full procedure and the troubleshooting for unstyled components.
 
 Generated Helm source is committed. It is ours now.
@@ -159,7 +158,7 @@ When Spartan ships a meaningful upstream fix to a Helm component:
 1. Regenerate into a scratch location and diff against ours.
 2. Port the fix, keeping our variants and any recorded overrides.
 3. Update the `AGENTS.local.md` entry if the override still applies.
-4. Re-run `./scripts/sync-skills.sh` so the vendored skill matches the installed Spartan version.
+4. Run `npx skills update spartan-ng-developer` so the skill matches the installed Spartan version.
 
 Do this alongside the annual Angular upgrade — see
 [longevity.md](longevity.md#2-upgrade-on-a-schedule-not-on-demand) — so there is one review moment
