@@ -144,9 +144,14 @@ config still lints clean, it just stops enforcing what the standards promise.
 
 ### Starting a new app
 
+These standards assume Angular lives in a `frontend/` sub-folder of a backend repo — Laravel, Rails,
+Django. Serving the API is not Angular's job, and the layer rules in
+[architecture.md](.agents/skills/angular-standards/references/architecture.md) are written for that
+split. Run this from the repo root; the CLI creates the folder:
+
 ```bash
-npx @angular/cli@latest new my-app --style css --ssr
-cd my-app
+npx @angular/cli@latest new frontend --style css --no-ssr --skip-git --ai-config none --interactive=false
+cd frontend
 
 npx skills add gerardp/angular-standards
 npx skills add angular/skills -s angular-developer
@@ -154,6 +159,14 @@ npx skills add mofirojean/angular-ui-skills -s spartan-ng-developer
 
 npm i -D @spartan-ng/cli && ng g @spartan-ng/cli:init && ng g @spartan-ng/cli:ui-theme
 ```
+
+The three flags that are not obvious. `--skip-git`: the backend repo already has git, and nesting
+one inside it gives you a folder whose changes never commit. `--ai-config none`: the CLI otherwise
+writes its own `AGENTS.md` over the one you copy below. `--no-ssr`: an app entirely behind a login
+gets nothing from SSR and pays for it with a Node server to deploy next to the backend — add it
+later with `ng add @angular/ssr` if a public, indexable route ever appears, and decide it per route
+rather than app-wide (see
+[routing.md](.agents/skills/angular-standards/references/routing.md#rendering-strategies)).
 
 Then set up [Enforcement](#enforcement), copy `AGENTS.md`, `CLAUDE.md` and `AGENTS.local.md` from
 this repo, and fill in the "Project facts" section of `AGENTS.local.md` — backend URL, auth model,
