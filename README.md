@@ -29,9 +29,6 @@ npx skills add angular/skills -s angular-developer
 npx skills add https://github.com/spartan-ng/spartan --skill spartan
 ```
 
-Then, once per project, wire up the mechanical enforcement — see
-[Enforcement](#enforcement) below.
-
 ## Layout
 
 ```
@@ -64,33 +61,6 @@ vendor/skills/               Pinned reference copies of the upstream skills. Nev
                              from here, never hand-edited — see THIRD-PARTY-NOTICES.md.
 scripts/sync-skills.sh       Re-sync vendor/skills/ from upstream.
 ```
-
-## Enforcement
-
-The rules an agent can ignore are the rules that decay. `assets/` holds the two files that turn the
-checkable ones into build failures:
-
-```bash
-ng add @angular-eslint/schematics --skip-confirmation --defaults
-
-if [ -d ../.agents/skills/angular-standards ]; then
-  standards_skill=../.agents/skills/angular-standards
-else
-  standards_skill=.agents/skills/angular-standards
-fi
-
-cp "$standards_skill/assets/eslint.config.js" ./eslint.config.js
-mkdir -p scripts && cp "$standards_skill/assets/check-eslint-config.mjs" ./scripts/
-npm pkg set scripts.lint="node scripts/check-eslint-config.mjs && ng lint"
-```
-
-The order matters: `ng add` generates its own baseline `eslint.config.js`, so copy the house config
-**afterwards**. Otherwise the schematic silently overwrites the rules this skill promises.
-
-`eslint.config.js` enforces the banned-package and banned-decorator lists, "no I/O in a component",
-the layer dependency direction, the accessibility baseline as errors, and the zoneless test rules.
-`check-eslint-config.mjs` exists because a flat-config composition mistake fails **silently** — the
-config still lints clean, it just stops enforcing what the standards promise.
 
 ## Using it
 
@@ -189,23 +159,11 @@ ng g @spartan-ng/cli:info --json
 `info --json` must report `config.found: true`, non-null Tailwind, CDK and Brain versions, and
 `button` under `installedComponents`. If it does not, stop: the setup did not finish.
 
-Then set up [Enforcement](#enforcement) and complete the strict flags in
+Then complete the strict flags in
 [core-engineering.md](.agents/skills/angular-standards/references/core-engineering.md#typescript-configuration).
 Fill in the "Project facts" section of the root `AGENTS.local.md` — backend URL, auth model, rendering
 strategy. It is the highest-value thing you can give an agent, because it is the context that
 cannot be inferred from the code.
-
-### Working with agents
-
-Start the agent from the full-stack repository root as usual:
-
-```bash
-codex
-```
-
-Codex loads the root `AGENTS.md` and root-local skills. The `Angular frontend` rule activates the
-standards only when a task touches `frontend/`, so backend work keeps its own guidance. Ask for a
-review with *"review my frontend changes against the standards"*.
 
 ### Keeping it current
 
