@@ -28,13 +28,6 @@ npx skills add angular/skills -s angular-developer
 npx skills add https://github.com/spartan-ng/spartan --skill spartan
 ```
 
-> **Those two, and no other Angular UI skill.** The popular ones are written for a generic Angular
-> project; this one has a design system, so their worked examples teach against it. The list of
-> what to skip and why is in the skill's `SKILL.md`.
->
-> `angular/skills` is Angular's mirror of `angular/angular/skills/dev-skills/` — same content,
-> clones in seconds. Spartan has no mirror, so that command pulls the whole monorepo for one skill.
-
 Then, once per project, wire up the mechanical enforcement — see
 [Enforcement](#enforcement) below.
 
