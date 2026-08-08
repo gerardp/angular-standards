@@ -160,8 +160,25 @@ experimental — do not depend on it in this codebase until it is stable, and re
 `AGENTS.local.md` if that changes. See
 [longevity.md](longevity.md#do-not-build-on-developer-preview).
 
-**Audit:** Flag feature-specific services declared `providedIn: 'root'`. Flag any comment or code
-that assumes a route-scoped service is destroyed on navigation.
+### The one exception: services loaded with `injectAsync`
+
+`injectAsync()` resolves a service with no `providers` array to consult, so its target **must** be
+auto-provisioned — `providedIn: 'root'` is structural, not a choice. A feature-specific service that
+is lazy-loaded this way is therefore exempt from the rule above, on one condition: **it must be
+stateless.**
+
+That condition is the whole reason the rule exists. Root provision is discouraged here because a
+root service accumulates fields only one screen reads and becomes the app's shared mutable global
+([reactivity-and-state.md](reactivity-and-state.md#state-ownership)). A stateless collaborator — an
+exporter, a parser, a formatter — carries none of that risk: it is a function with dependencies. If
+it grows a signal or a cache, the exemption is void and it needs a different design.
+
+See [performance.md](performance.md#lazy-load-heavy-services) for the pattern.
+
+**Audit:** Flag feature-specific services declared `providedIn: 'root'`, **unless** the service is
+the target of an `injectAsync()` call and holds no mutable state — no signals, no caches, no fields
+written after construction. Flag any comment or code that assumes a route-scoped service is
+destroyed on navigation.
 
 ## Resolvers: use sparingly
 

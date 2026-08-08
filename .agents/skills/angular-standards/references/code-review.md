@@ -50,6 +50,9 @@ Load only the standards relevant to the diff. Do not read all of `references/` e
 | `@spartan-ng/*` version bump | `spartan-ui.md` — was `healthcheck` run? |
 | Forms | `forms.md` |
 | `*.routes.ts`, `app.config.ts` | `routing.md` |
+| `angular.json`, budget thresholds | `performance.md` |
+| `injectAsync`, or a service newly declared `providedIn: 'root'` | `performance.md`, `routing.md` |
+| `NgZone`, `ChangeDetectorRef`, `changeDetection:`, `*cdkVirtualFor`, a `@for` over a large list, a pipe that caches rather than formats | `performance.md` |
 | Auth, interceptors, storage | `security.md` |
 | `*.spec.ts` | `testing.md` |
 | `package.json` | `longevity.md` — the dependency policy |

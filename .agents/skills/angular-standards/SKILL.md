@@ -61,6 +61,7 @@ These six apply to every change. Everything else is in the topic files.
 | Control flow, Tailwind v4, animations | [templates-and-styling.md](references/templates-and-styling.md) |
 | Spartan NG brain/helm (house rules) | [spartan-ui.md](references/spartan-ui.md) |
 | Routes, guards, lazy loading, SSR | [routing.md](references/routing.md) |
+| Budgets, profiling, lazy services, long lists | [performance.md](references/performance.md) |
 | Tokens, XSS, CSP, input validation | [security.md](references/security.md) |
 | Vitest, harnesses, zoneless testing | [testing.md](references/testing.md) |
 | Review checklist | [anti-patterns.md](references/anti-patterns.md) |
