@@ -59,7 +59,8 @@ AGENTS.local.md              Your overrides + project facts. Fill this in.
 
 ### Starting a new app
 
-These standards work with any backend when Angular lives in a `frontend/` sub-folder. See the
+These standards work with any backend — Node.js, AdonisJS, Rails, or another framework — when
+Angular lives in a `frontend/` sub-folder. See the
 [backend + Angular setup guide](docs/backend-angular-setup.md), which uses Laravel as its example.
 
 ### Keeping it current
