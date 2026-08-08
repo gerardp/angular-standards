@@ -1,7 +1,8 @@
 # Angular 22 agent kit
 
 Coding standards and agent skills for a long-lived Angular application, packaged as an installable
-skill.
+skill. It covers what the official Angular skill deliberately does not: where files go, how state
+flows, what a dependency costs, and which APIs are banned because they are on their way out.
 
 **Stack:** Angular 22.1+ (zoneless, standalone, Signal Forms) · Tailwind CSS v4 · Spartan NG ·
 Vitest · Playwright
@@ -30,19 +31,6 @@ npx skills add https://github.com/spartan-ng/spartan --skill spartan
 
 Then, once per project, wire up the mechanical enforcement — see
 [Enforcement](#enforcement) below.
-
-## What this is
-
-Three layers, in precedence order:
-
-| Layer | What | Maintained by |
-| --- | --- | --- |
-| `AGENTS.local.md` | Your repo's deliberate exceptions | You |
-| `angular-standards` skill | House rules — architecture, state, styling, security | This repo |
-| `angular-developer`, `spartan` | Framework and component-library API depth | Upstream |
-
-The middle layer covers what the official Angular skill deliberately does not: where files go, how
-state flows, what a dependency costs, and which APIs are banned because they are on their way out.
 
 ## Layout
 
@@ -120,14 +108,6 @@ npx skills add https://github.com/spartan-ng/spartan --skill spartan
 
 npm i -D @spartan-ng/cli && ng g @spartan-ng/cli:init && ng g @spartan-ng/cli:ui-theme
 ```
-
-The three flags that are not obvious. `--skip-git`: the backend repo already has git, and nesting
-one inside it gives you a folder whose changes never commit. `--ai-config none`: the CLI otherwise
-writes its own `AGENTS.md` over the one you copy below. `--no-ssr`: an app entirely behind a login
-gets nothing from SSR and pays for it with a Node server to deploy next to the backend — add it
-later with `ng add @angular/ssr` if a public, indexable route ever appears, and decide it per route
-rather than app-wide (see
-[routing.md](.agents/skills/angular-standards/references/routing.md#rendering-strategies)).
 
 Then set up [Enforcement](#enforcement), copy `AGENTS.md`, `CLAUDE.md` and `AGENTS.local.md` from
 this repo, and fill in the "Project facts" section of `AGENTS.local.md` — backend URL, auth model,
