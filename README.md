@@ -67,7 +67,8 @@ scripts/sync-skills.sh       Re-sync vendor/skills/ from upstream.
 ### Starting a new app
 
 These standards assume Angular lives in a `frontend/` sub-folder of a backend repo — Laravel, Rails,
-Django. Serving the API is not Angular's job, and the layer rules in
+Django. See the [full setup example](https://gist.github.com/gerardp/c8a4b4091552ae92fdf7499c57ba3cbb).
+Serving the API is not Angular's job, and the layer rules in
 [architecture.md](.agents/skills/angular-standards/references/architecture.md) are written for that
 split. Run this from the repo root; the CLI creates the folder:
 
