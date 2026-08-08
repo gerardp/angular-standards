@@ -33,7 +33,7 @@ if (!configPath) {
   console.error(
     'eslint.config.js not found. Looked in:\n' +
       candidates.map((p) => `  - ${p}`).join('\n') +
-      '\n\nCopy it from .agents/skills/angular-standards/assets/eslint.config.js to the project root.',
+      '\n\nCopy it from the installed angular-standards skill assets to the Angular project root.',
   );
   process.exit(1);
 }

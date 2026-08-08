@@ -126,8 +126,15 @@ two files that do it. On a project that does not have them yet, install them:
 
 ```bash
 ng add @angular-eslint/schematics --skip-confirmation --defaults
-cp .agents/skills/angular-standards/assets/eslint.config.js ./eslint.config.js
-mkdir -p scripts && cp .agents/skills/angular-standards/assets/check-eslint-config.mjs ./scripts/
+
+if [ -d ../.agents/skills/angular-standards ]; then
+  standards_skill=../.agents/skills/angular-standards
+else
+  standards_skill=.agents/skills/angular-standards
+fi
+
+cp "$standards_skill/assets/eslint.config.js" ./eslint.config.js
+mkdir -p scripts && cp "$standards_skill/assets/check-eslint-config.mjs" ./scripts/
 npm pkg set scripts.lint="node scripts/check-eslint-config.mjs && ng lint"
 ```
 

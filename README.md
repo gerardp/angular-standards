@@ -72,8 +72,15 @@ checkable ones into build failures:
 
 ```bash
 ng add @angular-eslint/schematics --skip-confirmation --defaults
-cp .agents/skills/angular-standards/assets/eslint.config.js ./eslint.config.js
-mkdir -p scripts && cp .agents/skills/angular-standards/assets/check-eslint-config.mjs ./scripts/
+
+if [ -d ../.agents/skills/angular-standards ]; then
+  standards_skill=../.agents/skills/angular-standards
+else
+  standards_skill=.agents/skills/angular-standards
+fi
+
+cp "$standards_skill/assets/eslint.config.js" ./eslint.config.js
+mkdir -p scripts && cp "$standards_skill/assets/check-eslint-config.mjs" ./scripts/
 npm pkg set scripts.lint="node scripts/check-eslint-config.mjs && ng lint"
 ```
 
@@ -94,14 +101,43 @@ Django. Serving the API is not Angular's job, and the layer rules in
 [architecture.md](.agents/skills/angular-standards/references/architecture.md) are written for that
 split. Run this from the repo root; the CLI creates the folder:
 
-```bash
-npx @angular/cli@latest new frontend --style css --strict --no-ssr --skip-git --ai-config none --interactive=false
-cd frontend
+Install the skills in the **backend repository root**, before entering `frontend/`. This is the
+right scope when the agent is always started from the full-stack root: Codex discovers the root
+`.agents/skills/`, while the routing rule below limits the Angular standards to work under
+`frontend/`.
 
+```bash
 npx skills add gerardp/angular-standards
 npx skills add angular/skills -s angular-developer
 npx skills add https://github.com/spartan-ng/spartan --skill spartan
 # Nothing else. The skill's SKILL.md lists which Angular UI skills to skip, and why.
+
+curl -fsSLo AGENTS.local.md https://raw.githubusercontent.com/gerardp/angular-standards/main/AGENTS.local.md
+```
+
+The root `AGENTS.md` must route frontend work to the Angular skill. Merge this section into it; do
+not replace existing backend instructions:
+
+```markdown
+## Angular frontend
+
+For every task that reads, writes or reviews files under `frontend/`:
+
+1. Read and follow `.agents/skills/angular-standards/SKILL.md` before acting.
+2. Read `AGENTS.local.md` for repository-specific facts and overrides.
+3. Run Angular, npm and Spartan commands from `frontend/`.
+4. The house standards override the upstream Angular and Spartan skills.
+```
+
+If Laravel Boost owns the root `AGENTS.md`, put that section in
+`.ai/guidelines/angular-frontend.md` instead and run `php artisan boost:update`. Boost will merge it
+into its generated agent guidance without losing it on the next update.
+
+Now create and enter the Angular workspace:
+
+```bash
+npx @angular/cli@latest new frontend --style css --strict --no-ssr --skip-git --ai-config none --interactive=false
+cd frontend
 ```
 
 Spartan requires Tailwind CSS v4 to be configured first. Install the packages:
@@ -153,28 +189,27 @@ ng g @spartan-ng/cli:info --json
 `info --json` must report `config.found: true`, non-null Tailwind, CDK and Brain versions, and
 `button` under `installedComponents`. If it does not, stop: the setup did not finish.
 
-Install the agent entry points into `frontend/`:
-
-```bash
-curl -fsSLo AGENTS.md https://raw.githubusercontent.com/gerardp/angular-standards/main/AGENTS.md
-curl -fsSLo CLAUDE.md https://raw.githubusercontent.com/gerardp/angular-standards/main/CLAUDE.md
-curl -fsSLo AGENTS.local.md https://raw.githubusercontent.com/gerardp/angular-standards/main/AGENTS.local.md
-```
-
 Then set up [Enforcement](#enforcement) and complete the strict flags in
 [core-engineering.md](.agents/skills/angular-standards/references/core-engineering.md#typescript-configuration).
-Fill in the "Project facts" section of `AGENTS.local.md` — backend URL, auth model, rendering
+Fill in the "Project facts" section of the root `AGENTS.local.md` — backend URL, auth model, rendering
 strategy. It is the highest-value thing you can give an agent, because it is the context that
 cannot be inferred from the code.
 
 ### Working with agents
 
-Claude Code, Cursor, and any tool that reads `AGENTS.md` pick this up automatically. Ask for a
-review with *"review my changes against the standards"*.
+Start the agent from the full-stack repository root as usual:
+
+```bash
+codex
+```
+
+Codex loads the root `AGENTS.md` and root-local skills. The `Angular frontend` rule activates the
+standards only when a task touches `frontend/`, so backend work keeps its own guidance. Ask for a
+review with *"review my frontend changes against the standards"*.
 
 ### Keeping it current
 
-In **your application**, that is the whole story:
+Run skill updates from the full-stack repository root:
 
 ```bash
 # during the Angular upgrade PR, and quarterly
