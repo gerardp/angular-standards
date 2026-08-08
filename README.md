@@ -71,17 +71,14 @@ The rules an agent can ignore are the rules that decay. `assets/` holds the two 
 checkable ones into build failures:
 
 ```bash
+ng add @angular-eslint/schematics --skip-confirmation --defaults
 cp .agents/skills/angular-standards/assets/eslint.config.js ./eslint.config.js
 mkdir -p scripts && cp .agents/skills/angular-standards/assets/check-eslint-config.mjs ./scripts/
-ng add @angular-eslint/schematics    # keep the eslint.config.js you just copied if prompted
+npm pkg set scripts.lint="node scripts/check-eslint-config.mjs && ng lint"
 ```
 
-```jsonc
-// package.json
-"scripts": {
-  "lint": "node scripts/check-eslint-config.mjs && ng lint"
-}
-```
+The order matters: `ng add` generates its own baseline `eslint.config.js`, so copy the house config
+**afterwards**. Otherwise the schematic silently overwrites the rules this skill promises.
 
 `eslint.config.js` enforces the banned-package and banned-decorator lists, "no I/O in a component",
 the layer dependency direction, the accessibility baseline as errors, and the zoneless test rules.
@@ -98,21 +95,77 @@ Django. Serving the API is not Angular's job, and the layer rules in
 split. Run this from the repo root; the CLI creates the folder:
 
 ```bash
-npx @angular/cli@latest new frontend --style css --no-ssr --skip-git --ai-config none --interactive=false
+npx @angular/cli@latest new frontend --style css --strict --no-ssr --skip-git --ai-config none --interactive=false
 cd frontend
 
 npx skills add gerardp/angular-standards
 npx skills add angular/skills -s angular-developer
 npx skills add https://github.com/spartan-ng/spartan --skill spartan
 # Nothing else. The skill's SKILL.md lists which Angular UI skills to skip, and why.
-
-npm i -D @spartan-ng/cli && ng g @spartan-ng/cli:init && ng g @spartan-ng/cli:ui-theme
 ```
 
-Then set up [Enforcement](#enforcement), copy `AGENTS.md`, `CLAUDE.md` and `AGENTS.local.md` from
-this repo, and fill in the "Project facts" section of `AGENTS.local.md` — backend URL, auth model,
-rendering strategy. It is the highest-value thing you can give an agent, because it is the context
-that cannot be inferred from the code.
+Spartan requires Tailwind CSS v4 to be configured first. Install the packages:
+
+```bash
+npm install tailwindcss @tailwindcss/postcss postcss --force
+```
+
+Create `.postcssrc.json`:
+
+```json
+{
+  "plugins": {
+    "@tailwindcss/postcss": {}
+  }
+}
+```
+
+Add this at the start of `src/styles.css`:
+
+```css
+@import 'tailwindcss';
+```
+
+Then initialise Spartan without prompts. `init` already installs its runtime dependencies, wires
+the Tailwind preset and generates the theme; do not run `ui-theme` again:
+
+```bash
+npm i -D @spartan-ng/cli
+ng g @spartan-ng/cli:init --project=frontend --theme=neutral --styles-entry-point=src/styles.css
+```
+
+Create `components.json` before the first `ui` run so the house path, alias and component style are
+deterministic rather than interactive:
+
+```json
+{
+  "componentsPath": "src/app/ui/helm",
+  "importAlias": "@spartan-ng/helm",
+  "style": "nova"
+}
+```
+
+```bash
+ng g @spartan-ng/cli:ui --name=button
+ng g @spartan-ng/cli:info --json
+```
+
+`info --json` must report `config.found: true`, non-null Tailwind, CDK and Brain versions, and
+`button` under `installedComponents`. If it does not, stop: the setup did not finish.
+
+Install the agent entry points into `frontend/`:
+
+```bash
+curl -fsSLo AGENTS.md https://raw.githubusercontent.com/gerardp/angular-standards/main/AGENTS.md
+curl -fsSLo CLAUDE.md https://raw.githubusercontent.com/gerardp/angular-standards/main/CLAUDE.md
+curl -fsSLo AGENTS.local.md https://raw.githubusercontent.com/gerardp/angular-standards/main/AGENTS.local.md
+```
+
+Then set up [Enforcement](#enforcement) and complete the strict flags in
+[core-engineering.md](.agents/skills/angular-standards/references/core-engineering.md#typescript-configuration).
+Fill in the "Project facts" section of `AGENTS.local.md` — backend URL, auth model, rendering
+strategy. It is the highest-value thing you can give an agent, because it is the context that
+cannot be inferred from the code.
 
 ### Working with agents
 

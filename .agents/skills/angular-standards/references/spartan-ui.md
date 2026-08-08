@@ -119,24 +119,62 @@ you what is already installed, so you do not re-add a component and clobber loca
 Fallback if the CLI is not installed: `componentsPath` in `components.json`, or the
 `@spartan-ng/helm/*` entry under `paths` in `tsconfig.json`.
 
-If `components.json` does not exist the project is not set up — see Setup below. Note that `init`
-does not create it; the first `ui` run does.
+If `components.json` does not exist the project is not set up — see Setup below. `init` does not
+create it. An interactive first `ui` run can create it, but this skill writes it explicitly before
+`ui` so an unattended setup cannot stall at its path, alias and style prompts.
 
-This repo's convention is `src/app/ui/helm/`, answered at the first `ui` prompt. If you change it,
-change it in `components.json` and update the `Audit:` globs in this file and the `ignores` in
-`eslint.config.js` to match.
+This repo's convention is `src/app/ui/helm/`, recorded in `components.json`. If you change it,
+update the `Audit:` globs in this file and the `ignores` in `eslint.config.js` to match.
 
 **Audit:** Flag any doc, script, or lint glob that assumes a helm path without deriving it from
 `components.json`.
 
 ## Setup
 
+Spartan requires Tailwind CSS v4 before its generators run. Follow Tailwind's
+[official Angular guide](https://tailwindcss.com/docs/installation/framework-guides/angular):
+
+```bash
+npm install tailwindcss @tailwindcss/postcss postcss --force
+```
+
+Create `.postcssrc.json`:
+
+```json
+{
+  "plugins": {
+    "@tailwindcss/postcss": {}
+  }
+}
+```
+
+Add `@import 'tailwindcss';` at the start of `src/styles.css`, then initialise Spartan. Passing a
+theme makes `init` non-interactive; it already generates the theme, so do not follow it with
+`ui-theme`:
+
 ```bash
 npm i -D @spartan-ng/cli
-ng g @spartan-ng/cli:init             # wires the Tailwind preset, CDK, peers, theme variables
-ng g @spartan-ng/cli:ui-theme         # emits the CSS custom properties for light/dark
-ng g @spartan-ng/cli:ui --name=button # add a component; first run also writes components.json
+ng g @spartan-ng/cli:init --theme=neutral
 ```
+
+For this house convention, create `components.json` before the first `ui` run rather than answering
+prompts:
+
+```json
+{
+  "componentsPath": "src/app/ui/helm",
+  "importAlias": "@spartan-ng/helm",
+  "style": "nova"
+}
+```
+
+```bash
+ng g @spartan-ng/cli:ui --name=button
+ng g @spartan-ng/cli:info --json
+```
+
+`info --json` must report `config.found: true`, non-null Tailwind, CDK and Brain versions, and
+`button` under `installedComponents`. Treat any missing value as an incomplete setup.
 
 In an Nx workspace every command is `npx nx g @spartan-ng/cli:<generator>` instead — decided by
 `nx.json`, as above.

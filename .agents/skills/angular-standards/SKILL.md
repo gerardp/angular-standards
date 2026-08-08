@@ -125,19 +125,16 @@ Most of these rules are checkable, and a failing build beats review discipline. 
 two files that do it. On a project that does not have them yet, install them:
 
 ```bash
+ng add @angular-eslint/schematics --skip-confirmation --defaults
 cp .agents/skills/angular-standards/assets/eslint.config.js ./eslint.config.js
 mkdir -p scripts && cp .agents/skills/angular-standards/assets/check-eslint-config.mjs ./scripts/
-ng add @angular-eslint/schematics    # keep the eslint.config.js you just copied if prompted
+npm pkg set scripts.lint="node scripts/check-eslint-config.mjs && ng lint"
 ```
 
-Then wire the composition check into `package.json`, so the flat-config footgun documented at the
-top of `eslint.config.js` cannot come back silently:
-
-```jsonc
-"scripts": {
-  "lint": "node scripts/check-eslint-config.mjs && ng lint"
-}
-```
+The order matters: `ng add` writes a baseline `eslint.config.js`; copying the house config before
+it lets the schematic overwrite the rules silently. The `npm pkg set` command wires the composition
+check into `package.json`, so the flat-config footgun documented at the top of `eslint.config.js`
+cannot come back silently.
 
 `eslint.config.js` enforces: the banned-package and banned-decorator lists, the "no I/O in a
 component" rule, the layer dependency direction, the accessibility baseline as errors, and the
