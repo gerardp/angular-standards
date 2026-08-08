@@ -28,30 +28,12 @@ npx skills add angular/skills -s angular-developer
 npx skills add https://github.com/spartan-ng/spartan --skill spartan
 ```
 
-> **The Spartan skill is the official one**, released from the library's own monorepo — it owns the
-> CLI (`info --json`, `healthcheck`, the `migrate-*` family), the `@spartan-ng/mcp` server, the
-> styling and composition rules, and theming. It ships no per-component catalogue on purpose: it
-> tells you to confirm selectors rather than recall them. This kit's answer to that is an explicit
-> order — the generated Helm source in your repo first, then MCP, then the docs site.
+> **Those two, and no other Angular UI skill.** The popular ones are written for a generic Angular
+> project; this one has a design system, so their worked examples teach against it. The list of
+> what to skip and why is in the skill's `SKILL.md`.
 >
-> **Those two, and nothing else.** Angular UI skills are easy to find, and the popular ones are
-> written for a generic Angular project — this one has a design system, so their worked examples
-> teach against it. `spartan-ng-developer` has the per-component catalogue the official skill
-> omits, alongside `.subscribe()` in a component, `[innerHTML]`, raw palette colours and
-> ReactiveForms as the default. `ui-craft` states the right rule at the top — reach for theme
-> tokens — and then works in raw palette shades with hand-written `dark:` overrides in its own
-> reference files. `angular-material-developer`, `ng-zorro-developer` and `primeng-developer`
-> recommend component libraries the dependency policy bans. `angular-new-app` scaffolds an app you
-> already have, and writes an `AGENTS.md` over this kit's — install it globally instead if you want
-> it (`npx skills add angular/skills -s angular-new-app -g`).
->
-> The exclusion list, and what to check when outside Spartan code lands in your repo either way, is
-> in the skill's `SKILL.md` and `spartan-ui.md`. Precedence resolves these conflicts on paper, but a
-> worked example is the most-copied thing in any document.
->
-> `angular/skills` is Angular's published mirror of `angular/angular/skills/dev-skills/` — same
-> content, clones in seconds instead of pulling the whole monorepo. Spartan publishes no such
-> mirror, so that one clones the full monorepo for a single skill. Nothing to be done about it.
+> `angular/skills` is Angular's mirror of `angular/angular/skills/dev-skills/` — same content,
+> clones in seconds. Spartan has no mirror, so that command pulls the whole monorepo for one skill.
 
 Then, once per project, wire up the mechanical enforcement — see
 [Enforcement](#enforcement) below.
@@ -167,7 +149,7 @@ cd frontend
 npx skills add gerardp/angular-standards
 npx skills add angular/skills -s angular-developer
 npx skills add https://github.com/spartan-ng/spartan --skill spartan
-# Nothing else. Not spartan-ng-developer, not ui-craft — see "Install" above for why.
+# Nothing else. The skill's SKILL.md lists which Angular UI skills to skip, and why.
 
 npm i -D @spartan-ng/cli && ng g @spartan-ng/cli:init && ng g @spartan-ng/cli:ui-theme
 ```
