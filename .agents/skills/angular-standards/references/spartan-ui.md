@@ -44,30 +44,28 @@ If none of the three is available, say the API could not be confirmed. Do not gu
 do not reconstruct one from memory — Spartan renamed selectors across the alpha → 1.x transition
 and a plausible-looking wrong selector fails at runtime, not at build.
 
-### The community catalogue is not installed
+### Community Spartan skills and snippets
 
-`mofirojean/angular-ui-skills` ships `spartan-ng-developer`, a per-component catalogue that would
-fill the gap above. **Do not install it.**
+Third-party Spartan skills, blog posts and Stack Overflow answers are easy to find and easy to
+install. **Do not add them** — the exclusion list is in [SKILL.md](../SKILL.md).
 
-Its worked examples teach things this project bans, each verified against
-[commit `784a630`](https://github.com/mofirojean/angular-ui-skills/tree/784a630f3cc2a0811cb4b588b94a7d36fff34424/skills/spartan-ng-developer):
+They are not written for this project, and they fail the same four ways often enough to check for
+by default. When any outside Spartan code lands here, audit it for exactly this:
 
-| Catalogue says | Rule it breaks |
+| Check | Rule |
 | --- | --- |
-| `ref.closed$.subscribe(...)` in a component (`helm-conventions.md`) | [reactivity-and-state.md](reactivity-and-state.md#rxjs) — never subscribe in a component |
-| `[innerHTML]="line.html"` (`recipes.md`) | [security.md](security.md#xss) — banned outside a sanitising boundary |
-| `bg-emerald-500/[0.07]`, `bg-red-500/[0.07]` (`recipes.md`) | This file — literal palette colours |
-| `pr-4 pl-3`, `text-right` (`recipes.md`) | [templates-and-styling.md](templates-and-styling.md#layout) — logical properties only |
-| *"Default to ReactiveForms"* (`forms.md`) | [forms.md](forms.md) — Signal Forms only |
-| *"`init` writes `components.json`"* (`setup.md`) | Factually wrong; the first `ui` run writes it |
+| Raw palette colours (`bg-emerald-500`) and hand-written `dark:` overrides instead of semantic tokens | [Theming](#theming) below |
+| Reactive Forms — `FormControl`, `formControlName`, `ReactiveFormsModule` | [forms.md](forms.md) — Signal Forms only |
+| `.subscribe()` in a component | [reactivity-and-state.md](reactivity-and-state.md#rxjs) |
+| `[innerHTML]`, physical direction utilities (`ml-*`, `text-right`) | [security.md](security.md#xss), [templates-and-styling.md](templates-and-styling.md#layout) |
 
-Precedence would technically resolve every row — this file wins. But precedence is a rule an agent
-applies *after* reading, and a worked example is the most copied thing in any skill. The benefit is
-a catalogue the three sources above already cover. That trade does not pay.
+Precedence resolves all of it on paper — this file wins. But precedence is a rule applied *after*
+reading, and a worked example is the most copied thing in any document. Treat outside Spartan
+material as a hint about which component to use, never as a pattern to paste.
 
-If it is installed anyway, treat it as component-shape reference only, never as a source of
-patterns, and re-read this table first. The linked commit is what the table was checked against; if
-a later commit fixed a row, this table is what is stale.
+Version banners are not evidence, either. A skill or post can carry a current version number and
+still contain guidance from three releases ago; the header is the cheapest thing to update. The
+installed version and the generated Helm source are what decide.
 
 Neither this project's rules nor its architecture are known to any upstream skill. They are
 reference material; the decisions are here.

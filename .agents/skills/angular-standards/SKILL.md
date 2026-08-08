@@ -88,26 +88,30 @@ npx skills add https://github.com/spartan-ng/spartan --skill spartan
 generated Helm source, then MCP, then the docs site. The order and the reasoning are in
 [spartan-ui.md](references/spartan-ui.md#finding-a-components-api).
 
-**Every skill selector is load-bearing.** Both repos ship siblings that are excluded on purpose —
-install only the two named above:
+**Those two, and nothing else.** Angular UI skills are easy to find and most of them fight these
+standards. The ones you are most likely to be offered:
 
-| Left out | From | Why |
-| --- | --- | --- |
-| `angular-material-developer`, `ng-zorro-developer`, `primeng-developer` | `mofirojean/angular-ui-skills` | Recommend component libraries this standard bans — [spartan-ui.md](references/spartan-ui.md), [longevity.md](references/longevity.md) |
-| `spartan-ng-developer` | `mofirojean/angular-ui-skills` | The per-component catalogue that would fill the gap above — but its worked examples teach patterns these standards ban — [spartan-ui.md](references/spartan-ui.md#the-community-catalogue-is-not-installed) |
-| `angular-new-app` | `angular/skills` | Scaffolds a new app. The app already exists by the time it is installed, and its `ng new --ai-config` step generates an `AGENTS.md` that collides with this project's. Its "generate everything with `ng generate`" step ignores [architecture.md](references/architecture.md) on file placement. |
+| Do not install | Why |
+| --- | --- |
+| `angular-material-developer`, `ng-zorro-developer`, `primeng-developer` | Recommend component libraries this standard bans — [spartan-ui.md](references/spartan-ui.md), [longevity.md](references/longevity.md) |
+| `spartan-ng-developer` | The per-component catalogue that would fill the gap above — but its worked examples teach patterns these standards ban — [spartan-ui.md](references/spartan-ui.md#community-spartan-skills-and-snippets) |
+| `ui-craft` | Contradicts itself on the rule that matters most here: its top-level principles say to reach for theme tokens so dark mode comes free, then its reference files work in raw palette shades with hand-written `dark:` overrides. See [spartan-ui.md](references/spartan-ui.md#theming) |
+| `angular-new-app` | Scaffolds a new app. The app already exists by the time it is installed, and its `ng new --ai-config` step generates an `AGENTS.md` that collides with this project's. Its "generate everything with `ng generate`" step ignores [architecture.md](references/architecture.md) on file placement. |
 
-**`ui-craft`** (also `mofirojean/angular-ui-skills`) is optional rather than excluded: it is
-library-agnostic visual-quality guidance (hierarchy, spacing, typography, density, empty states).
-Nothing in it conflicts with these standards. Add it if the project has dashboards or data-heavy
-views:
+The pattern is the same in all four: they are written for a generic Angular project, and this one
+has a design system. A skill that reaches for `bg-emerald-500` is not neutral advice here — it is a
+worked example of the rule these standards spend the most effort enforcing. And a document that
+contradicts *itself* is worse than one that is simply wrong: you cannot predict which half an agent
+copies.
 
-```bash
-npx skills add mofirojean/angular-ui-skills -s ui-craft
-```
+These are assessments of third-party documents made when this list was written, not permanent
+facts — upstream can fix any of them. They are reasons to exclude by default, not verdicts. If you
+have a reason to install one, read it against
+[spartan-ui.md](references/spartan-ui.md#community-spartan-skills-and-snippets) first and record the
+decision in `AGENTS.local.md`.
 
-`angular-new-app` is genuinely useful **before** a project exists. Install it globally if you want
-it: `npx skills add angular/skills -s angular-new-app -g`.
+`angular-new-app` is the exception that is genuinely useful **before** a project exists. Install it
+globally if you want it: `npx skills add angular/skills -s angular-new-app -g`.
 
 Update them by name — a bare `npx skills update` updates everything installed, which is a separate
 decision each time: `npx skills update angular-developer spartan`.

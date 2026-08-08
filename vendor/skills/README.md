@@ -19,14 +19,13 @@ it is the only way to get it.
 
 ## Only vendor what the standards cite
 
-`spartan-ng-developer` (from `mofirojean/angular-ui-skills`) used to be vendored here, to keep
-verifiable the conflict table in
-`.agents/skills/angular-standards/references/spartan-ui.md` that explains why the kit tells people
-not to install it. **It was removed**, because that table now pins an upstream permalink — immutable
-and checkable by anyone, with no local copy needed.
+A third-party Spartan skill was vendored here for a while, to substantiate a table cataloguing how
+it conflicted with these standards. Both are gone now.
 
-The principle worth keeping: a skill we do not install does not belong in `vendor/`. Vendoring is
-for sources the standards cite by filename. If a warning is all we need, a permalink is enough.
+The principle worth keeping: **`vendor/` is for sources the standards cite by filename, and nothing
+else.** A skill the kit tells people not to install does not need a local copy — and a per-file
+catalogue of someone else's mistakes is a maintenance burden that ages badly and reads worse. The
+exclusion list in `.agents/skills/angular-standards/SKILL.md` states the rule; that is enough.
 
 Exact commits and sync date: [UPSTREAM.txt](UPSTREAM.txt). Licences and copyright:
 [THIRD-PARTY-NOTICES.md](../../THIRD-PARTY-NOTICES.md).
