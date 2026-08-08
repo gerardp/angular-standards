@@ -44,32 +44,6 @@ Three layers, in precedence order:
 The middle layer covers what the official Angular skill deliberately does not: where files go, how
 state flows, what a dependency costs, and which APIs are banned because they are on their way out.
 
-### Can I use these standards with a different component library?
-
-Not as a configuration switch — that would be a fork, and it is an honest one to make.
-
-Spartan is a structural bet here, not a preference: Helm source is copied into your repo, so the
-component layer survives upstream going quiet. Several standards are written on top of that
-assumption, and they are not all in `spartan-ui.md`:
-
-| File | Spartan-specific clause |
-| --- | --- |
-| `architecture.md` | Pins `ui/helm/` in the `src/app/` layout |
-| `components.md` | Mandates Brain primitives for composite widgets |
-| `forms.md` | Mandates Helm form-field components for error announcement |
-| `longevity.md` | Five standing-decision rows, the `@spartan-ng/brain` peer ceiling, and the entire luxon exception |
-| `templates-and-styling.md` | Tailwind v4, adopted partly *because* Spartan requires it |
-| `assets/eslint.config.js` | `ignores: ['src/app/ui/helm/**']` |
-| `assets/check-eslint-config.mjs` | Its glob self-tests and `EXPECTATIONS` assert that exact path — repointing the glob without updating them fails the check |
-
-Everything else — the layer rules, "no I/O in a component", the signals decision table, the DTO
-boundary, routing, security, testing — is genuinely independent. So a fork is tractable: swap those
-seven, keep the rest. It is an afternoon, not a rewrite. But it is a fork, and pretending otherwise
-would hand you a set of rules with a hole in the middle.
-
-One thing that does not change either way: composite widgets with keyboard semantics come from a
-library or from Angular CDK, never hand-rolled. That is an accessibility argument, not a Spartan one.
-
 ## Layout
 
 ```
