@@ -59,8 +59,8 @@ AGENTS.local.md              Your overrides + project facts. Fill this in.
 
 ### Starting a new app
 
-These standards assume Angular lives in a `frontend/` sub-folder of a backend repository. See the
-[full setup example](https://gist.github.com/gerardp/c8a4b4091552ae92fdf7499c57ba3cbb).
+These standards work with any backend when Angular lives in a `frontend/` sub-folder. See the
+[backend + Angular setup guide](docs/backend-angular-setup.md), which uses Laravel as its example.
 
 ### Keeping it current
 
