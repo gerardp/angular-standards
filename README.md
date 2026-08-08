@@ -45,9 +45,10 @@ npx skills add https://github.com/spartan-ng/spartan --skill spartan
     templates-and-styling.md Tailwind v4, control flow, motion.
     spartan-ui.md            brain/helm, theming, upgrade rules.
     routing.md               Lazy loading, guards, route-scoped state, SSR.
+    performance.md           Budgets, profiling, lazy services, long lists.
     security.md              Tokens, XSS, CSP, secrets.
     testing.md               Vitest, zoneless testing, what to test.
-    anti-patterns.md         59-item review checklist, ordered by cost.
+    anti-patterns.md         64-item review checklist, ordered by cost.
     code-review.md           The audit process. Reads the Audit: lines above.
 
 AGENTS.md                    Pointer to the skill, for tools that read AGENTS.md.
