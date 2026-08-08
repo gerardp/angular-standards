@@ -13,10 +13,4 @@ path: skills/spartan
 commit: f74a337e988cd401414aaacf0597be7202c5ba0b
 skills: spartan
 
-source: spartan-catalog
-repo: mofirojean/angular-ui-skills
-path: skills/spartan-ng-developer
-commit: 784a630f3cc2a0811cb4b588b94a7d36fff34424
-skills: spartan-ng-developer
-
-synced: 2026-08-08T07:15:03Z
+synced: 2026-08-08T08:04:51Z

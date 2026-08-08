@@ -171,6 +171,8 @@ cd frontend
 npx skills add gerardp/angular-standards
 npx skills add angular/skills -s angular-developer
 npx skills add https://github.com/spartan-ng/spartan --skill spartan
+# Deliberately NOT mofirojean/angular-ui-skills -s spartan-ng-developer.
+# It is the obvious fourth and it fights these standards — see "Install" above.
 
 npm i -D @spartan-ng/cli && ng g @spartan-ng/cli:init && ng g @spartan-ng/cli:ui-theme
 ```
@@ -238,8 +240,7 @@ This repository is MIT licensed — see [LICENSE](LICENSE).
 
 The skills under `vendor/skills/` are copied verbatim from other MIT projects and keep their own
 copyright: [`angular/angular`](https://github.com/angular/angular/tree/main/skills/dev-skills)
-(Google LLC), [`spartan-ng/spartan`](https://github.com/spartan-ng/spartan/tree/main/skills/spartan)
-(Robin Goetz) and
-[`mofirojean/angular-ui-skills`](https://github.com/mofirojean/angular-ui-skills) (Mofiro Jean).
-Full notices in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md); exact commits in
+(Google LLC) and
+[`spartan-ng/spartan`](https://github.com/spartan-ng/spartan/tree/main/skills/spartan)
+(Robin Goetz). Full notices in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md); exact commits in
 `vendor/skills/UPSTREAM.txt`.
