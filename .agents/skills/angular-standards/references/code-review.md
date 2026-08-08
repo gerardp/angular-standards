@@ -46,7 +46,8 @@ Load only the standards relevant to the diff. Do not read all of `references/` e
 | `data-access/**` | `data-access.md`, `security.md` |
 | `*.html`, `*.css` | `templates-and-styling.md`, `spartan-ui.md` |
 | Generated Helm code (see `components.json`) | `spartan-ui.md` — check for an `AGENTS.local.md` entry |
-| Spartan component usage | `spartan-ui.md`, then `spartan-ng-developer/references/helm-conventions.md` |
+| Spartan component usage | `spartan-ui.md`, then `spartan/rules/composition.md` and `spartan/rules/styling.md` |
+| `@spartan-ng/*` version bump | `spartan-ui.md` — was `healthcheck` run? |
 | Forms | `forms.md` |
 | `*.routes.ts`, `app.config.ts` | `routing.md` |
 | Auth, interceptors, storage | `security.md` |

@@ -7,6 +7,13 @@ Full API surface: `angular-developer/references/signal-forms.md` — read it bef
 writing a form. It is the largest reference for a reason; the API has sharp edges this file only
 summarises.
 
+Most Angular and Spartan material still defaults to Reactive Forms, so a copied example is the
+likeliest way this rule gets broken. Port the example; do not port its forms API.
+
+**Audit:** Flag `FormControl`, `FormGroup`, `FormArray`, `FormBuilder`, `formControlName`,
+`formGroup`, `ngModel` or `ReactiveFormsModule` in any new or changed code, including code adapted
+from an upstream skill's example.
+
 ## Shape
 
 ```ts

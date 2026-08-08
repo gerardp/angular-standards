@@ -3,11 +3,12 @@
 # Re-sync the vendored upstream skills under vendor/skills/.
 #
 # These are a pinned REFERENCE COPY, never edited by hand and never published from this repo —
-# they belong to angular/angular and mofirojean/angular-ui-skills, and consumers install them
-# from there. We keep a pinned copy so `.agents/skills/angular-standards/references/` can cite
-# specific upstream files and so an upgrade shows up as a reviewable diff. A stale copy has
-# agents writing last year's Angular, which is the failure mode
-# .agents/skills/angular-standards/references/longevity.md exists to prevent.
+# they belong to angular/angular, spartan-ng/spartan and mofirojean/angular-ui-skills, and
+# consumers install them from there. We keep a pinned copy so
+# `.agents/skills/angular-standards/references/` can cite specific upstream files and so an
+# upgrade shows up as a reviewable diff. A stale copy has agents writing last year's Angular,
+# which is the failure mode .agents/skills/angular-standards/references/longevity.md exists
+# to prevent.
 #
 # Run this:
 #   - after every Angular major or minor upgrade
@@ -34,9 +35,16 @@ UPSTREAM_FILE="$SKILLS_DIR/UPSTREAM.txt"
 
 # ── Sources ────────────────────────────────────────────────────────────────────────────────────
 # key|repo|branch|path-within-repo|space-separated skill dirs to replace
+#
+# Two Spartan sources, but only one is recommended. `spartan` is the official skill, shipped from
+# the library's own monorepo and released with it — the single source consumers install.
+# `spartan-catalog` is the community skill, deliberately NOT installed: its worked examples
+# contradict these standards. It is vendored so that accusation stays checkable against a pinned
+# copy. See .agents/skills/angular-standards/references/spartan-ui.md for the table.
 SOURCES=(
   "angular|angular/angular|main|skills/dev-skills|angular-developer angular-new-app"
-  "spartan|mofirojean/angular-ui-skills|master|skills/spartan-ng-developer|spartan-ng-developer"
+  "spartan|spartan-ng/spartan|main|skills/spartan|spartan"
+  "spartan-catalog|mofirojean/angular-ui-skills|master|skills/spartan-ng-developer|spartan-ng-developer"
 )
 
 CHECK_ONLY=false
@@ -176,4 +184,8 @@ Next:
      update the dependency-ceiling table in .agents/skills/angular-standards/references/longevity.md.
   4. If upstream guidance now contradicts .agents/skills/angular-standards/references/, reconcile deliberately.
      Known divergence to re-check: the null rule in .agents/skills/angular-standards/references/forms.md.
+  5. Re-verify the spartan-catalog conflict table in spartan-ui.md against the new copy — it is the
+     only reason that source is still vendored, and a stale accusation is as bad as a stale
+     recommendation. If upstream fixed them all, reconsider installing it. If the official `spartan`
+     skill grew a per-component catalogue, retire spartan-catalog from SOURCES instead.
 EOF

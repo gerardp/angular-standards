@@ -16,10 +16,10 @@ finds them.
 
 1. **`AGENTS.local.md`** — this repo's deliberate exceptions. Overrides everything below.
 2. **`.agents/skills/angular-standards/references/`** — house rules.
-3. **The upstream skills** — `angular-developer` (`angular/angular`) and `spartan-ng-developer`
-   (`mofirojean/angular-ui-skills`). Framework and component API depth. Install them alongside;
-   the SKILL.md has the exact commands, including which sibling skills to exclude and why. Keep
-   them current with `npx skills update`.
+3. **The upstream skills** — `angular-developer` (`angular/angular`) and `spartan`
+   (`spartan-ng/spartan`, the official Spartan skill). Framework and component API depth. Install
+   them alongside; the SKILL.md has the exact commands, including which sibling skills are
+   excluded and why. Keep them current with `npx skills update angular-developer spartan`.
 
 Where the house rules and an upstream skill disagree, the house rules win.
 

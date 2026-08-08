@@ -25,22 +25,37 @@ the current version from the people who maintain them:
 
 ```bash
 npx skills add angular/skills -s angular-developer
-npx skills add mofirojean/angular-ui-skills -s spartan-ng-developer
+npx skills add https://github.com/spartan-ng/spartan --skill spartan
 ```
 
-> **Keep both `-s` flags.** Those repos ship seven skills between them, and four of the others
-> fight these standards. `angular-material-developer`, `ng-zorro-developer` and `primeng-developer`
-> recommend component libraries the dependency policy bans. `angular-new-app` scaffolds a new app —
-> by the time it is installed the app exists, and its `ng new --ai-config` step writes an
-> `AGENTS.md` that collides with this kit's; install it globally instead if you want it
+> **The Spartan skill is the official one**, released from the library's own monorepo — it owns the
+> CLI (`info --json`, `healthcheck`, the `migrate-*` family), the `@spartan-ng/mcp` server, the
+> styling and composition rules, and theming. It ships no per-component catalogue on purpose: it
+> tells you to confirm selectors rather than recall them. This kit's answer to that is an explicit
+> order — the generated Helm source in your repo first, then MCP, then the docs site.
+>
+> **The community `spartan-ng-developer` skill is deliberately not installed.** It has the
+> catalogue, and its worked examples also teach patterns these standards ban: `.subscribe()` in a
+> component, `[innerHTML]`, literal Tailwind palette colours, physical direction utilities,
+> ReactiveForms as the default, plus a factual error about when `components.json` is written.
+> Precedence would resolve every one, but a worked example is the most-copied thing in any skill.
+> The table, with file references and the commit it was checked against, is in `spartan-ui.md`.
+>
+> **Keep every skill selector.** Both repos ship siblings that fight these standards.
+> `angular-material-developer`, `ng-zorro-developer` and `primeng-developer` (all
+> `mofirojean/angular-ui-skills`) recommend component libraries the dependency policy bans.
+> `angular-new-app` (`angular/skills`) scaffolds a new app — by the time it is installed the app
+> exists, and its `ng new --ai-config` step writes an `AGENTS.md` that collides with this kit's;
+> install it globally instead if you want it
 > (`npx skills add angular/skills -s angular-new-app -g`).
 >
-> The seventh, `ui-craft`, is optional rather than excluded — library-agnostic visual-quality
-> guidance that pairs with Spartan. Add it if you have dashboards:
-> `npx skills add mofirojean/angular-ui-skills -s ui-craft`.
+> `ui-craft`, also from `mofirojean/angular-ui-skills`, is optional rather than excluded —
+> library-agnostic visual-quality guidance with nothing in it that conflicts. Add it if you have
+> dashboards: `npx skills add mofirojean/angular-ui-skills -s ui-craft`.
 >
 > `angular/skills` is Angular's published mirror of `angular/angular/skills/dev-skills/` — same
-> content, clones in seconds instead of pulling the whole monorepo.
+> content, clones in seconds instead of pulling the whole monorepo. Spartan publishes no such
+> mirror, so that one clones the full monorepo for a single skill. Nothing to be done about it.
 
 Then, once per project, wire up the mechanical enforcement — see
 [Enforcement](#enforcement) below.
@@ -53,7 +68,7 @@ Three layers, in precedence order:
 | --- | --- | --- |
 | `AGENTS.local.md` | Your repo's deliberate exceptions | You |
 | `angular-standards` skill | House rules — architecture, state, styling, security | This repo |
-| `angular-developer`, `spartan-ng-developer` | Framework and component-library API depth | Upstream |
+| `angular-developer`, `spartan` | Framework and component-library API depth | Upstream |
 
 The middle layer covers what the official Angular skill deliberately does not: where files go, how
 state flows, what a dependency costs, and which APIs are banned because they are on their way out.
@@ -155,7 +170,7 @@ cd frontend
 
 npx skills add gerardp/angular-standards
 npx skills add angular/skills -s angular-developer
-npx skills add mofirojean/angular-ui-skills -s spartan-ng-developer
+npx skills add https://github.com/spartan-ng/spartan --skill spartan
 
 npm i -D @spartan-ng/cli && ng g @spartan-ng/cli:init && ng g @spartan-ng/cli:ui-theme
 ```
@@ -183,8 +198,13 @@ review with *"review my changes against the standards"*.
 In **your application**, that is the whole story:
 
 ```bash
-npx skills update    # during the Angular upgrade PR, and quarterly
+# during the Angular upgrade PR, and quarterly
+npx skills update angular-standards angular-developer spartan
 ```
+
+Name them. A bare `npx skills update` updates every skill you have installed globally and locally,
+which is a separate decision each time — and it pulls upstream's latest, which is not the same as
+"whatever matches the version in your `package.json`".
 
 Do not gate your CI on skill freshness. Failing a build because upstream shipped a doc change
 blocks work that has nothing to do with it — it is a scheduled task, not a build gate.
@@ -218,7 +238,8 @@ This repository is MIT licensed — see [LICENSE](LICENSE).
 
 The skills under `vendor/skills/` are copied verbatim from other MIT projects and keep their own
 copyright: [`angular/angular`](https://github.com/angular/angular/tree/main/skills/dev-skills)
-(Google LLC) and
+(Google LLC), [`spartan-ng/spartan`](https://github.com/spartan-ng/spartan/tree/main/skills/spartan)
+(Robin Goetz) and
 [`mofirojean/angular-ui-skills`](https://github.com/mofirojean/angular-ui-skills) (Mofiro Jean).
 Full notices in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md); exact commits in
 `vendor/skills/UPSTREAM.txt`.

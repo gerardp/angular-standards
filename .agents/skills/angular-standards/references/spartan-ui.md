@@ -3,10 +3,74 @@
 Spartan is the component layer. Angular Material is not used, and neither is any other component
 library — see [longevity.md](longevity.md#3-dependency-policy).
 
-> **API detail lives in the upstream skill.** `spartan-ng-developer/` covers installation, the four
-> Helm template patterns, every component category, Brain primitives, forms integration, theming and
-> accessibility. **Read it before writing Spartan code.** This file states only the decisions that
-> are ours, and wins where the two disagree.
+> **API detail lives in the upstream skills.** This file states only the decisions that are ours,
+> and wins where any of them disagree.
+
+## The upstream skill
+
+**One skill: `spartan`**, from `spartan-ng/spartan`. It is written by the Spartan maintainers and
+lives in the library's own monorepo, so it is released alongside the code it documents.
+
+That makes it well-aligned, **not** pinned to this project. `npx skills update` fetches upstream's
+latest, which may describe a Spartan newer than the one in `package.json`. So when the skill and
+the project disagree, the project wins, in this order: the generated Helm source, then
+`package.json`, then the skill. Never assume an API exists because the skill documents it — check
+that the installed version has it.
+
+| You need | Read |
+| --- | --- |
+| Anything about the CLI — `init`, `ui`, `ui-theme`, `info`, `healthcheck`, `migrate-*` | `spartan/cli.md` |
+| The project's actual paths, versions and installed components | `spartan/cli.md` → `info --json` |
+| Styling rules — `hlm()`, `classes()`, semantic tokens, overlay z-index | `spartan/rules/styling.md` |
+| Form composition — `hlmField`, fieldsets, error display | `spartan/rules/forms.md` |
+| Nesting rules — what goes inside what | `spartan/rules/composition.md` |
+| Icons — `provideIcons`, sizing | `spartan/rules/icons.md` |
+| Theming, CSS variables, adding a custom colour | `spartan/customization.md` |
+| Distribution model, `components.json` fields | `spartan/registry.md` |
+
+### Finding a component's API
+
+The official skill deliberately carries **no per-component catalogue**. Its instruction is *"never
+guess selectors — confirm them."* So confirm them, in this order:
+
+1. **The generated Helm source in this repo.** It is ours and it is on disk — the file under
+   `componentsPath` is the actual API, not a description of it. This beats every other source and
+   needs no network.
+2. **The `@spartan-ng/mcp` server** — `spartan_components_get` with `extract: "api"`, then
+   `extract: "code"` for an example. Setup is in `spartan/mcp.md`.
+3. **`https://www.spartan.ng/components/<name>`.**
+
+If none of the three is available, say the API could not be confirmed. Do not guess a selector, and
+do not reconstruct one from memory — Spartan renamed selectors across the alpha → 1.x transition
+and a plausible-looking wrong selector fails at runtime, not at build.
+
+### The community catalogue is not installed
+
+`mofirojean/angular-ui-skills` ships `spartan-ng-developer`, a per-component catalogue that would
+fill the gap above. **Do not install it.**
+
+Its worked examples teach things this project bans, each verified against
+[commit `784a630`](https://github.com/mofirojean/angular-ui-skills/tree/784a630f3cc2a0811cb4b588b94a7d36fff34424/skills/spartan-ng-developer):
+
+| Catalogue says | Rule it breaks |
+| --- | --- |
+| `ref.closed$.subscribe(...)` in a component (`helm-conventions.md`) | [reactivity-and-state.md](reactivity-and-state.md#rxjs) — never subscribe in a component |
+| `[innerHTML]="line.html"` (`recipes.md`) | [security.md](security.md#xss) — banned outside a sanitising boundary |
+| `bg-emerald-500/[0.07]`, `bg-red-500/[0.07]` (`recipes.md`) | This file — literal palette colours |
+| `pr-4 pl-3`, `text-right` (`recipes.md`) | [templates-and-styling.md](templates-and-styling.md#layout) — logical properties only |
+| *"Default to ReactiveForms"* (`forms.md`) | [forms.md](forms.md) — Signal Forms only |
+| *"`init` writes `components.json`"* (`setup.md`) | Factually wrong; the first `ui` run writes it |
+
+Precedence would technically resolve every row — this file wins. But precedence is a rule an agent
+applies *after* reading, and a worked example is the most copied thing in any skill. The benefit is
+a catalogue the three sources above already cover. That trade does not pay.
+
+If it is installed anyway, treat it as component-shape reference only, never as a source of
+patterns, and re-read this table first. The linked commit is what the table was checked against; if
+a later commit fixed a row, this table is what is stale.
+
+Neither this project's rules nor its architecture are known to any upstream skill. They are
+reference material; the decisions are here.
 
 ## The two layers
 
@@ -29,11 +93,39 @@ external packages, not one. See the [luxon exception](longevity.md#the-luxon-exc
 configured in `components.json` (`componentsPath`), and `@spartan-ng/helm/<name>` is a
 `tsconfig.json` path alias to it — *not* a `node_modules` package.
 
-To find it: read `componentsPath` in `components.json`, or the `@spartan-ng/helm/*` entry under
-`paths` in `tsconfig.json`.
+**Ask the CLI, do not parse the file.** Pick the runner from the filesystem first — `nx.json` at the
+workspace root means Nx, otherwise Angular CLI:
 
-This repo's convention is `src/app/ui/helm/`, set at `init` time. If you change it, change it in
-`components.json` and update the `Audit:` globs in this file and the `ignores` in
+```bash
+if [ -f nx.json ]; then
+  npx nx g @spartan-ng/cli:info --json
+else
+  ng g @spartan-ng/cli:info --json
+fi
+```
+
+Write it as an `if`, not as `[ -f nx.json ] && npx nx g … || ng g …`. That one-liner falls through
+to `ng g` when the Nx command *fails*, not only when `nx.json` is absent — so a real Nx error gets
+swallowed and retried against the wrong runner, and you debug the wrong workspace type.
+
+That `nx.json` check is the only way in. `info` *reports* `workspaceType`, but you cannot read it
+without having already chosen a runner, so do not treat the field as the way to detect one — it is
+there to confirm what you picked. The same choice applies to every generator below; this file
+writes the Angular CLI form throughout.
+
+`info` is read-only and returns `componentsPath`, `importAlias`, `installedComponents`,
+`availableComponents`, `versions` and `tailwindCssFile`. It applies the CLI's own defaults, which
+reading `components.json` by hand does not. Run it **before** generating anything — it also tells
+you what is already installed, so you do not re-add a component and clobber local edits.
+
+Fallback if the CLI is not installed: `componentsPath` in `components.json`, or the
+`@spartan-ng/helm/*` entry under `paths` in `tsconfig.json`.
+
+If `components.json` does not exist the project is not set up — see Setup below. Note that `init`
+does not create it; the first `ui` run does.
+
+This repo's convention is `src/app/ui/helm/`, answered at the first `ui` prompt. If you change it,
+change it in `components.json` and update the `Audit:` globs in this file and the `ignores` in
 `eslint.config.js` to match.
 
 **Audit:** Flag any doc, script, or lint glob that assumes a helm path without deriving it from
@@ -43,15 +135,32 @@ This repo's convention is `src/app/ui/helm/`, set at `init` time. If you change 
 
 ```bash
 npm i -D @spartan-ng/cli
-ng g @spartan-ng/cli:init          # wires the Tailwind preset, CDK, peers, theme variables
-ng g @spartan-ng/cli:ui-theme      # emits the CSS custom properties for light/dark
-ng g @spartan-ng/cli:ui button     # add a component
+ng g @spartan-ng/cli:init             # wires the Tailwind preset, CDK, peers, theme variables
+ng g @spartan-ng/cli:ui-theme         # emits the CSS custom properties for light/dark
+ng g @spartan-ng/cli:ui --name=button # add a component; first run also writes components.json
 ```
 
-In an Nx workspace it is `npx nx g @spartan-ng/cli:ui <name>`. The upstream skill's `setup.md` has
-the full procedure and the troubleshooting for unstyled components.
+In an Nx workspace every command is `npx nx g @spartan-ng/cli:<generator>` instead — decided by
+`nx.json`, as above.
+
+Full generator reference: `spartan/cli.md`. If components render unstyled, it is almost always the
+Tailwind wiring: check that the global stylesheet imports
+`@spartan-ng/brain/hlm-tailwind-preset.css` and that `tailwindcss` is v4
+(`spartan/customization.md` has the exact import block).
 
 Generated Helm source is committed. It is ours now.
+
+**After any Spartan upgrade, run the healthcheck.** It scans for deprecated APIs and stale imports
+and fixes them, which is the whole `migrate-*` family in one command:
+
+```bash
+ng g @spartan-ng/cli:healthcheck             # report only
+ng g @spartan-ng/cli:healthcheck --autoFix   # apply
+```
+
+Do not invoke `migrate-*` generators individually unless you are targeting one known migration.
+
+**Audit:** Flag a `@spartan-ng/*` version bump in `package.json` whose PR shows no healthcheck run.
 
 ## Usage
 
@@ -136,6 +245,12 @@ redefined under the dark selector and everything follows.
 `#hex`, `rgb()`) in any template or component style. Raw colours are allowed only where the theme
 variables are defined, in `styles.css`.
 
+**Need a colour the palette does not have?** Add it as a token, not as a one-off. Define the
+variable in both `:root` and `.dark`, then expose it to Tailwind with `@theme inline` so
+`bg-warning` works like `bg-primary` does. The exact shape is in `spartan/customization.md`. A
+semantic token added once is a rebrand-safe decision; a hex in a template is a bug with a delay
+fuse.
+
 ## Composition
 
 ```
@@ -148,6 +263,15 @@ Our own components in `ui/` compose Helm components. Features import from `ui/`.
 (a button, an input) are fine to import directly from Helm in a feature; anything with an
 app-specific shape gets wrapped once in `ui/` so the shape lives in one place.
 
+**Build them the way Helm builds them.** A component in `ui/` that takes classes from its callers
+merges them with `classes()` from `@spartan-ng/helm/utils`, called in the constructor — it applies
+your base classes to the host and merges the caller's `class` over them, with the caller winning
+conflicts. Never concatenate class strings by hand; `hlm()` (clsx + tailwind-merge) exists for the
+computed case. Both patterns are written out in `spartan/rules/styling.md`.
+
+**Audit:** Flag template-literal or `+` class concatenation in a component under `ui/`. It produces
+duplicate, mutually-overriding Tailwind classes whose winner depends on stylesheet order.
+
 ## Upgrading Spartan
 
 `@spartan-ng/brain` is upgraded on the normal dependency cadence. Helm components do **not** update
@@ -155,10 +279,18 @@ automatically — they are our source.
 
 When Spartan ships a meaningful upstream fix to a Helm component:
 
-1. Regenerate into a scratch location and diff against ours.
-2. Port the fix, keeping our variants and any recorded overrides.
-3. Update the `AGENTS.local.md` entry if the override still applies.
-4. Run `npx skills update spartan-ng-developer` so the skill matches the installed Spartan version.
+1. Run `ng g @spartan-ng/cli:healthcheck` first. It catches the deprecated APIs and stale imports
+   mechanically, which is most of what an upgrade actually breaks.
+2. Regenerate into a scratch location and diff against ours.
+3. Port the fix, keeping our variants and any recorded overrides.
+4. Update the `AGENTS.local.md` entry if the override still applies.
+5. Run `npx skills update spartan` to pull the latest upstream guidance.
+
+On that last step: `npx skills update` with no name updates **every** installed skill, including
+`angular-developer`, which is a separate decision — name the skill. And it fetches upstream's
+latest, which is not the same as "the version this project has installed". It usually tracks
+closely, because the skill ships from the Spartan monorepo, but if the guidance and
+`package.json` disagree, `package.json` and the generated Helm source win.
 
 Do this alongside the annual Angular upgrade — see
 [longevity.md](longevity.md#2-upgrade-on-a-schedule-not-on-demand) — so there is one review moment

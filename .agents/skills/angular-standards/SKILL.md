@@ -19,8 +19,8 @@ Read this file first. It routes you to the rule that applies.
    May not exist yet.
 2. **`references/` in this skill** — house rules. Stricter than, or additional to, the upstream
    Angular and Spartan skills.
-3. **The upstream skills** — `angular-developer` from `angular/angular`, and `spartan-ng-developer`
-   from `mofirojean/angular-ui-skills`.
+3. **The upstream skills** — `angular-developer` from `angular/angular`, and `spartan` from
+   `spartan-ng/spartan` (the official Spartan skill).
 
 When `references/` and an upstream skill disagree, `references/` wins. It is written to be stricter,
 never contradictory on framework facts.
@@ -41,9 +41,9 @@ These six apply to every change. Everything else is in the topic files.
    of deprecated and removal-scheduled APIs. This is a 10-year application; using a deprecated API
    is creating scheduled work for a future maintainer.
 5. **Never edit generated Helm code by hand without reading**
-   [spartan-ui.md](references/spartan-ui.md). Its location comes from `components.json`
-   (`componentsPath`), not from a hard-coded path. That code is generated, owned by us, and has
-   upgrade rules.
+   [spartan-ui.md](references/spartan-ui.md). Ask the CLI where it lives —
+   `ng g @spartan-ng/cli:info --json` — never assume a path. That code is generated, owned by us,
+   and has upgrade rules.
 6. **State the tradeoff before adding a dependency.** See the dependency policy in
    [longevity.md](references/longevity.md).
 
@@ -73,27 +73,34 @@ The standards files cite upstream material as `<skill-name>/references/<file>.md
 
 ```bash
 npx skills add angular/skills -s angular-developer
-npx skills add mofirojean/angular-ui-skills -s spartan-ng-developer
+npx skills add https://github.com/spartan-ng/spartan --skill spartan
 ```
 
 - **`angular-developer`** — component anatomy, DI resolution, router lifecycle, Signal Forms API,
   testing, CLI. `angular/skills` is Angular's published mirror of
   `angular/angular/skills/dev-skills/`; both work, the mirror clones in seconds.
-- **`spartan-ng-developer`** — the four Helm template patterns, per-component APIs, Brain
-  primitives, theming. Read `references/helm-conventions.md` before writing any Spartan template.
+- **`spartan`** — the **official** Spartan skill, released from the library's own monorepo. The
+  single source for Spartan: the `@spartan-ng/cli` generators (`info --json`, `healthcheck`, the
+  `migrate-*` family), the `@spartan-ng/mcp` server, the styling/forms/composition/icons rules,
+  `components.json`, and theming.
 
-**Both `-s` flags are load-bearing.** Those two repos ship seven skills between them. Four are left
-out on purpose:
+`spartan` carries no per-component catalogue on purpose — confirm a component's API from the
+generated Helm source, then MCP, then the docs site. The order and the reasoning are in
+[spartan-ui.md](references/spartan-ui.md#finding-a-components-api).
 
-| Left out | Why |
-| --- | --- |
-| `angular-material-developer`, `ng-zorro-developer`, `primeng-developer` | Recommend component libraries this standard bans — [spartan-ui.md](references/spartan-ui.md), [longevity.md](references/longevity.md) |
-| `angular-new-app` | Scaffolds a new app. The app already exists by the time it is installed, and its `ng new --ai-config` step generates an `AGENTS.md` that collides with this project's. Its "generate everything with `ng generate`" step ignores [architecture.md](references/architecture.md) on file placement. |
+**Every skill selector is load-bearing.** Both repos ship siblings that are excluded on purpose —
+install only the two named above:
 
-The seventh, **`ui-craft`**, is optional rather than excluded: it is library-agnostic visual-quality
-guidance (hierarchy, spacing, typography, density, empty states) and explicitly pairs with
-`spartan-ng-developer`. Nothing in it conflicts with these standards. Add it if the project has
-dashboards or data-heavy views:
+| Left out | From | Why |
+| --- | --- | --- |
+| `angular-material-developer`, `ng-zorro-developer`, `primeng-developer` | `mofirojean/angular-ui-skills` | Recommend component libraries this standard bans — [spartan-ui.md](references/spartan-ui.md), [longevity.md](references/longevity.md) |
+| `spartan-ng-developer` | `mofirojean/angular-ui-skills` | The per-component catalogue that would fill the gap above — but its worked examples teach patterns these standards ban — [spartan-ui.md](references/spartan-ui.md#the-community-catalogue-is-not-installed) |
+| `angular-new-app` | `angular/skills` | Scaffolds a new app. The app already exists by the time it is installed, and its `ng new --ai-config` step generates an `AGENTS.md` that collides with this project's. Its "generate everything with `ng generate`" step ignores [architecture.md](references/architecture.md) on file placement. |
+
+**`ui-craft`** (also `mofirojean/angular-ui-skills`) is optional rather than excluded: it is
+library-agnostic visual-quality guidance (hierarchy, spacing, typography, density, empty states).
+Nothing in it conflicts with these standards. Add it if the project has dashboards or data-heavy
+views:
 
 ```bash
 npx skills add mofirojean/angular-ui-skills -s ui-craft
@@ -101,6 +108,9 @@ npx skills add mofirojean/angular-ui-skills -s ui-craft
 
 `angular-new-app` is genuinely useful **before** a project exists. Install it globally if you want
 it: `npx skills add angular/skills -s angular-new-app -g`.
+
+Update them by name — a bare `npx skills update` updates everything installed, which is a separate
+decision each time: `npx skills update angular-developer spartan`.
 
 If a cited file is not present, the skill is not installed. Say so rather than guessing at the API,
 and fall back to `https://angular.dev` for framework questions.
