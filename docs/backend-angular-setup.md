@@ -53,9 +53,7 @@ php artisan boost:update --discover
 ## Angular frontend and agent skills
 
 Run these commands from the backend repository root. Installing the skills here lets an agent
-started from that root discover both the backend and frontend guidance. Target Codex and Claude
-Code explicitly so the CLI keeps the canonical skills in `.agents/skills/` and creates the
-corresponding links in `.claude/skills/`; do not create those links manually.
+started from that root discover both the backend and frontend guidance.
 
 ```bash
 npx skills add gerardp/angular-standards -a codex -a claude-code -y
