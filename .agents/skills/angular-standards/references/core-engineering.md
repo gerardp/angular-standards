@@ -2,6 +2,43 @@
 
 Baseline rules that are not Angular-specific.
 
+## Before you write it
+
+Stop at the first rung that holds.
+
+1. **Does this need to exist?** Speculative code has no user to validate it and no test that
+   proves it wrong. Promote a helper on the second consumer, not the first
+   ([architecture.md](architecture.md#where-does-this-file-go)); add a store when the criteria are
+   met, not in anticipation ([reactivity-and-state.md](reactivity-and-state.md#when-to-add-a-store)).
+2. **Is it already in this repo?** Search before you write. `util/`, `ui/` and `core/` only pay for
+   themselves if the second consumer looks first — a duplicate helper costs twice on every future
+   change, and the second copy is the one that rots.
+3. **Does the web platform do it?** `Intl.*`, `<dialog>`, `popover`, `:has()`, container queries,
+   CSS transitions. See [longevity.md](longevity.md#4-prefer-the-boring-standard-thing).
+4. **Does Angular do it?** HTTP-into-signals, forms, lazy loading, accessibility primitives. This is
+   question 1 of the dependency policy ([longevity.md](longevity.md#3-dependency-policy)).
+5. **Does something already installed do it?** `@angular/cdk` and `@spartan-ng/brain` are already in
+   the tree and already on the upgrade budget; a new package is a new bet
+   ([spartan-ui.md](spartan-ui.md#composite-widgets-use-brain)).
+6. **Is it one line?** Then it is one line, inline — no wrapper, no file of its own.
+7. Only then write it, as the minimum that works.
+
+The order is the same one [longevity.md](longevity.md#4-prefer-the-boring-standard-thing) argues
+for: platform outlives framework, framework outlives library. Rungs 3–5 are where a 10-year codebase
+is won, and they are the ones an agent skips — writing the helper is faster than finding out the
+platform already ships it.
+
+**The ladder governs indirection you are adding for yourself, never a boundary the standards
+require.** A data-access service read by one component ([architecture.md](architecture.md#the-one-rule)),
+a wrapper isolating a risky dependency ([longevity.md](longevity.md#isolate-what-you-cannot-avoid)),
+a layer the dependency direction mandates — these are already a "yes" at rung 1. They exist so the
+*next* change is possible, and their call-site count says nothing about whether they should.
+
+**Audit:** Flag a new `util/` helper that duplicates a JS built-in, an `Intl` capability, or a
+function that already exists elsewhere in the repo. Flag indirection whose only justification is
+future reuse — generic helper, base class, pass-through layer — at a single call site. Never flag a
+boundary these standards require.
+
 ## TypeScript configuration
 
 Strict everything. These are set once in `tsconfig.json` and never relaxed — turning a flag off to

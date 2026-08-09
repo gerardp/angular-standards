@@ -42,6 +42,7 @@ Load only the standards relevant to the diff. Do not read all of `references/` e
 
 | Changed | Read |
 | --- | --- |
+| Any `.ts` file | `core-engineering.md` |
 | Any `.ts` under `features/` | `architecture.md`, `components.md`, `reactivity-and-state.md` |
 | `data-access/**` | `data-access.md`, `security.md` |
 | `*.html`, `*.css` | `templates-and-styling.md`, `spartan-ui.md` |

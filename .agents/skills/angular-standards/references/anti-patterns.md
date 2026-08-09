@@ -52,59 +52,60 @@ Ordered by how expensive each one is to unwind later.
 | 31 | `inject(ActivatedRoute)` to read a param | `withComponentInputBinding()` + `input.required()` | [routing](routing.md#route-params-are-signal-inputs) |
 | 32 | Logic in a template expression | A `computed()` | [components](components.md#templates) |
 | 33 | Component or pure helper promoted to `ui/`/`util/` with one consumer | Colocate until there is a second | [architecture](architecture.md#where-does-this-file-go) |
+| 34 | Indirection justified only by future reuse (generic helper, base class, pass-through layer) at one call site — *not* a required layer boundary | Write it inline; extract on the second call site | [core-engineering](core-engineering.md#before-you-write-it) |
 
 ## Styling
 
 | # | Anti-pattern | Instead | Rule |
 | --- | --- | --- | --- |
-| 34 | Raw palette colour (`bg-slate-900`, hex, `rgb()`) | Semantic token (`bg-background`) | [styling](templates-and-styling.md#utilities-first-semantic-tokens-always) |
-| 35 | Utilities overriding a helm component at the call site | Add a variant to the helm CVA config | [spartan](spartan-ui.md#usage) |
-| 36 | Hand-rolled dropdown/modal/tabs/combobox | A Spartan brain primitive | [spartan](spartan-ui.md#composite-widgets-use-brain) |
-| 37 | `@apply` to "tidy" a long class list | A component | [styling](templates-and-styling.md#long-class-lists) |
-| 38 | `::ng-deep` or `!important` | Restructure; style the component that owns the element | [styling](templates-and-styling.md#when-utilities-are-not-enough) |
-| 39 | Physical direction utilities (`ml-*`, `text-left`) | Logical (`ms-*`, `text-start`) | [styling](templates-and-styling.md#layout) |
-| 40 | Animating `width`/`height`/`top`/`left` | `transform` and `opacity` | [styling](templates-and-styling.md#motion) |
-| 41 | No `prefers-reduced-motion` handling | Add the global reduce block | [styling](templates-and-styling.md#motion) |
-| 42 | `tailwind.config.js` in a v4 project | CSS-first config in `styles.css` | [styling](templates-and-styling.md#tailwind-v4-configuration) |
-| 43 | Helm component edited without an `AGENTS.local.md` entry | Record it, or the next regen reverts it | [spartan](spartan-ui.md#editing-helm-components) |
+| 35 | Raw palette colour (`bg-slate-900`, hex, `rgb()`) | Semantic token (`bg-background`) | [styling](templates-and-styling.md#utilities-first-semantic-tokens-always) |
+| 36 | Utilities overriding a helm component at the call site | Add a variant to the helm CVA config | [spartan](spartan-ui.md#usage) |
+| 37 | Hand-rolled dropdown/modal/tabs/combobox | A Spartan brain primitive | [spartan](spartan-ui.md#composite-widgets-use-brain) |
+| 38 | `@apply` to "tidy" a long class list | A component | [styling](templates-and-styling.md#long-class-lists) |
+| 39 | `::ng-deep` or `!important` | Restructure; style the component that owns the element | [styling](templates-and-styling.md#when-utilities-are-not-enough) |
+| 40 | Physical direction utilities (`ml-*`, `text-left`) | Logical (`ms-*`, `text-start`) | [styling](templates-and-styling.md#layout) |
+| 41 | Animating `width`/`height`/`top`/`left` | `transform` and `opacity` | [styling](templates-and-styling.md#motion) |
+| 42 | No `prefers-reduced-motion` handling | Add the global reduce block | [styling](templates-and-styling.md#motion) |
+| 43 | `tailwind.config.js` in a v4 project | CSS-first config in `styles.css` | [styling](templates-and-styling.md#tailwind-v4-configuration) |
+| 44 | Helm component edited without an `AGENTS.local.md` entry | Record it, or the next regen reverts it | [spartan](spartan-ui.md#editing-helm-components) |
 
 ## Tests
 
 | # | Anti-pattern | Instead | Rule |
 | --- | --- | --- | --- |
-| 44 | Behaviour change or bug fix without a corresponding test | Add the smallest behavioural or regression test | [testing](testing.md#tests-are-part-of-the-change) |
-| 45 | `fakeAsync`/`tick`/`setTimeout` for sequencing | `await fixture.whenStable()` | [testing](testing.md#zoneless-testing) |
-| 46 | Asserting private members or signal internals | Assert user-visible behaviour | [testing](testing.md#test-behaviour-not-implementation) |
-| 47 | Module-level mutable state shared across tests | Set it up inside `beforeEach` | [testing](testing.md#hygiene) |
-| 48 | Flaky test retried until green | Fix it or delete it | [testing](testing.md#ci-gate) |
-| 49 | Auto-mock instead of a typed fake | A fake implementing the real interface | [testing](testing.md#dependency-substitution) |
+| 45 | Behaviour change or bug fix without a corresponding test | Add the smallest behavioural or regression test | [testing](testing.md#tests-are-part-of-the-change) |
+| 46 | `fakeAsync`/`tick`/`setTimeout` for sequencing | `await fixture.whenStable()` | [testing](testing.md#zoneless-testing) |
+| 47 | Asserting private members or signal internals | Assert user-visible behaviour | [testing](testing.md#test-behaviour-not-implementation) |
+| 48 | Module-level mutable state shared across tests | Set it up inside `beforeEach` | [testing](testing.md#hygiene) |
+| 49 | Flaky test retried until green | Fix it or delete it | [testing](testing.md#ci-gate) |
+| 50 | Auto-mock instead of a typed fake | A fake implementing the real interface | [testing](testing.md#dependency-substitution) |
 
 ## Accessibility
 
 | # | Anti-pattern | Instead | Rule |
 | --- | --- | --- | --- |
-| 50 | `(click)` on a `<div>` or `<span>` | A real `<button>` | [components](components.md#accessibility) |
-| 51 | Input without an associated label | `<label for>` | [forms](forms.md#accessibility) |
-| 52 | `outline: none` with no replacement | A visible focus style | [core-engineering](core-engineering.md#accessibility-baseline) |
-| 53 | State conveyed by colour alone | Add text or an icon | [core-engineering](core-engineering.md#accessibility-baseline) |
-| 54 | Concatenated user-facing sentence | One parameterised message | [core-engineering](core-engineering.md#internationalisation-readiness) |
+| 51 | `(click)` on a `<div>` or `<span>` | A real `<button>` | [components](components.md#accessibility) |
+| 52 | Input without an associated label | `<label for>` | [forms](forms.md#accessibility) |
+| 53 | `outline: none` with no replacement | A visible focus style | [core-engineering](core-engineering.md#accessibility-baseline) |
+| 54 | State conveyed by colour alone | Add text or an icon | [core-engineering](core-engineering.md#accessibility-baseline) |
+| 55 | Concatenated user-facing sentence | One parameterised message | [core-engineering](core-engineering.md#internationalisation-readiness) |
 
 ## Performance
 
 | # | Anti-pattern | Instead | Rule |
 | --- | --- | --- | --- |
-| 55 | No `budgets` in the production build config, or a budget raised to make a build pass | Set it; shrink the artefact that failed — the fix differs per budget type | [performance](performance.md#budgets-the-only-rule-here-the-build-can-enforce) |
-| 56 | `NgZone` / `runOutsideAngular()` / any zone-based optimisation | Nothing — the app is zoneless, there is no zone | [performance](performance.md#stale-advice) |
-| 57 | `ChangeDetectorRef` injected, or a `changeDetection:` line on a component | Put the state in a signal; OnPush is the v22 default | [performance](performance.md#stale-advice) |
-| 58 | Heavy computation cached in a pure pipe | `computed()` — already lazy and memoised | [performance](performance.md#slow-computations) |
-| 59 | `@for` over an unbounded list; `*cdkVirtualFor` without `trackBy` | Virtual scrolling, with a track function | [performance](performance.md#long-lists) |
+| 56 | No `budgets` in the production build config, or a budget raised to make a build pass | Set it; shrink the artefact that failed — the fix differs per budget type | [performance](performance.md#budgets-the-only-rule-here-the-build-can-enforce) |
+| 57 | `NgZone` / `runOutsideAngular()` / any zone-based optimisation | Nothing — the app is zoneless, there is no zone | [performance](performance.md#stale-advice) |
+| 58 | `ChangeDetectorRef` injected, or a `changeDetection:` line on a component | Put the state in a signal; OnPush is the v22 default | [performance](performance.md#stale-advice) |
+| 59 | Heavy computation cached in a pure pipe | `computed()` — already lazy and memoised | [performance](performance.md#slow-computations) |
+| 60 | `@for` over an unbounded list; `*cdkVirtualFor` without `trackBy` | Virtual scrolling, with a track function | [performance](performance.md#long-lists) |
 
 ## Process
 
 | # | Anti-pattern | Instead | Rule |
 | --- | --- | --- | --- |
-| 60 | Angular major sitting past its active window | Upgrade within 9 months of release; never enter LTS | [longevity](longevity.md#2-upgrade-on-a-schedule-not-on-demand) |
-| 61 | `tsconfig` strictness flag weakened | Restore it, or record it in `AGENTS.local.md` | [core-engineering](core-engineering.md#typescript-configuration) |
-| 62 | Deviation from a standard with no `AGENTS.local.md` entry | Record it with a removal condition | `AGENTS.local.md` |
-| 63 | Upstream skill (`angular-developer`, `spartan`) edited by hand | Edit this skill's `references/`; upstream skills are re-synced | [SKILL.md](../SKILL.md) |
-| 64 | Commented-out code | Delete it; git remembers | [core-engineering](core-engineering.md#comments) |
+| 61 | Angular major sitting past its active window | Upgrade within 9 months of release; never enter LTS | [longevity](longevity.md#2-upgrade-on-a-schedule-not-on-demand) |
+| 62 | `tsconfig` strictness flag weakened | Restore it, or record it in `AGENTS.local.md` | [core-engineering](core-engineering.md#typescript-configuration) |
+| 63 | Deviation from a standard with no `AGENTS.local.md` entry | Record it with a removal condition | `AGENTS.local.md` |
+| 64 | Upstream skill (`angular-developer`, `spartan`) edited by hand | Edit this skill's `references/`; upstream skills are re-synced | [SKILL.md](../SKILL.md) |
+| 65 | Commented-out code | Delete it; git remembers | [core-engineering](core-engineering.md#comments) |
