@@ -54,7 +54,7 @@ const GLOBAL_PACKAGES = [
 ];
 
 /** Minimum selector count in EVERY block that defines no-restricted-syntax. */
-const GLOBAL_SYNTAX_COUNT = 6;
+const GLOBAL_SYNTAX_COUNT = 7;
 
 for (const block of config) {
   if (!block?.rules) continue;
@@ -135,24 +135,29 @@ function resolve(file) {
     banFeatures: groups.some((g) => g.includes('features')),
     banApiSvc: groups.some((g) => g.includes('-api.service')),
     banFakeAsync: (syntax ?? []).some((s) => s.selector?.includes('fakeAsync')),
+    banEagerCD: (syntax ?? []).some((s) => s.selector?.includes('changeDetection')),
   };
 }
 
 /** What each representative file MUST resolve to. Update deliberately, never to make CI pass. */
 const EXPECTATIONS = {
   // ui/ components: full layer boundaries, no injection, no I/O.
-  'src/app/ui/card/card.ts': { globals: true, banInject: true, banFeatures: true, banApiSvc: true },
+  'src/app/ui/card/card.ts': {
+    globals: true, banInject: true, banFeatures: true, banApiSvc: true, banEagerCD: true,
+  },
   // ui/ specs: keep the layer boundaries, lose the inject ban (TestBed.inject is legitimate).
   'src/app/ui/card/card.spec.ts': {
     globals: true, banInject: false, banFeatures: true, banApiSvc: true, banFakeAsync: true,
   },
   // Generated Helm code: globals only — we did not author it and it legitimately injects.
+  // The Eager/Default ban is global and does apply here: it never fires on the explicit `OnPush`
+  // a generated component may carry, only on a value that opts out of it.
   'src/app/ui/helm/button/button.ts': {
-    globals: true, banInject: false, banFeatures: false, banApiSvc: false,
+    globals: true, banInject: false, banFeatures: false, banApiSvc: false, banEagerCD: true,
   },
   // Feature components: no cross-feature imports, no direct API service.
   'src/app/features/inv/list.ts': {
-    globals: true, banInject: false, banFeatures: true, banApiSvc: true,
+    globals: true, banInject: false, banFeatures: true, banApiSvc: true, banEagerCD: true,
   },
   // Feature services/stores: may use an API service; still no cross-feature imports.
   'src/app/features/inv/inv.service.ts': {

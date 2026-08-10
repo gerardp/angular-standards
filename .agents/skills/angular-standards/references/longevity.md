@@ -35,6 +35,8 @@ Do not write these. If you find them, migrate them.
 | `@ViewChild` / `@ViewChildren` / `@ContentChild` / `@ContentChildren` | `viewChild()`, `viewChildren()`, `contentChild()`, `contentChildren()` | Superseded |
 | `@HostBinding` / `@HostListener` | `host: {}` in the component decorator | Superseded |
 | Constructor parameter injection | `inject()` in field initialisers | Superseded |
+| `ChangeDetectionStrategy.Default` | no `changeDetection` line at all — OnPush is the v22 default | Deprecated v22, superseded by `Eager` |
+| `ChangeDetectionStrategy.Eager` | same — no `changeDetection` line | **Project policy**, not deprecated. `Eager` is `Default`'s stable successor; opting a component out of OnPush is banned here |
 | Zone.js / `provideZoneChangeDetection()` | zoneless (the default since v21) | **Project policy**, not deprecated — the API is still stable |
 | Karma + Jasmine | Vitest (the v22 CLI default) | Replaced |
 | Protractor | Playwright | Removed years ago |
@@ -43,6 +45,22 @@ Do not write these. If you find them, migrate them.
 
 **Audit:** Flag any occurrence of a banned API. Every one is a build failure waiting for a future
 major.
+
+### `Eager` arrives by migration, not by hand
+
+`Eager` was added in v21.2 as an alias of `Default`, and in v22 it became the successor while
+`Default` was deprecated. The v22 `ng update` migration rewrites every component that had no
+`changeDetection` line — or an explicit `Default` — to `ChangeDetectionStrategy.Eager`, so that a
+pre-v22 app keeps its pre-v22 behaviour across the upgrade.
+
+That is correct as a compatibility default and wrong as an end state. On an upgrade PR it means the
+diff *adds* a banned line to files nobody touched. Delete those lines in the same PR: without the
+line the component is OnPush, which is the entire point of the v22 default. A component that
+genuinely breaks once the line is gone has state that is not in a signal — fix that, do not keep
+the `Eager`.
+
+Worth knowing because it inverts the usual assumption: this is the one banned API that appears in
+the codebase without anyone typing it.
 
 ### "Superseded" vs "deprecated"
 

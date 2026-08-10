@@ -82,6 +82,16 @@ const BANNED_SYNTAX = [
     selector: 'CallExpression[callee.name="provideZoneChangeDetection"]',
     message: 'This app is zoneless. angular-standards/references/longevity.md',
   },
+  // The v22 ng update migration WRITES this line for you, into files nobody touched — so it is
+  // the one banned API that arrives without anyone typing it. Deliberately narrowed to the two
+  // values that opt a component out of OnPush: an explicit `OnPush` is noise, not a defect, and
+  // generated Helm code may legitimately carry one.
+  {
+    selector:
+      'Property[key.name="changeDetection"] > MemberExpression[object.name="ChangeDetectionStrategy"][property.name=/^(Eager|Default)$/]',
+    message:
+      'Eager/Default opt the component out of OnPush, which is the v22 default. Delete the changeDetection line and put the state in a signal. angular-standards/references/longevity.md#eager-arrives-by-migration-not-by-hand',
+  },
 ];
 
 /**

@@ -290,7 +290,7 @@ older guides and essentially every third-party listicle carry it.
 | --- | --- |
 | `NgZone.runOutsideAngular()`, "avoid zone pollution" | Zoneless: there is no zone to escape from |
 | `ChangeDetectorRef.detectChanges()` / `markForCheck()` / `detach()` | Signals schedule their own updates. Reaching for manual CD means some state is not in a signal — fix that instead |
-| Add `changeDetection: ChangeDetectionStrategy.OnPush` | OnPush is the v22 default. The line is noise, and `Default` is banned |
+| Add `changeDetection: ChangeDetectionStrategy.OnPush` | OnPush is the v22 default. The line is noise; `Eager` and the `Default` it supersedes are banned — [longevity.md](longevity.md#eager-arrives-by-migration-not-by-hand) |
 | `trackBy` function with `*ngFor` | `@for … track` (the one exception is `*cdkVirtualFor`, above) |
 | Cache a heavy computation in a pure pipe | `computed()` |
 | `*ngIf="user$ \| async as user"` | Banned. Use `toSignal()` or `httpResource` in a service |

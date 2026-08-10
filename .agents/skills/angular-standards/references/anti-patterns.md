@@ -96,7 +96,7 @@ Ordered by how expensive each one is to unwind later.
 | --- | --- | --- | --- |
 | 56 | No `budgets` in the production build config, or a budget raised to make a build pass | Set it; shrink the artefact that failed — the fix differs per budget type | [performance](performance.md#budgets-the-only-rule-here-the-build-can-enforce) |
 | 57 | `NgZone` / `runOutsideAngular()` / any zone-based optimisation | Nothing — the app is zoneless, there is no zone | [performance](performance.md#stale-advice) |
-| 58 | `ChangeDetectorRef` injected, or a `changeDetection:` line on a component | Put the state in a signal; OnPush is the v22 default | [performance](performance.md#stale-advice) |
+| 58 | `ChangeDetectorRef` injected, or a `changeDetection:` line on a component (`Eager`, `Default` or `OnPush`) | Put the state in a signal; delete the line — OnPush is the v22 default | [performance](performance.md#stale-advice) |
 | 59 | Heavy computation cached in a pure pipe | `computed()` — already lazy and memoised | [performance](performance.md#slow-computations) |
 | 60 | `@for` over an unbounded list; `*cdkVirtualFor` without `trackBy` | Virtual scrolling, with a track function | [performance](performance.md#long-lists) |
 

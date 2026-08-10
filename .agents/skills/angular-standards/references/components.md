@@ -30,8 +30,9 @@ export class InvoiceList {
 Rules visible in that example, all mandatory:
 
 - **Standalone.** Never `NgModule`. `standalone: true` is the default since v19 — do not write it.
-- **No `changeDetection` line.** OnPush is the default in v22+. Adding it is noise; setting
-  `Default` explicitly is banned.
+- **No `changeDetection` line.** OnPush is the default in v22+. Adding `OnPush` explicitly is noise;
+  `Eager` — and the `Default` it supersedes — is banned, see
+  [longevity.md](longevity.md#banned-apis).
 - **`inject()` in field initialisers.** Never constructor parameter injection.
 - **`readonly` on every injected dependency, input, output, and computed.**
 - **`protected` for members the template uses, `private` for internals, `readonly` public only for
