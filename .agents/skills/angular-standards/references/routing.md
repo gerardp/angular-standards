@@ -92,6 +92,25 @@ otherwise have been tempted to put that logic in the component.
 **Audit:** Flag `inject(ActivatedRoute)` used to read `params`, `queryParams`, or `data`. It is
 legitimate only for navigation-event introspection.
 
+### v22 changed which params a child route inherits
+
+`paramsInheritanceStrategy` now defaults to `'always'`; before v22 it was `'emptyOnly'`, which
+inherited only when the child route had an empty path or the parent had no component. A child route
+now inherits its ancestors' **params, `data` and resolved data** unconditionally.
+
+Mostly this makes deep routes behave the way people already assumed. It matters on an upgrade
+because of how this project reads params: with `withComponentInputBinding()`, every inherited key is
+a candidate binding for a component `input()` of the same name. The exposure is therefore not a
+param name repeated in the route tree — that is the obvious case and the least interesting one. It
+is a component `input()` that happens to share a name with an ancestor's param, `data` key or
+resolver, and that previously stayed unbound.
+
+Worth a deliberate check because nothing fails to compile, and the symptom is a component rendering
+someone else's value rather than an error.
+
+**Audit:** On a v21→v22 upgrade PR, compare each routed component's `input()` names against the
+params, `data` keys and resolver keys of its ancestor routes. Flag any collision.
+
 ## Guards
 
 Functional guards. Class-based guards are banned.
@@ -206,11 +225,52 @@ If you use SSR, the hydration rules matter:
 - Reading `window`, `document`, `localStorage`, or `Date.now()` during render causes hydration
   mismatches. Guard with `afterNextRender()`.
 - Use `PendingTasks` to delay serialisation until critical async work finishes.
-- Consider incremental hydration (`@defer (hydrate on …)`) to keep interactive-only JS off the
-  critical path.
+- Incremental hydration is **already on** — you opt blocks into it, you do not enable it. See below.
 
 **Audit:** Flag direct `window`/`document`/`localStorage` access outside `afterNextRender()` or an
 explicit platform check.
+
+### Incremental hydration is on by default
+
+Since v22, `provideClientHydration()` enables incremental hydration on its own.
+`withIncrementalHydration()` is deprecated with removal intended in v24, and is banned here —
+[longevity.md](longevity.md#banned-apis). If an upgrade leaves it in `app.config.ts`, delete it in
+the same PR: it is a no-op that reads like a feature flag, which is the worst thing a line of
+configuration can be.
+
+What you write instead is the trigger, in the template:
+
+```html
+@defer (hydrate on viewport) {
+  <app-activity-chart [data]="chartData()" />
+} @placeholder (minimum 300ms) {
+  <div class="h-64 animate-pulse rounded-lg bg-muted"></div>
+}
+```
+
+Be precise about what that trigger changes, because it is not what the word "hydration" suggests.
+**Without** a `hydrate` trigger, the server renders the *placeholder, not the content*: Angular's
+default is that `@defer` blocks *"always render their `@placeholder` (or nothing if a placeholder is
+not specified) and triggers are not invoked"* during SSR, and the real content is rendered on the
+client afterwards. **Adding** `hydrate` makes the server render the main template and ship it
+dehydrated, so the markup is in the HTML from the start and only its JavaScript waits.
+
+So this is not a "lazy or not" switch. It decides whether the block's content exists in the server's
+HTML at all — an SEO and first-paint question as much as a JavaScript one. Content that should be
+indexed or visible immediately wants a `hydrate` trigger; a widget nobody scrolls to does not.
+
+**Keep the `@placeholder` anyway.** Incremental hydration never shows it, but a later client-side
+navigation to this route is an ordinary CSR render, and then the placeholder is what the user looks
+at while the chunk loads — Angular is explicit that it *"is not used for incremental hydration, but
+… is still necessary for subsequent client-side rendering cases."* On that path the block also needs
+an ordinary trigger; with none listed it falls back to `@defer`'s default, `on idle`.
+
+`withNoIncrementalHydration()` turns the feature off application-wide. It is a deviation like any
+other: it needs an `AGENTS.local.md` entry with a reason and a removal condition. A reproduced bug
+is a reason; a suspicion is not.
+
+**Audit:** Flag `withIncrementalHydration()`. Flag `withNoIncrementalHydration()` with no
+`AGENTS.local.md` entry.
 
 ## Preloading
 

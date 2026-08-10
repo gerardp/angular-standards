@@ -29,6 +29,10 @@ Do not write these. If you find them, migrate them.
 | `BrowserAnimationsModule`, `provideAnimations()` | native CSS transitions/keyframes | Deprecated |
 | `NgModule` for app code | standalone components, `bootstrapApplication` | Legacy |
 | `HttpClientModule` | `provideHttpClient()` | Deprecated |
+| `withFetch()` | nothing — `FetchBackend` is the default since v22 | Deprecated v22 |
+| `reportProgress` request option | `reportUploadProgress` / `reportDownloadProgress` — [data-access.md](data-access.md#progress-events) | Deprecated v22 |
+| `withIncrementalHydration()` | nothing — on by default with `provideClientHydration()` — [routing.md](routing.md#incremental-hydration-is-on-by-default) | Deprecated v22; removal intended v24 |
+| `$safeNavigationMigration(…)` in a template | fix the type or the condition, then delete the wrapper | Migration aid, documented as temporary — see below |
 | `RouterModule.forRoot/forChild` | `provideRouter()` | Legacy |
 | `platformBrowserDynamic().bootstrapModule()` | `bootstrapApplication(App, appConfig)` | Legacy |
 | `@Input()` / `@Output()` decorators | `input()`, `input.required()`, `output()` | Superseded |
@@ -59,8 +63,32 @@ line the component is OnPush, which is the entire point of the v22 default. A co
 genuinely breaks once the line is gone has state that is not in a signal — fix that, do not keep
 the `Eager`.
 
-Worth knowing because it inverts the usual assumption: this is the one banned API that appears in
-the codebase without anyone typing it.
+Worth knowing because it inverts the usual assumption: a banned API can arrive in the codebase
+without anyone typing it. It is not the only one.
+
+### `$safeNavigationMigration` arrives the same way
+
+In v22 the safe navigation operator changed to match JavaScript: a broken `?.` chain now evaluates
+to `undefined`, where Angular templates previously produced `null`. The `ng update` migration wraps
+affected expressions in `$safeNavigationMigration(…)` to preserve the old result, and Angular's own
+documentation calls it a **"temporary migration aid only"** that may be removed in a future version.
+
+Same shape as `Eager`, worse failure mode: it lands in templates nobody edited, and it silently pins
+them to semantics the framework has already left.
+
+Removing it is not a find-and-replace. Each call marks a place where an expression was typed as
+nullable *and* something downstream cared about `null` specifically — a `=== null` check, a `??`
+fallback, an input whose component distinguishes the two. Fix the type or the condition so the
+expression is correct under `undefined`, then delete the wrapper. Where a template genuinely needs
+`null`, `?? null` says so explicitly and survives the removal.
+
+The v22 compiler also reports `nullishCoalescingNotNullable` and `optionalChainNotNullable` on
+expressions whose left-hand side was never nullable. That is the same information from the other
+direction — a `?.` or `??` that was always dead code. Delete the operator; do not silence the
+diagnostic.
+
+**Audit:** Flag any surviving `$safeNavigationMigration(` in a template. An upgrade PR may introduce
+them; it must not merge with them.
 
 ### "Superseded" vs "deprecated"
 
@@ -136,6 +164,31 @@ policy and should be replaced.
 
 **Audit:** Flag a dependency whose Angular peer ceiling is below the current major with no tracking
 issue linked in `AGENTS.local.md`.
+
+### Check the toolchain too, not just the libraries
+
+Angular pins Node, TypeScript and RxJS to explicit ranges, and the TypeScript range is narrow enough
+to matter on its own: a routine TypeScript minor bump is an Angular-breaking change. Read the ranges
+off <https://angular.dev/reference/versions> — never off a release summary.
+
+| | Angular 21 | Angular 22 |
+| --- | --- | --- |
+| Node.js | `^20.19.0 \|\| ^22.12.0 \|\| ^24.0.0` | `^22.22.3 \|\| ^24.15.0 \|\| ^26.0.0` |
+| TypeScript | `>=5.9.0 <6.0.0` | `>=6.0.0 <6.1.0` |
+| RxJS | `^6.5.3 \|\| ^7.4.0` | `^6.5.3 \|\| ^7.4.0` |
+
+Rows as published for the `.0.x` release of each major; later minors sometimes widen them, so check
+the page rather than this table.
+
+Read the v22 Node row carefully, because it is the one third-party summaries get wrong. It is not
+"Node 22 or newer": it is three specific minors with patch floors, and Node 20 — still inside its
+own LTS window when v22 shipped — is not one of them, while 24 and 26 are. Compressing that to
+"requires Node 22" loses both halves.
+
+CI images, `.nvmrc` and any `engines` field are part of the upgrade PR, not a follow-up.
+
+**Audit:** Flag a CI image, `.nvmrc` or `engines` field naming a Node or TypeScript version outside
+the published range for the Angular major in `package.json`.
 
 ### Upgrade procedure
 

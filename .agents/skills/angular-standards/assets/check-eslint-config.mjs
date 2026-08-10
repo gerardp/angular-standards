@@ -54,7 +54,10 @@ const GLOBAL_PACKAGES = [
 ];
 
 /** Minimum selector count in EVERY block that defines no-restricted-syntax. */
-const GLOBAL_SYNTAX_COUNT = 7;
+const GLOBAL_SYNTAX_COUNT = 6;
+
+/** The OnPush opt-out ban. A named rule, not a selector — see the note in eslint.config.js. */
+const ON_PUSH_RULE = '@angular-eslint/prefer-on-push-component-change-detection';
 
 for (const block of config) {
   if (!block?.rules) continue;
@@ -120,13 +123,18 @@ for (const [glob, file, expected] of [
 function resolve(file) {
   let imports = null;
   let syntax = null;
+  let onPush = null;
   for (const block of config) {
     if (!block?.rules || !block.files) continue;
     if (!block.files.some((g) => matches(g, file))) continue;
     if (block.ignores?.some((g) => matches(g, file))) continue;
     if (block.rules['no-restricted-imports']) imports = block.rules['no-restricted-imports'];
     if (block.rules['no-restricted-syntax']) syntax = block.rules['no-restricted-syntax'];
+    // `in`, not a truthiness test: severity 0 is the falsy spelling of 'off', and a block that
+    // turns this rule off is exactly what the assertion below has to catch.
+    if (ON_PUSH_RULE in block.rules) onPush = block.rules[ON_PUSH_RULE];
   }
+  const onPushSeverity = Array.isArray(onPush) ? onPush[0] : onPush;
   const groups = (imports?.[1]?.patterns ?? []).flatMap((p) => p.group);
   const paths = (imports?.[1]?.paths ?? []).map((p) => p.name);
   return {
@@ -135,7 +143,7 @@ function resolve(file) {
     banFeatures: groups.some((g) => g.includes('features')),
     banApiSvc: groups.some((g) => g.includes('-api.service')),
     banFakeAsync: (syntax ?? []).some((s) => s.selector?.includes('fakeAsync')),
-    banEagerCD: (syntax ?? []).some((s) => s.selector?.includes('changeDetection')),
+    banEagerCD: onPushSeverity === 'error' || onPushSeverity === 2,
   };
 }
 
@@ -150,8 +158,8 @@ const EXPECTATIONS = {
     globals: true, banInject: false, banFeatures: true, banApiSvc: true, banFakeAsync: true,
   },
   // Generated Helm code: globals only — we did not author it and it legitimately injects.
-  // The Eager/Default ban is global and does apply here: it never fires on the explicit `OnPush`
-  // a generated component may carry, only on a value that opts out of it.
+  // The OnPush opt-out ban is global and does apply here: it stays silent on the explicit `OnPush`
+  // a generated component may carry, and only fires on a value that opts out of it.
   'src/app/ui/helm/button/button.ts': {
     globals: true, banInject: false, banFeatures: false, banApiSvc: false, banEagerCD: true,
   },

@@ -82,16 +82,6 @@ const BANNED_SYNTAX = [
     selector: 'CallExpression[callee.name="provideZoneChangeDetection"]',
     message: 'This app is zoneless. angular-standards/references/longevity.md',
   },
-  // The v22 ng update migration WRITES this line for you, into files nobody touched — so it is
-  // the one banned API that arrives without anyone typing it. Deliberately narrowed to the two
-  // values that opt a component out of OnPush: an explicit `OnPush` is noise, not a defect, and
-  // generated Helm code may legitimately carry one.
-  {
-    selector:
-      'Property[key.name="changeDetection"] > MemberExpression[object.name="ChangeDetectionStrategy"][property.name=/^(Eager|Default)$/]',
-    message:
-      'Eager/Default opt the component out of OnPush, which is the v22 default. Delete the changeDetection line and put the state in a signal. angular-standards/references/longevity.md#eager-arrives-by-migration-not-by-hand',
-  },
 ];
 
 /**
@@ -228,6 +218,13 @@ module.exports = tseslint.config(
       '@angular-eslint/no-output-rename': 'error',
       '@angular-eslint/no-host-metadata-property': 'off', // we REQUIRE the host object
       '@angular-eslint/no-attribute-decorator': 'error',
+      // Reports a component that opts OUT of OnPush — i.e. ChangeDetectionStrategy.Eager, or the
+      // Default it supersedes. An explicit OnPush, or no changeDetection line at all, is silent.
+      // Already 'error' in tsRecommended as of angular-eslint 22.1; restated here because this is
+      // the ban the v22 `ng update` migration trips on its own, and the config it comes from is
+      // not ours. Do NOT add a no-restricted-syntax selector for the same thing — it double-reports
+      // and is narrower. angular-standards/references/longevity.md#eager-arrives-by-migration-not-by-hand
+      '@angular-eslint/prefer-on-push-component-change-detection': 'error',
 
       'no-restricted-imports': restrictImports(),
       'no-restricted-syntax': restrictSyntax(),

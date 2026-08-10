@@ -130,12 +130,72 @@ provideHttpClient(
 )
 ```
 
-**Do not add `withFetch()`.** `HttpClient` uses the Fetch API by default in current Angular;
-`withFetch()` is legacy noise in a new codebase. `withXhr()` exists to opt *out* of Fetch — you
-will not need it. `provideHttpClient()` is still required, to configure interceptors and XSRF.
+**Do not add `withFetch()`.** `FetchBackend` is the default since v22 and `withFetch()` is now
+deprecated outright — see [longevity.md](longevity.md#banned-apis). `provideHttpClient()` is still
+required, to configure interceptors and XSRF.
 
 Interceptors are **functional** (`HttpInterceptorFn`). Class-based interceptors and
 `HttpClientModule` are banned — see [longevity.md](longevity.md).
+
+## Progress events
+
+`reportProgress` is deprecated in v22. Ask for the direction you actually want:
+
+```ts
+this.http.get('/api/exports/large.csv', { reportDownloadProgress: true, observe: 'events' });
+```
+
+Ask only where a progress indicator is genuinely rendered. The request emits an event per chunk, so
+this is not a free flag to leave on.
+
+**Download progress works on the default Fetch backend. Upload progress is unavailable on it — and
+it fails loudly, not quietly.** Angular's wording on `reportUploadProgress`: *"When set to `true` a
+request emited against the `FetchBackend` will throw an error."* So it is not a flag you can set
+speculatively and discover later; on the default backend it breaks the request.
+
+### If you need a real upload percentage
+
+`withXhr()` is the only way to get one, and it is an **application-wide switch, not a per-request
+option**:
+
+```ts
+// browser configuration only — see the constraint below
+provideHttpClient(
+  withXhr(),
+  withInterceptors([authInterceptor, errorInterceptor]),
+)
+```
+
+```ts
+this.http.post('/api/documents', file, { reportUploadProgress: true, observe: 'events' });
+```
+
+`withXhr()` itself is stable and is not on a deprecation clock. The constraint is *where it runs*:
+Angular says XHR support **on the server** is deprecated and intended to be removed in v23, and the
+underlying `xhr2` does not safely handle redirects — it can forward an `Authorization` header to a
+host you did not choose. It must not reach the SSR environment.
+
+That does not happen by itself. Under SSR, `app.config.ts` is the *shared* config — the server
+config merges on top of it — so `withXhr()` written there applies on the server too. Adopting it
+means confining it to the browser configuration and verifying what the server actually resolves.
+Nothing fails at build time if you get this wrong.
+
+So treat it as a decision with a cost, not a convenience:
+
+- **First ask whether transport progress is the requirement.** An indeterminate indicator, or a
+  status endpoint the client polls, keeps the app on Fetch. Neither is free — a status endpoint is
+  backend work, and neither reports bytes on the wire — but the transport choice is the expensive
+  half, and it is the one you cannot undo per screen.
+- **If a percentage is genuinely required**, adopt `withXhr()` deliberately and record it in
+  `AGENTS.local.md`. The removal condition is *the percentage requirement disappears, or Fetch gains
+  upload progress* — not a version number. Nothing here expires on a schedule.
+- **Do not build a second `HttpClient` on `HttpXhrBackend`** as an "isolated" workaround. It skips
+  the interceptor chain, so `errorInterceptor`, auth and XSRF stop applying to exactly the requests
+  that carry user file uploads. See [security.md](security.md).
+
+**Audit:** Flag `reportProgress`. Flag `reportUploadProgress` in a project with no `withXhr()` —
+that request throws against the default backend. Flag `withXhr()` with no `AGENTS.local.md` entry,
+or reachable from the server config. Flag a manually constructed `HttpClient`.
 
 ## Errors
 
