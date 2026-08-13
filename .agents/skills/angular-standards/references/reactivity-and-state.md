@@ -177,7 +177,7 @@ which is precisely why deferring this decision is safe.
 
 RxJS is not banned; it is scoped. Use it where the problem is genuinely a stream over time:
 
-- Debounced search input
+- Debounced search input — see [below](#debouncing-stays-in-rxjs-for-now)
 - WebSocket / SSE streams
 - Complex cancellation and sequencing
 
@@ -194,3 +194,27 @@ Rules when you do:
 
 **Audit:** Flag `.subscribe(` anywhere under `src/app/features/` or `src/app/ui/`. Flag any
 subscribe without `takeUntilDestroyed()`.
+
+### Debouncing stays in RxJS for now
+
+v22 ships `debounced()` in `@angular/core` — `debounced(this.query, 300)` — which covers the
+typeahead case with no RxJS import at all. **Do not adopt it yet.** It is *experimental*, a tier
+below Developer Preview, and Angular's own guide says it *"might change before it is stable"*. The
+path between a keystroke and a request is the wrong place to absorb a breaking rename.
+
+Two things about its shape are worth knowing before it stabilises, because neither is what
+"debounced signal" suggests:
+
+- **It returns a `Resource`, not a `Signal`.** You read `debouncedQuery.value()`, and `status()` is
+  `'loading'` while the timer runs. Swapping it in later is therefore not a one-line change at the
+  call site — it changes how every template reads the value.
+- **It must be called in an injection context**, or be handed an explicit `Injector` in its options.
+
+Until then, debounce in the service and keep the component reading a plain signal: `debounceTime`
+into `toSignal()`, feeding the `httpResource` that already cancels the superseded request. The
+debounce only has to throttle the trigger; it does not have to manage the request. Revisit at
+v23/v24 — the same treatment `@Service()` gets in
+[performance.md](performance.md#lazy-load-heavy-services).
+
+**Audit:** Flag any import of `debounced` from `@angular/core`. Adopting it early is a deviation
+like any other: it needs an `AGENTS.local.md` entry with a reason and a removal condition.

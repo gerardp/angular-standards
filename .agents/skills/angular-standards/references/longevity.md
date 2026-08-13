@@ -42,6 +42,7 @@ Do not write these. If you find them, migrate them.
 | `ChangeDetectionStrategy.Default` | no `changeDetection` line at all — OnPush is the v22 default | Deprecated v22, superseded by `Eager` |
 | `ChangeDetectionStrategy.Eager` | same — no `changeDetection` line | **Project policy**, not deprecated. `Eager` is `Default`'s stable successor; opting a component out of OnPush is banned here |
 | Zone.js / `provideZoneChangeDetection()` | zoneless (the default since v21) | **Project policy**, not deprecated — the API is still stable |
+| `debounced()` from `@angular/core` | `debounceTime` into `toSignal()` in a service — [reactivity-and-state.md](reactivity-and-state.md#debouncing-stays-in-rxjs-for-now) | **Project policy**, not deprecated — experimental in v22; revisit at v23/v24 |
 | Karma + Jasmine | Vitest (the v22 CLI default) | Replaced |
 | Protractor | Playwright | Removed years ago |
 | `signal.mutate()` | `.set()` / `.update()` with a new reference | Never shipped as stable; does not exist |
@@ -106,6 +107,12 @@ disappear without the deprecation guarantee.
 - Spartan NG brain primitives cover the same accessible-primitive need and are 1.0/stable — prefer
   them. See [spartan-ui.md](spartan-ui.md).
 - Revisit when Aria goes stable. Record the decision in `AGENTS.local.md` if it changes.
+
+**Experimental** is the tier below Developer Preview — no deprecation guarantee and no stability
+promise at all. The one to know in v22 is `debounced()`, banned above and explained in
+[reactivity-and-state.md](reactivity-and-state.md#debouncing-stays-in-rxjs-for-now); route-injector
+auto-cleanup is the other ([routing.md](routing.md#route-injectors-are-not-destroyed-on-navigation)).
+Blog posts routinely present both as ordinary v22 features. They are not.
 
 **Stable and safe to build on as of v22.1:** Signals, `computed`, `linkedSignal`, `resource` /
 `rxResource` / `httpResource`, Signal Forms, standalone components, built-in control flow,
