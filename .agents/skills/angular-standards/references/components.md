@@ -138,6 +138,71 @@ count. A long file holding one coherent view is fine.
 **Audit:** Flag components whose template contains two or more `@if` branches switching between
 what are effectively different screens.
 
+## Inheritance
+
+**Do not `extends` a class carrying `@Component` or `@Directive` in app code.** Compose instead.
+
+Inheritance works — that is the problem. A subclass inherits the union of every ancestor's inputs,
+outputs and host bindings, and a base that uses `inject()` in field initialisers needs no `super()`
+forwarding at all. So the coupling is real and invisible:
+
+- **The public API is not in the file.** A subclass's inputs and outputs come from ancestors it does
+  not name. Rename an input on the base and every subclass's template contract changes silently.
+- **Host bindings accumulate.** Two levels down, nothing in the subclass says what ends up on the
+  host element.
+- **Lifecycle hooks override, they do not chain.** A subclass declaring `ngOnInit` replaces the
+  base's unless it calls `super.ngOnInit()`. This is the one case that genuinely breaks, and it
+  breaks quietly.
+- **The base is a fan-out point on upgrade.** You cannot change it without auditing every subclass
+  — exactly the coupling the layer rules exist to prevent.
+
+`hostDirectives` buys the same reuse with the composition written down: the directive is named in
+the metadata, and only the inputs listed there enter the component's API.
+
+The three replacements, in order:
+
+| Sharing | Use |
+| --- | --- |
+| Host behaviour — bindings, listeners, a11y wiring | `hostDirectives` on the consumer |
+| Markup around a variable middle | Content projection (`<ng-content>`) |
+| Pure logic, no template, no host | A plain function beside its consumer — promoted to `util/` only on a second, cross-feature caller ([architecture.md](architecture.md#where-does-this-file-go)) |
+
+```ts
+// Wrong — trackingId is part of InvoicePanel's public API without appearing anywhere in it.
+@Directive({ host: { '[attr.data-tracking-id]': 'trackingId()' } })
+abstract class TrackedPanel {
+  readonly trackingId = input.required<string>();
+}
+
+@Component({ selector: 'app-invoice-panel' /* ... */ })
+export class InvoicePanel extends TrackedPanel {}
+
+// Right — a concrete directive, composed, with the contributed input named at the call site.
+@Directive({
+  selector: '[appTracked]',
+  host: { '[attr.data-tracking-id]': 'trackingId()' },
+})
+export class TrackingBehavior {
+  readonly trackingId = input.required<string>();
+}
+
+@Component({
+  selector: 'app-invoice-panel',
+  hostDirectives: [{ directive: TrackingBehavior, inputs: ['trackingId'] }],
+  // ...
+})
+export class InvoicePanel {}
+```
+
+A `hostDirectives` entry has to be a concrete, instantiable directive — the API takes a `Type`, so
+an abstract base cannot be composed, and an input is only exposed if the directive declares it.
+
+This is the same move Spartan makes: Helm composes Brain by applying its directives, never by
+extending them — see [spartan-ui.md](spartan-ui.md).
+
+**Audit:** Flag `extends` on any class decorated with `@Component` or `@Directive`, and any
+`@Directive()`-decorated abstract base class in app code. Generated Helm code is exempt.
+
 ## Deferred loading
 
 Use `@defer` for below-the-fold and interaction-gated content:

@@ -84,8 +84,11 @@ TestBed.configureTestingModule({
 });
 ```
 
-Prefer a small hand-written fake over a mocking framework. A fake that implements the real
-interface fails to compile when the interface changes — which is exactly the signal you want.
+Prefer a small hand-written fake over a mocking framework. Anchor it to the surface the test
+consumes — `satisfies Pick<InvoiceApiService, 'create'>` — so it fails to compile when the service
+changes, which is exactly the signal you want. The provider line will not do this for you:
+`ValueProvider` types both `provide` and `useValue` as `any`
+([architecture.md](architecture.md#abstractions-are-for-real-seams-not-for-testability)).
 Auto-mocks silently keep passing while the real code has moved on. Over ten years this difference
 compounds enormously.
 

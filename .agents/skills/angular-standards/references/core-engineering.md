@@ -115,7 +115,12 @@ See [components.md](components.md#naming) for the Angular file/class suffix conv
 
 ## Functions
 
-- One reason to exist. If you need "and" to describe it, split it.
+- **One coherent job, one reason to change.** Split when a unit holds concerns that independent
+  requirements or actors would change separately — not because its description contains "and", and
+  not because it has more than one caller. A verb count is not a responsibility count:
+  `InvoiceApiService` loading, creating and voiding invoices is one job, invoice transport
+  ([data-access.md](data-access.md#one-service-per-backend-area)). Splitting per verb produces a
+  folder of one-method classes that always change together.
 - Early return over nested conditionals.
 - Pure by default. Anything in `util/` must be pure — no DI, no Angular imports, no side effects.
 - Parameters: three or fewer positional, then take an options object.

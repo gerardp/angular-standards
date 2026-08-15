@@ -80,6 +80,91 @@ That last rule is the one that decays first and costs the most. It is enforced m
 **Audit:** Flag cross-feature imports and any upward import (e.g. `core/` importing from
 `features/`). Flag any component in `ui/` that injects a service.
 
+### Abstractions are for real seams, not for testability
+
+Angular's DI already gives you the seam. A class is its own injection token, so a test overrides it
+with no abstraction in the way:
+
+```ts
+const fakeInvoiceApi = {
+  create: () => of(stubInvoice),
+} satisfies Pick<InvoiceApiService, 'create'>;
+
+TestBed.configureTestingModule({
+  providers: [{ provide: InvoiceApiService, useValue: fakeInvoiceApi }],
+});
+```
+
+The `satisfies` clause is doing the work, not the provider: `ClassProvider` and `ValueProvider` both
+type `provide` as `any`, so the provider line checks nothing on its own. Anchoring the fake to a
+`Pick<>` of the real service is what makes it fail to compile when the service changes — the signal
+[testing.md](testing.md#dependency-substitution) is asking for.
+
+An `interface` + `InjectionToken`, or an `abstract class` base, layered on top of that buys nothing
+and costs a file. Inject the concrete class.
+
+**A TypeScript `interface` cannot be an injection token at all.** It is erased at compile time:
+`inject(InvoiceRepository)` does not compile, and a constructor parameter typed as one fails with
+NG2003 — an error, not a warning, under `strictInjectionParameters`
+([core-engineering.md](core-engineering.md#typescript-configuration)). "Inject the interface, not
+the class" is C#/Java advice. In Angular the token has to be a runtime value.
+
+Introduce a contract — an abstract class, or an `InjectionToken<T>` — only when **two
+implementations ship in the same app** and something picks between them at runtime:
+
+- Platform split — a browser and a server implementation, swapped in `app.config.server.ts`.
+- Route or tenant scope — different providers on different routes.
+- A wrapper isolating a risky dependency ([longevity.md](longevity.md#isolate-what-you-cannot-avoid)),
+  where the abstract type is what stops the vendor's types leaking into features.
+
+"We might swap it later" is not one of them, and neither is a test double.
+
+```ts
+// The seam is real: there is no IndexedDB on the server.
+export abstract class DocumentCache {
+  abstract read(id: DocumentId): Promise<Document | null>;
+  abstract write(doc: Document): Promise<void>;
+}
+
+// Each implementation declares the contract. Nothing else checks it — `ClassProvider` types
+// `provide` as `any` and `useClass` as `Type<any>`, so the provider line below would accept
+// a class that has drifted.
+export class IndexedDbDocumentCache implements DocumentCache { /* ... */ }
+export class NoopDocumentCache implements DocumentCache { /* ... */ }
+
+// app.config.ts        → { provide: DocumentCache, useClass: IndexedDbDocumentCache }
+// app.config.server.ts → { provide: DocumentCache, useClass: NoopDocumentCache }
+```
+
+**Abstract class or `InjectionToken<T>`?** Default to the abstract class: one symbol is both the
+type and the token, so `inject(DocumentCache)` is typed with no second declaration to keep in sync.
+Reach for `InjectionToken<T>` when the implementations cannot share a base — a plain object, a
+factory result, a value — or when the contract has to stay a structural type.
+
+**Every implementation states the contract; how depends on what it is.** A class declares
+`implements` or `extends`. A value, object or factory result — which cannot — is anchored the same
+way a test fake is: `satisfies T`, or an explicit return type on the factory. Without one of the
+two, nothing checks the implementation at all, because `provide` and `useClass`/`useValue`/
+`useFactory` are all typed `any`.
+
+**The count rule applies to service and adapter contracts, not to every token.** A configuration
+object, a function, a primitive or anything else with no class to inject *needs* an
+`InjectionToken` — that is Angular's runtime identifier, not a speculative abstraction. The same
+goes for a `multi: true` token, which is plural by design. What the rule bans is a contract wrapped
+around a single service you could have injected directly.
+
+**Two implementations need one test suite.** Write the tests against the contract and run them
+against both. Substitutability asserted only in the type system is not asserted at all — the
+compiler checks signatures, and every bug worth having here is in the behaviour behind them.
+
+**Audit:** Flag an `interface` or `abstract class` introduced as a DI contract with a single
+implementation. Flag a constructor parameter or `inject()` call whose type is a TypeScript
+interface. Flag an `InjectionToken` created for something that could be injected as its own class —
+not one standing in for a value, a function or a `multi` collection. Flag a class implementation of
+a DI contract that does not declare `implements`/`extends`, and a non-class one with neither
+`satisfies T` nor a typed factory return. Flag a second implementation added without a shared suite
+exercising both.
+
 ## Where does this file go?
 
 Answer in order; the first match wins.

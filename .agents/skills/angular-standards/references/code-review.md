@@ -53,6 +53,8 @@ Load only the standards relevant to the diff. Do not read all of `references/` e
 | `*.routes.ts`, `app.config.ts` | `routing.md` |
 | `angular.json`, budget thresholds | `performance.md` |
 | `injectAsync`, or a service newly declared `providedIn: 'root'` | `performance.md`, `routing.md` |
+| A DI contract or provider anywhere — `InjectionToken`, an `abstract class` used as a token, `provide:`/`useClass`/`useValue`/`useFactory`, or a second implementation of an existing contract | `architecture.md` |
+| `extends` on a class decorated `@Component`/`@Directive`, or a new `hostDirectives` entry | `components.md` |
 | `NgZone`, `ChangeDetectorRef`, `changeDetection:`, `*cdkVirtualFor`, a `@for` over a large list, a pipe that caches rather than formats | `performance.md` |
 | Auth, interceptors, storage | `security.md` |
 | `*.spec.ts` | `testing.md` |
