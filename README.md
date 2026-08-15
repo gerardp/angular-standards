@@ -47,8 +47,9 @@ npx skills add https://github.com/spartan-ng/spartan --skill spartan
     routing.md               Lazy loading, guards, route-scoped state, SSR.
     performance.md           Budgets, profiling, lazy services, long lists.
     security.md              Tokens, XSS, CSP, secrets.
+    observability.md         Error reporting, correlation, field metrics.
     testing.md               Vitest, zoneless testing, what to test.
-    anti-patterns.md         65-item review checklist, ordered by cost.
+    anti-patterns.md         68-item review checklist, ordered by cost.
     code-review.md           The audit process. Reads the Audit: lines above.
 
 AGENTS.md                    Pointer to the skill, for tools that read AGENTS.md.
@@ -97,6 +98,17 @@ A rule that lives only in someone's head gets violated by the next agent and by 
 ## Provenance
 
 This repository is MIT licensed — see [LICENSE](LICENSE).
+
+These standards are partly based on Kyler Johnson's
+[angular-architecture-skills](https://github.com/KylerJohnsonDev/angular-architecture-skills) (MIT)
+and its companion article,
+[Angular + NgRx Architecture for Agents](https://www.kylerjohnson.dev/blog/angular-ngrx-architecture-for-agents).
+What carried over: the layered model and its dependency direction, the rule that a component never
+performs I/O, and the format of rules paired with mechanical enforcement. The specifics diverge —
+this repository targets Angular 22+, reads through `httpResource` rather than services returning
+Observables, and does not adopt a store by default — so read it as the origin of the approach, not
+as a source that is compatible rule by rule. Notice in
+[THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
 
 The skills under `vendor/skills/` are copied verbatim from other MIT projects and keep their own
 copyright: [`angular/angular`](https://github.com/angular/angular/tree/main/skills/dev-skills)

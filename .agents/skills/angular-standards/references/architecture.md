@@ -218,6 +218,94 @@ what the file does.
 Every feature is lazy-loaded: use `loadComponent` for a single-screen feature and `loadChildren`
 for a feature with its own route tree. See [routing.md](routing.md).
 
+## Graduating to enforced boundaries
+
+The invariant is the one stated above: **the dependency direction is enforced mechanically, at every
+commit.** Which tool enforces it is an implementation detail that changes as the project grows. Read
+this section as being about that invariant — not about adopting a particular tool.
+
+| Rung | Mechanism | Adopt when |
+| --- | --- | --- |
+| 1 | Folders + `no-restricted-imports` | The baseline, already in `eslint.config.js`. Stays until an equivalent mechanism replaces it |
+| 2 | `eslint-plugin-boundaries` with declared element types | Violations recur that the current patterns do not catch, or you need a constraint `no-restricted-imports` cannot express |
+| 3 | Separate library projects with real public API surfaces, **plus** a boundary mechanism on top | See the triggers below |
+
+Rung 1 is a path-pattern approximation and says so — the note in `eslint.config.js` calls it "a good
+approximation, not airtight". Rung 2 closes that gap: element types are declared once, so the rules
+describe *what a file is* rather than what its path looks like. Move when you can point at a
+violation that got through, or at a rule you tried to write and could not — a type-only import
+allowance, or a per-area matrix. **Not** at a feature count. "Past a handful of features" is the
+motivation for looking, not a condition you can check.
+
+Rung 3 is a *structural* change, not a lint rule: the boundary stops being a convention about folders
+and becomes a project with its own build and entry point. What that buys you is **encapsulation** —
+a consumer can reach the public API and nothing behind it.
+
+**It does not buy you direction, and this is the trap.** A library's entry point hides internals; it
+says nothing about who is allowed to depend on whom. Library `features-invoices` can import
+`features-billing`'s public API perfectly legally, and no compiler will object — the constraint that
+features never import each other is not expressible as an entry point. That is exactly why Nx ships
+[`enforce-module-boundaries`](https://nx.dev/docs/features/enforce-module-boundaries) as a *separate
+lint rule* rather than treating the project graph as sufficient.
+
+So rung 3 is "library projects **plus** a boundary mechanism", never libraries alone. Either keep the
+ESLint rules from rungs 1-2 pointed at the new project paths, or replace them with Nx tags — but
+something must still encode the direction, or the invariant at the top of this section is
+unenforced while looking more rigorous than before.
+
+**Rung 3 does not mean Nx either.** The Angular CLI generates publishable library projects with their
+own build target ([angular.dev](https://angular.dev/tools/libraries/creating-libraries)), and for one
+or two libraries that plus the existing lint rules is the whole answer. Reach for Nx — and its tag
+matrix on top — when the *graph* is the problem: many projects, rules between them that a flat
+`no-restricted-imports` list cannot express, or affected-only builds that need dependency information
+the CLI does not track. Adopting Nx to publish one library is tooling for a problem you do not have.
+
+### Rung 3 triggers are not uniform
+
+Some are sufficient on their own; one is not.
+
+- **Sufficient alone — a package published outside this repo.** It needs a public API surface, its
+  own build target and independent versioning. That is a library boundary whatever the folder layout
+  says, and pretending otherwise just means maintaining one informally.
+- **Sufficient alone — CI time that genuinely requires affected-only builds**, once the cheaper
+  options are exhausted.
+- **Not sufficient alone — two or more teams owning separate areas.** Team count is an
+  organisational fact. On its own it argues for ownership tooling, not for restructuring the build.
+  Pair it with one of the above.
+
+`CODEOWNERS` is worth setting up alongside rung 3, but it is **not a rung**. It routes review and
+records ownership; it cannot fail a build on an illegal import. Treating review assignment as a
+boundary mechanism is the category error this section exists to prevent.
+
+### Migrating between rungs
+
+Two rules, and the first one is the one that gets broken:
+
+1. **No commit may leave the invariant unenforced.** The replacement lands and is proven *before* the
+   old mechanism is removed. A migration that deletes rung 1 in one commit and configures rung 3 in
+   the next has a window where any import is legal, and that window is exactly when the violating
+   merge lands.
+2. **Equivalence is demonstrated, not asserted.** The migration PR shows the new configuration
+   rejecting the same violations the old one did — the cross-feature import above being the one that
+   matters most.
+
+Once equivalence is proven, **removing the superseded mechanism is correct**. Two configurations
+enforcing one invariant are two sources of truth, and they drift; the second one to be edited
+silently becomes decoration.
+
+`eslint-plugin-boundaries`, and Nx if rung 3 goes that way, are each a new dependency and answer the
+four questions in [longevity.md](longevity.md#3-dependency-policy) like anything else. Rung 2 is
+cheaper than rung 3, and neither is an upgrade you take because it is available.
+
+**No rung is free, including the CLI route.** `ng generate library` pulls in Angular's library
+toolchain — `ng-packagr` and its build target — which is a real dependency to count, maintained by
+the Angular team and far smaller than Nx, but not zero. The honest comparison at rung 3 is
+`ng-packagr` against Nx, not "no dependency" against Nx.
+
+**Audit:** Flag a boundary-mechanism migration whose PR shows no equivalence evidence. Flag any
+commit in which the dependency direction is enforced by nothing. Flag a move to rung 3 with no
+`AGENTS.local.md` entry recording which trigger was met.
+
 ## Does this feature need a store?
 
 Most do not. Start with `httpResource` in a data-access service plus component-local signals; that

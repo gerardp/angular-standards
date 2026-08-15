@@ -22,6 +22,7 @@ SOFTWARE.
 
 ---
 
-This repository vendors third-party MIT-licensed material under `.agents/skills/`.
-See THIRD-PARTY-NOTICES.md for those copyright notices, which are not covered by
-the grant above.
+This repository includes third-party MIT-licensed material: verbatim reference
+copies under `vendor/skills/` and derived material under
+`.agents/skills/angular-standards/`. See THIRD-PARTY-NOTICES.md for the original
+copyright and licence notices; those portions are not covered by the grant above.

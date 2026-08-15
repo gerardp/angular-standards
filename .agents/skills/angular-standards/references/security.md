@@ -170,5 +170,10 @@ Set at the server or CDN, and verify them after every infrastructure change.
 - Error messages shown to users say what failed and what to do, never a stack trace or an internal
   identifier.
 
+These rules govern what must never leave the browser. What to do with what legitimately does leave —
+correlating a report with the backend request that caused it, deciding which errors are worth
+reporting at all, and measuring real-user performance — is
+[observability.md](observability.md).
+
 **Audit:** Flag `console.log` of request/response objects, and error reporter setup without a
 scrubbing hook.

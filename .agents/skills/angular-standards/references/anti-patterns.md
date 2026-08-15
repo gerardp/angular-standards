@@ -111,3 +111,4 @@ Ordered by how expensive each one is to unwind later.
 | 65 | Deviation from a standard with no `AGENTS.local.md` entry | Record it with a removal condition | `AGENTS.local.md` |
 | 66 | Upstream skill (`angular-developer`, `spartan`) edited by hand | Edit this skill's `references/`; upstream skills are re-synced | [SKILL.md](../SKILL.md) |
 | 67 | Commented-out code | Delete it; git remembers | [core-engineering](core-engineering.md#comments) |
+| 68 | Feature flag with no owner, or no removal condition / review date | Both, required and validated at the flag's authoritative source | [longevity](longevity.md#5-feature-flags-carry-an-owner-and-an-end-state) |

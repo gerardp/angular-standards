@@ -300,3 +300,58 @@ there is a choice at equal cost:
 - Standard `<dialog>`, `popover`, `:has()`, container queries over JS reimplementations.
 
 **Audit:** Flag JS implementations of behaviour the platform now provides natively.
+
+---
+
+## 5. Feature flags carry an owner and an end state
+
+A feature flag is a branch in production that someone has to keep alive. Over a decade the cost is
+not the flag, it is the flags nobody remembers: every one doubles the paths a future maintainer must
+reason about, and a codebase with forty of them has no describable behaviour.
+
+The rules differ by kind, so establish the kind first. Most confusion here comes from treating three
+unrelated things as one feature.
+
+| Kind | Owner | End state |
+| --- | --- | --- |
+| Release / experiment | Required | **A removal condition.** Past it the flag is debt — delete it, and the dead branch with it, in the PR that notices |
+| Operational kill switch | Required | May live indefinitely. Requires a **review date** instead, so "still needed" is a decision someone made rather than an assumption |
+| Entitlement / permission | — | **Not a feature flag.** See below |
+
+### Entitlements are not flags
+
+A flag answers "is this behaviour on?". An entitlement answers "is this user allowed?". They look
+identical in a template and are governed by completely different rules: entitlements belong to the
+security model, and **the server enforces them** — see
+[security.md](security.md#the-rule-that-governs-the-rest) and anti-pattern #6.
+
+Modelling a permission as a client-side flag is the failure worth naming: it reads like
+configuration, so it gets reviewed like configuration, and it behaves like an authorisation
+vulnerability. Client-side flags are UX. They are not a security boundary.
+
+### Metadata lives at the authoritative source
+
+Owner and end state must be **required and validated wherever that flag is authoritatively
+defined** — a typed record in the codebase, or an external flag platform. Which one is a project
+decision, not a rule here.
+
+What is banned is the second list: a hand-maintained inventory of flags kept alongside the real
+source. It is correct on the day it is written and wrong within two sprints, and the failure is
+silent, because nothing reads it. If the authoritative source cannot express an owner and an end
+state, that is a gap to fix at the source rather than to route around with a document.
+
+### Reading a flag
+
+Reads go through the project's flags service. **Consumers calling that service is the design, not a
+violation** — the service is the seam. What is banned is bypassing it: importing the vendor SDK
+directly, or reading raw flag config, anywhere outside the adapter that owns it. That is the same
+isolation rule as [above](#isolate-what-you-cannot-avoid), for the same reason: flag platforms get
+replaced, and the exit cost should be one file.
+
+Both branches of a release or experiment flag need tests. A flag with one tested branch is an
+untested code path scheduled to become the only code path.
+
+**Audit:** Flag a definition with no owner, or with no removal condition (release/experiment) or
+review date (kill switch). Flag direct flag-SDK or raw flag-config access outside the adapter. Flag
+a release/experiment flag whose tests cover only one branch. Flag a permission check implemented as
+a client-side flag.

@@ -54,9 +54,12 @@ Load only the standards relevant to the diff. Do not read all of `references/` e
 | `angular.json`, budget thresholds | `performance.md` |
 | `injectAsync`, or a service newly declared `providedIn: 'root'` | `performance.md`, `routing.md` |
 | A DI contract or provider anywhere — `InjectionToken`, an `abstract class` used as a token, `provide:`/`useClass`/`useValue`/`useFactory`, or a second implementation of an existing contract | `architecture.md` |
+| `eslint.config.js`, `nx.json`, `project.json`, `ng-package.json`, or any other module-boundary configuration | `architecture.md` — the graduation and migration rules |
 | `extends` on a class decorated `@Component`/`@Directive`, or a new `hostDirectives` entry | `components.md` |
 | `NgZone`, `ChangeDetectorRef`, `changeDetection:`, `*cdkVirtualFor`, a `@for` over a large list, a pipe that caches rather than formats | `performance.md` |
 | Auth, interceptors, storage | `security.md` |
+| A global `ErrorHandler`, error-reporter setup, breadcrumb or analytics instrumentation, a trace/correlation header | `observability.md` |
+| A feature-flag definition, the flag service/adapter, or any new flag read | `longevity.md` — the flag lifecycle rules |
 | `*.spec.ts` | `testing.md` |
 | `package.json` | `longevity.md` — the dependency policy |
 | Angular version bump | `longevity.md` |

@@ -124,6 +124,10 @@ Functional guards. Class-based guards are banned.
 Prefer `canMatch` for anything conditional about a feature's existence: it prevents the chunk from
 even downloading, and it lets a fallback route match instead of producing a dead end.
 
+A route gated on a feature flag still obeys the flag lifecycle rules — owner, end state, and reads
+going through the flags service. See
+[longevity.md](longevity.md#5-feature-flags-carry-an-owner-and-an-end-state).
+
 ```ts
 export const canMatchAdmin: CanMatchFn = () =>
   inject(SessionService).hasRole('admin') || inject(Router).createUrlTree(['/forbidden']);

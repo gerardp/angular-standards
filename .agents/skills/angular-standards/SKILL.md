@@ -63,6 +63,7 @@ These six apply to every change. Everything else is in the topic files.
 | Routes, guards, lazy loading, SSR | [routing.md](references/routing.md) |
 | Budgets, profiling, lazy services, long lists | [performance.md](references/performance.md) |
 | Tokens, XSS, CSP, input validation | [security.md](references/security.md) |
+| Error reporting, correlation, field metrics | [observability.md](references/observability.md) |
 | Vitest, harnesses, zoneless testing | [testing.md](references/testing.md) |
 | Review checklist | [anti-patterns.md](references/anti-patterns.md) |
 | **Reviewing a diff, branch or PR** | [code-review.md](references/code-review.md) |
