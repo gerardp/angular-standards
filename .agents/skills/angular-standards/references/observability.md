@@ -48,7 +48,7 @@ and on any project that already has tracing it is the wrong one:
 Whatever carries the identifier, the same value must also reach the error report, or the two cannot
 be joined. An id that exists only in the network tab is not correlation.
 
-**Audit:** Flag an error reporter configured with no request-correlation identifier. Flag a
+**Audit (review):** Flag an error reporter configured with no request-correlation identifier. Flag a
 hand-written `traceparent` header in a project that already ships a tracing SDK.
 
 ## Deciding what to report
@@ -76,7 +76,7 @@ produces a feed nobody reads, the team mutes it, and the one real defect in the 
 a muted alerting channel is worse than no channel, because it still looks like coverage on a
 dashboard. The fix is that the expected 404 never escaped its service in the first place.
 
-**Audit:** Flag a `reportable`/`shouldReport` field on the shared error type. Flag a service or store
+**Audit (review):** Flag a `reportable`/`shouldReport` field on the shared error type. Flag a service or store
 that lets a known-expected error propagate to the global `ErrorHandler` instead of handling it. Flag
 a global `ErrorHandler` that filters or drops errors it receives rather than reporting them.
 
@@ -96,7 +96,7 @@ state at all, so a later SDK upgrade or a code path that bypasses the hook canno
 is the backstop for everything the SDK collects on its own, which capture-time code never sees. What
 is not acceptable is relying on either one alone.
 
-**Audit:** Flag breadcrumb capture that records request or form bodies. Flag PII scrubbing
+**Audit (review):** Flag breadcrumb capture that records request or form bodies. Flag PII scrubbing
 implemented only as a reporter callback, with no sanitising at the capture site — and flag capture
 site sanitising shipped without the reporter hook `security.md` requires.
 
@@ -131,7 +131,7 @@ it by reflex is acceptable here.** "The platform can already do it" is true of t
 false of the metrics, and answering question 1 of the dependency policy honestly means saying so
 rather than treating the rejection as self-evident.
 
-**Audit:** Flag field metrics collected without a route and build dimension. Flag a second metrics
+**Audit (review):** Flag field metrics collected without a route and build dimension. Flag a second metrics
 collector added to a project already shipping an APM SDK that reports the same values.
 
 ## Keeping the provider swappable
@@ -154,5 +154,5 @@ The swappability comes from the import being in one file, not from an abstractio
 
 Features and services call that service. They do not import the SDK and they do not know its name.
 
-**Audit:** Flag an observability or error-reporting SDK imported from more than one file, or from any
+**Audit (review):** Flag an observability or error-reporting SDK imported from more than one file, or from any
 file outside `core/`.

@@ -17,8 +17,8 @@ reports pre-existing issues buries the ones the author can act on.
 
 ### 2. Run the mechanical checks first
 
-Most of the standards are enforced by tooling. Run it before reading anything; do not hand-report
-what a tool already reports.
+Part of the standards is enforced by tooling — run it before reading anything, and do not
+hand-report what a tool already reports. Which part is written on each rule; see step 4.
 
 ```bash
 npm run lint   # runs scripts/check-eslint-config.mjs, then ng lint
@@ -71,6 +71,28 @@ wastes the author's time and teaches them to ignore reviews.
 
 Work from the `Audit:` lines in the standards files you loaded. Those lines exist so that authoring
 rules and review rules cannot drift apart — each one names a specific, checkable condition.
+
+**Each one is tagged with who enforces it. This is where your effort goes:**
+
+| Tag | Meaning | What you do |
+| --- | --- | --- |
+| `**Audit (lint):**` | `eslint.config.js` reports it in full | **Nothing.** Step 2 already caught it. Re-reporting it by hand is the noise this tag exists to remove. |
+| `**Audit (partial):**` | The tool catches some of the condition | Check **only the remainder**. Every `partial` line carries a `*Lint covers:*` / `*You check:*` pair naming both halves — do not re-derive the split. |
+| `**Audit (review):**` | No mechanical guardian exists | **All of it by hand.** This is where review earns its keep. |
+
+Today that is 2 `lint`, 10 `partial`, 69 `review` out of 81. That ratio is not a defect — the lint
+owns a large set of rules (type strictness, a11y, template hygiene, banned decorators) that never
+needed an `Audit:` line because the tool covers them completely. The `Audit:` lines are the residue
+that requires judgement, which is why most of them are `review`.
+
+Two consequences, both deliberate:
+
+- **A `review` tag is not a weaker rule.** It is a rule with no guardian but you. `forms.md`'s ban on
+  reactive forms is `review`, and it is one of the most consequential rules in the standard.
+- **A `lint` tag is a falsifiable claim.** If you hit a `lint` rule that `npm run lint` did not
+  report, the tag is wrong — that is a finding against this skill, and the fix belongs in
+  `assets/eslint.config.js`. Report it. Silent enforcement gaps are exactly what the tag exists to
+  make visible.
 
 Then check the consolidated list in [anti-patterns.md](anti-patterns.md), which is ordered by cost
 to unwind.

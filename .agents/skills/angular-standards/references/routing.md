@@ -35,7 +35,7 @@ No feature is eagerly imported into `app.routes.ts`. The initial bundle contains
 nothing else. This is not a performance micro-optimisation — it is what keeps the app's startup
 cost flat as it grows over ten years.
 
-**Audit:** Flag any static import of a feature component in `app.routes.ts` or `app.config.ts`.
+**Audit (review):** Flag any static import of a feature component in `app.routes.ts` or `app.config.ts`.
 
 ## Route params are signal inputs
 
@@ -89,7 +89,7 @@ The feature service looks thin here, and at this size it is. It earns its keep t
 derived state, a second call to orchestrate, or a mutation — which is exactly when you would
 otherwise have been tempted to put that logic in the component.
 
-**Audit:** Flag `inject(ActivatedRoute)` used to read `params`, `queryParams`, or `data`. It is
+**Audit (review):** Flag `inject(ActivatedRoute)` used to read `params`, `queryParams`, or `data`. It is
 legitimate only for navigation-event introspection.
 
 ### v22 changed which params a child route inherits
@@ -108,7 +108,7 @@ resolver, and that previously stayed unbound.
 Worth a deliberate check because nothing fails to compile, and the symptom is a component rendering
 someone else's value rather than an error.
 
-**Audit:** On a v21→v22 upgrade PR, compare each routed component's `input()` names against the
+**Audit (review):** On a v21→v22 upgrade PR, compare each routed component's `input()` names against the
 params, `data` keys and resolver keys of its ancestor routes. Flag any collision.
 
 ## Guards
@@ -198,7 +198,7 @@ it grows a signal or a cache, the exemption is void and it needs a different des
 
 See [performance.md](performance.md#lazy-load-heavy-services) for the pattern.
 
-**Audit:** Flag feature-specific services declared `providedIn: 'root'`, **unless** the service is
+**Audit (review):** Flag feature-specific services declared `providedIn: 'root'`, **unless** the service is
 the target of an `injectAsync()` call and holds no mutable state — no signals, no caches, no fields
 written after construction. Flag any comment or code that assumes a route-scoped service is
 destroyed on navigation.
@@ -231,7 +231,7 @@ If you use SSR, the hydration rules matter:
 - Use `PendingTasks` to delay serialisation until critical async work finishes.
 - Incremental hydration is **already on** — you opt blocks into it, you do not enable it. See below.
 
-**Audit:** Flag direct `window`/`document`/`localStorage` access outside `afterNextRender()` or an
+**Audit (review):** Flag direct `window`/`document`/`localStorage` access outside `afterNextRender()` or an
 explicit platform check.
 
 ### Incremental hydration is on by default
@@ -273,7 +273,7 @@ an ordinary trigger; with none listed it falls back to `@defer`'s default, `on i
 other: it needs an `AGENTS.local.md` entry with a reason and a removal condition. A reproduced bug
 is a reason; a suspicion is not.
 
-**Audit:** Flag `withIncrementalHydration()`. Flag `withNoIncrementalHydration()` with no
+**Audit (review):** Flag `withIncrementalHydration()`. Flag `withNoIncrementalHydration()` with no
 `AGENTS.local.md` entry.
 
 ## Preloading
@@ -293,4 +293,4 @@ Every route sets a `title`. It is the accessible page name, the browser tab, and
 { path: 'invoices', title: 'Invoices', loadChildren: ... }
 ```
 
-**Audit:** Flag routes without a `title`.
+**Audit (review):** Flag routes without a `title`.

@@ -52,7 +52,7 @@ triggered* a change-detection cycle, which is the question you actually have.
 Angular DevTools remains the tool for the component tree and the injector graph. Chrome DevTools is
 the one for "why is this slow".
 
-**Audit:** Flag a performance-motivated change with no profile, no measurement, and no budget
+**Audit (review):** Flag a performance-motivated change with no profile, no measurement, and no budget
 failure behind it. "This should be faster" is not a reason to add a carve-out to a standard.
 
 ## Budgets: the only rule here the build can enforce
@@ -93,7 +93,7 @@ which artefact that is depends on the budget type — they measure different thi
 Raising the number is allowed only with an `AGENTS.local.md` entry recording the new figure and why
 — same discipline as any other deviation.
 
-**Audit:** Flag a production build config with no `budgets` array. Flag any PR that raises a budget
+**Audit (review):** Flag a production build config with no `budgets` array. Flag any PR that raises a budget
 threshold without a corresponding `AGENTS.local.md` entry.
 
 ### Reading the bundle
@@ -197,7 +197,7 @@ This is worth doing for a genuinely heavy, genuinely optional dependency. It is 
 an ordinary feature service — you would be adding a promise to every call site to save two
 kilobytes.
 
-**Audit:** Flag a component that eagerly injects a service whose only consumer is one rarely-used
+**Audit (review):** Flag a component that eagerly injects a service whose only consumer is one rarely-used
 handler, where that service pulls in a large third-party dependency.
 
 ## Slow computations
@@ -222,7 +222,7 @@ ergonomics. Pipes remain right for *formatting* — see
 The guide's first recommendation is the one that still holds and is still the best one: **fix the
 algorithm**. A `computed()` wrapped around an O(n²) loop is a faster way to be slow.
 
-**Audit:** Flag a pure pipe whose purpose is caching a computation rather than formatting a value.
+**Audit (review):** Flag a pure pipe whose purpose is caching a computation rather than formatting a value.
 
 ## Long lists
 
@@ -261,7 +261,7 @@ this adds nothing to `package.json` and needs no dependency justification —
 Prefer a fixed `itemSize` where the design allows it: fixed-size strategy never measures a row, and
 measurement is most of the cost of the alternative.
 
-**Audit:** Flag a `@for` rendering an unbounded collection — anything backed by a paginated or
+**Audit (review):** Flag a `@for` rendering an unbounded collection — anything backed by a paginated or
 user-filtered endpoint with no page size cap. Flag `*cdkVirtualFor` without `trackBy`.
 
 ## Web workers
@@ -305,5 +305,13 @@ faster than any other kind.** It is written against a specific change-detection 
 has now replaced that model twice. When you find a performance tip, check its date and check which
 model it assumes before you check whether it works.
 
-**Audit:** Flag any import of `NgZone`, any `ChangeDetectorRef` injection, and any
+**Audit (partial):** Flag any import of `NgZone`, any `ChangeDetectorRef` injection, and any
 `changeDetection:` line in a `@Component`.
+*Lint covers:* a `changeDetection:` line that opts the component **out** of OnPush — `Eager` or
+`Default` — via `@angular-eslint/prefer-on-push-component-change-detection`. That is the case that
+breaks behaviour.
+*You check:*
+- **An explicit `changeDetection: ChangeDetectionStrategy.OnPush`.** The rule is deliberately silent
+  on it, but this audit bans *any* `changeDetection:` line: OnPush is the v22 default, so writing it
+  is noise ([components.md](components.md#shape)). Harmless, still a finding.
+- **`NgZone` imports and `ChangeDetectorRef` injections.** Neither has a rule; grep for both.

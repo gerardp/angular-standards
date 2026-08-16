@@ -10,7 +10,7 @@ summarises.
 Most Angular and Spartan material still defaults to Reactive Forms, so a copied example is the
 likeliest way this rule gets broken. Port the example; do not port its forms API.
 
-**Audit:** Flag `FormControl`, `FormGroup`, `FormArray`, `FormBuilder`, `formControlName`,
+**Audit (review):** Flag `FormControl`, `FormGroup`, `FormArray`, `FormBuilder`, `formControlName`,
 `formGroup`, `ngModel` or `ReactiveFormsModule` in any new or changed code, including code adapted
 from an upstream skill's example.
 
@@ -135,8 +135,12 @@ submit(this.form, async () => {
 manual `isSubmitting` flag for double-submit protection. Read the form's own pending state for
 button UI.
 
-**Audit:** Flag `HttpClient` or `httpResource` inside a `submit()` callback. Flag hand-rolled
+**Audit (partial):** Flag `HttpClient` or `httpResource` inside a `submit()` callback. Flag hand-rolled
 `isSubmitting` signals.
+*Lint covers:* the I/O imports, and only when the `submit()` lives in a **component** — that is where
+`IO_PATHS` applies.
+*You check:* the same I/O in a `submit()` that lives in a service (allowed to import it, still the wrong
+place for this), and every hand-rolled `isSubmitting` signal — there is no rule for that at all.
 
 ## Server-side validation
 
@@ -156,8 +160,14 @@ away.
 - Do not rely on colour alone to indicate an invalid field.
 - Show validation errors after `touched()`, not on every keystroke from an untouched field.
 
-**Audit:** Flag inputs without an associated label. Flag error text rendered without
+**Audit (partial):** Flag inputs without an associated label. Flag error text rendered without
 `aria-describedby` wiring.
+*Lint covers:* **neither of these.** `label-has-associated-control` fires on a `<label>` that
+references no control — it cannot see an `<input>` that has no label in the first place, which is
+the case this rule is about. Verified against this config.
+*You check:* both, by hand. Every control needs a label you can point at, and every error message
+needs `aria-describedby` from the control to the message — `valid-aria` checks that an attribute is
+spelled correctly and valid for its role, never that a required wiring is absent.
 
 ## Large forms
 

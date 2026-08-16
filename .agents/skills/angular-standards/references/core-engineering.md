@@ -34,7 +34,7 @@ a wrapper isolating a risky dependency ([longevity.md](longevity.md#isolate-what
 a layer the dependency direction mandates — these are already a "yes" at rung 1. They exist so the
 *next* change is possible, and their call-site count says nothing about whether they should.
 
-**Audit:** Flag a new `util/` helper that duplicates a JS built-in, an `Intl` capability, or a
+**Audit (review):** Flag a new `util/` helper that duplicates a JS built-in, an `Intl` capability, or a
 function that already exists elsewhere in the repo. Flag indirection whose only justification is
 future reuse — generic helper, base class, pass-through layer — at a single call site. Never flag a
 boundary these standards require.
@@ -69,7 +69,7 @@ unblock a change trades a decade of safety for an afternoon.
 `noUncheckedIndexedAccess` and `exactOptionalPropertyTypes` are the two people disable first. Do
 not. They catch the class of bug that survives to production.
 
-**Audit:** Flag any PR that weakens a `tsconfig` strictness flag without a corresponding entry in
+**Audit (review):** Flag any PR that weakens a `tsconfig` strictness flag without a corresponding entry in
 `AGENTS.local.md`.
 
 ## Types
@@ -86,7 +86,12 @@ not. They catch the class of bug that survives to production.
 - **Never `!` non-null assertion** except immediately after a check the compiler cannot see, with a
   comment.
 
-**Audit:** Flag `any`, `as` assertions on external data, and `!` assertions without a comment.
+**Audit (partial):** Flag `any`, `as` assertions on external data, and `!` assertions without a comment.
+*Lint covers:* `any` (`no-explicit-any`, plus `template/no-any`) and every `!` assertion
+(`no-non-null-assertion`, off in specs).
+*You check:* whether an `as` assertion is being applied to external data — the dangerous case, and one
+no rule distinguishes from a benign narrowing — and whether a `!` carries the comment that justifies it.
+The rule bans `!` outright, so a `!` you decide to keep needs an inline disable *and* the comment.
 
 ## Immutability
 
@@ -139,7 +144,7 @@ retries++;
 
 Delete commented-out code. Version control remembers it.
 
-**Audit:** Flag commented-out blocks of code and comments that restate the line below them.
+**Audit (review):** Flag commented-out blocks of code and comments that restate the line below them.
 
 ## Error handling
 
@@ -180,6 +185,6 @@ Decide the i18n strategy before the app grows past a handful of screens and reco
 locale; runtime libraries allow a user-facing switcher. Both are viable; choosing late is what
 hurts.
 
-**Audit:** Flag string concatenation producing user-facing sentences, manual date/number
+**Audit (review):** Flag string concatenation producing user-facing sentences, manual date/number
 formatting, and physical CSS direction properties (`ml-*`, `mr-*`, `left-*`, `text-left`) in new
 code.

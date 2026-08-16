@@ -74,7 +74,7 @@ The upstream skill puts this bluntly and it is worth repeating: *if you are call
 signal inside an `effect()`, you are making a mistake.* It produces infinite loops, ordering bugs,
 and state whose origin cannot be traced by reading the code.
 
-**Audit:** Flag every `effect()`. Each one must have a comment naming the non-signal system it is
+**Audit (review):** Flag every `effect()`. Each one must have a comment naming the non-signal system it is
 syncing to. Flag any `effect()` containing `.set(`, `.update(`, or an HTTP call.
 
 ## State ownership
@@ -92,7 +92,7 @@ Ask "who else reads this?" and place state at the narrowest scope that answers i
 that only one screen reads. That service becomes the app's shared mutable global and the thing
 nobody dares change in year three.
 
-**Audit:** For each field on a root-provided service, ask whether more than one feature reads it.
+**Audit (review):** For each field on a root-provided service, ask whether more than one feature reads it.
 If not, flag it for relocation.
 
 ## When to add a store
@@ -192,7 +192,7 @@ Rules when you do:
 
 `exhaustMap` on form submission is the standard fix for double-submit. Use it.
 
-**Audit:** Flag `.subscribe(` anywhere under `src/app/features/` or `src/app/ui/`. Flag any
+**Audit (review):** Flag `.subscribe(` anywhere under `src/app/features/` or `src/app/ui/`. Flag any
 subscribe without `takeUntilDestroyed()`.
 
 ### Debouncing stays in RxJS for now
@@ -216,5 +216,5 @@ debounce only has to throttle the trigger; it does not have to manage the reques
 v23/v24 — the same treatment `@Service()` gets in
 [performance.md](performance.md#lazy-load-heavy-services).
 
-**Audit:** Flag any import of `debounced` from `@angular/core`. Adopting it early is a deviation
+**Audit (lint):** Flag any import of `debounced` from `@angular/core`. Adopting it early is a deviation
 like any other: it needs an `AGENTS.local.md` entry with a reason and a removal condition.

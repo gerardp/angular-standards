@@ -3,7 +3,7 @@ name: angular-standards
 description: House coding standards for a long-lived Angular 22+ application — layer architecture and dependency direction, signals and state, data access, Signal Forms, Tailwind v4, Spartan NG, routing, security, testing, and the banned-API list — plus the review process that audits changes against them. Use when writing, refactoring or reviewing Angular code, when deciding where a file goes, when adding a dependency, when upgrading Angular, or when asked to review a diff, branch or PR against project conventions.
 license: MIT
 metadata:
-  version: '2.0'
+  version: 3.0.0
 ---
 
 # Angular standards
@@ -121,6 +121,21 @@ decision each time: `npx skills update angular-developer spartan`.
 If a cited file is not present, the skill is not installed. Say so rather than guessing at the API,
 and fall back to `https://angular.dev` for framework questions.
 
+## What this skill does not cover
+
+Declared, so a gap is not mistaken for an oversight. On these, there is no house rule: decide it in
+the project, and write the decision into `AGENTS.local.md` so the next agent inherits it.
+
+| Not covered | Why, and what to do instead |
+| --- | --- |
+| **SSR state transfer** — `TransferState`, avoiding a client refetch of what the server already fetched | [routing.md](references/routing.md#rendering-strategies) covers hydration correctness (mismatch causes, incremental hydration, `afterNextRender`). It stops at state transfer because the reference setup scaffolds `--no-ssr`, and writing enforceable rules for a rendering mode no project here has turned on would be doctrine, not evidence. Turning SSR on is the trigger to write this section — not a reason to guess at it now. |
+| **Monorepo / multi-app** — Nx or workspace layout, shared libraries across apps, per-app builds | [architecture.md](references/architecture.md) covers the single-app layer model and the *graduation* rules for when a folder should become a real library boundary. Past that, the boundary tool's own conventions win. |
+| **Legacy migration** — AngularJS, NgModule-era apps, pre-v16 codebases | These standards describe a v22+ end state. They are a target for a migration, not a procedure for one. |
+| **Backend, API design, database** | [docs/backend-angular-setup.md](https://github.com/gerardp/angular-standards/blob/main/docs/backend-angular-setup.md) covers only how a backend repo and an Angular `frontend/` sit together. |
+
+An item here is a **declared** gap, not a permanent one. Moving one out of this table means writing
+the rules with `Audit:` lines like everything else — not adding prose that has no guardian.
+
 ## Mechanical enforcement — set this up once per project
 
 Most of these rules are checkable, and a failing build beats review discipline. `assets/` holds the
@@ -159,7 +174,20 @@ discipline.
 - Adding a rule? Put it in the relevant `references/` file **with an `Audit:` line**, so
   [code-review.md](references/code-review.md) picks it up automatically. One source of truth for
   authoring and for review.
+- **Tag that `Audit:` line with its enforcer** — `(lint)`, `(partial)` or `(review)`, defined in
+  [code-review.md](references/code-review.md#4-collect-findings). Untagged means a reviewer cannot
+  tell whether the tool already covers it, and re-derives that every time. If you tag it `(lint)`,
+  the rule must actually be in `assets/eslint.config.js` — the tag is a claim reviewers are told to
+  falsify.
+- Writing a rule with no mechanical guardian is fine and often unavoidable — tag it `(review)` and
+  move on. Writing one that *could* be a lint rule and leaving it in prose is the thing to avoid:
+  it reads as enforced and is not.
 - Deviating from a rule? Record it in the project's `AGENTS.local.md` **with a removal condition**.
   An override without an expiry becomes permanent by accident.
 - Angular deprecated something new? Add it to the banned table in
   [longevity.md](references/longevity.md) during the upgrade PR, while the release notes are open.
+- Changing any rule? Bump `metadata.version` above and add the entry to
+  [CHANGELOG.md](CHANGELOG.md) **in the same commit**. The same reasoning that puts a removal
+  condition on every override applies to the standards themselves: a rule that changes without a
+  stated consequence is drift, and this skill is distributed by an updater that overwrites files in
+  place. A new ban or a stricter rule is a **major** bump, and its entry names what it invalidates.

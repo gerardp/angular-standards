@@ -9,7 +9,7 @@ none of it substitutes for server-side enforcement.
 items, and client-side validation are user experience. A user with devtools can call any endpoint
 with any payload.
 
-**Audit:** Flag any PR whose description implies a permission is enforced by a guard or by hiding
+**Audit (review):** Flag any PR whose description implies a permission is enforced by a guard or by hiding
 UI, with no corresponding server-side check.
 
 ## Token storage
@@ -25,7 +25,7 @@ In order of preference:
 2. **In-memory only** — a private signal in a `core/` service, gone on refresh, re-obtained via a
    refresh cookie.
 
-**Audit:** Flag `localStorage`/`sessionStorage` containing anything named token, jwt, auth,
+**Audit (review):** Flag `localStorage`/`sessionStorage` containing anything named token, jwt, auth,
 session, credential, or key. Flag `JSON.stringify` of an auth object into storage.
 
 ## Token refresh
@@ -66,7 +66,7 @@ Rules:
   that is an infinite loop against your own auth server.
 - The refresh request itself must never be intercepted into another refresh.
 
-**Audit:** Flag `finalize` placed after `shareReplay` in any shared-request pipeline.
+**Audit (review):** Flag `finalize` placed after `shareReplay` in any shared-request pipeline.
 
 ## HTTP configuration
 
@@ -82,7 +82,7 @@ with cookies.
 
 The auth interceptor attaches credentials centrally. No service builds its own auth header.
 
-**Audit:** Flag manual `Authorization` headers constructed outside the auth interceptor.
+**Audit (review):** Flag manual `Authorization` headers constructed outside the auth interceptor.
 
 ## XSS
 
@@ -97,7 +97,7 @@ controlled here.
 - **Never build a template string from user input and render it.**
 - **Never pass user input to `eval`, `new Function`, `setTimeout(string)`.**
 
-**Audit:** Flag every `bypassSecurityTrust*` call and every `[innerHTML]` binding. Each needs a
+**Audit (review):** Flag every `bypassSecurityTrust*` call and every `[innerHTML]` binding. Each needs a
 justification comment naming the sanitisation step.
 
 ## Content Security Policy
@@ -121,7 +121,7 @@ unavoidable, use a per-response nonce.
 For a decade-long app, also consider a **Trusted Types** policy — it turns DOM XSS sinks into
 runtime errors rather than vulnerabilities.
 
-**Audit:** Flag `'unsafe-inline'` or `'unsafe-eval'` in `script-src`.
+**Audit (review):** Flag `'unsafe-inline'` or `'unsafe-eval'` in `script-src`.
 
 ## Input validation
 
@@ -132,7 +132,7 @@ validation.
 Data from URL params, query strings, `postMessage`, and third-party embeds is untrusted the same
 way an API response is.
 
-**Audit:** Flag URL/query parameter values used directly in a DOM sink, a redirect target, or an
+**Audit (review):** Flag URL/query parameter values used directly in a DOM sink, a redirect target, or an
 HTTP path without validation. Open-redirect via an unvalidated `returnUrl` is the classic instance.
 
 ## Secrets
@@ -143,7 +143,7 @@ is public, and `.env` files bundled by the build are public too.
 If a value would grant access when leaked, it lives on the server and the client calls an endpoint.
 Publishable keys designed for client use (analytics site IDs, Stripe publishable keys) are fine.
 
-**Audit:** Flag anything matching secret/private/apiKey/password/token patterns in
+**Audit (review):** Flag anything matching secret/private/apiKey/password/token patterns in
 `src/environments/` or anywhere under `src/`.
 
 ## Dependencies
@@ -175,5 +175,5 @@ correlating a report with the backend request that caused it, deciding which err
 reporting at all, and measuring real-user performance — is
 [observability.md](observability.md).
 
-**Audit:** Flag `console.log` of request/response objects, and error reporter setup without a
+**Audit (review):** Flag `console.log` of request/response objects, and error reporter setup without a
 scrubbing hook.

@@ -19,8 +19,12 @@ This is the rule everything else hangs off. It is what makes the app testable, w
 from growing tendrils into each other, and what lets an agent modify one layer without reasoning
 about the whole system.
 
-**Audit:** Flag any component that injects `HttpClient`, calls `httpResource`/`resource`/`rxResource`
+**Audit (partial):** Flag any component that injects `HttpClient`, calls `httpResource`/`resource`/`rxResource`
 in its own class body, or imports anything from `data-access/` other than a type.
+*Lint covers:* the imports — `HttpClient`/`httpResource` from `@angular/common/http`, `resource` from
+`@angular/core`, `rxResource` from `@angular/core/rxjs-interop`, and any `*-api.service` import.
+*You check:* imports from `data-access/` that are **not** `*-api.service` files — the lint keys on that
+filename convention, so a component reaching into a differently-named file there is invisible to it.
 
 ## Layers
 
@@ -77,8 +81,15 @@ features/  ──▶  core/  ──▶  util/
 That last rule is the one that decays first and costs the most. It is enforced mechanically in
 `eslint.config.js`, not by review discipline. A violation is a build failure.
 
-**Audit:** Flag cross-feature imports and any upward import (e.g. `core/` importing from
+**Audit (partial):** Flag cross-feature imports and any upward import (e.g. `core/` importing from
 `features/`). Flag any component in `ui/` that injects a service.
+*Lint covers:* upward imports, the `ui/` inject ban, and cross-feature imports written through a path
+alias (`@app/features/...`).
+*You check:* **cross-feature imports written relatively** — `../billing/rates` from inside
+`features/inv/` contains no `features/` segment, so no glob matches it and it lints clean. This is the
+ordinary way to write the import, not an exotic one. The NOTE on `LAYER_PATTERNS.features` in
+`eslint.config.js` says the same thing: install `eslint-plugin-boundaries` and declare element types
+if you want this closed mechanically.
 
 ### Abstractions are for real seams, not for testability
 
@@ -157,7 +168,7 @@ around a single service you could have injected directly.
 against both. Substitutability asserted only in the type system is not asserted at all — the
 compiler checks signatures, and every bug worth having here is in the behaviour behind them.
 
-**Audit:** Flag an `interface` or `abstract class` introduced as a DI contract with a single
+**Audit (review):** Flag an `interface` or `abstract class` introduced as a DI contract with a single
 implementation. Flag a constructor parameter or `inject()` call whose type is a TypeScript
 interface. Flag an `InjectionToken` created for something that could be injected as its own class —
 not one standing in for a value, a function or a `multi` collection. Flag a class implementation of
@@ -209,7 +220,7 @@ it. Do not create feature-wide `components/`, `services/`, or `stores/` buckets:
 describe file types, not domain boundaries. Name pure-logic files after what they do
 (`invoice-filters.ts`), never after their technical category (`invoice-helpers.ts`).
 
-**Audit:** Flag feature-wide `components/`, `services/`, or `stores/` directories that group
+**Audit (review):** Flag feature-wide `components/`, `services/`, or `stores/` directories that group
 unrelated files by technical type. In a multi-screen feature, flag screen-specific files placed at
 the feature root when only one screen or flow uses them. Do not flag root placement in a
 single-screen feature. Flag generic `helpers.ts` or `*-helpers.ts` filenames; the name must state
@@ -302,7 +313,7 @@ toolchain — `ng-packagr` and its build target — which is a real dependency t
 the Angular team and far smaller than Nx, but not zero. The honest comparison at rung 3 is
 `ng-packagr` against Nx, not "no dependency" against Nx.
 
-**Audit:** Flag a boundary-mechanism migration whose PR shows no equivalence evidence. Flag any
+**Audit (review):** Flag a boundary-mechanism migration whose PR shows no equivalence evidence. Flag any
 commit in which the dependency direction is enforced by nothing. Flag a move to rung 3 with no
 `AGENTS.local.md` entry recording which trigger was met.
 

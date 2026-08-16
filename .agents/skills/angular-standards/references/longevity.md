@@ -48,8 +48,15 @@ Do not write these. If you find them, migrate them.
 | `signal.mutate()` | `.set()` / `.update()` with a new reference | Never shipped as stable; does not exist |
 | `entryComponents`, `ViewEncapsulation.Native` | — | Already removed |
 
-**Audit:** Flag any occurrence of a banned API. Every one is a build failure waiting for a future
+**Audit (partial):** Flag any occurrence of a banned API. Every one is a build failure waiting for a future
 major.
+*Lint covers:* the entries backed by a rule — `@angular/animations`, `HttpClientModule`,
+`platform-browser-dynamic`, `moment`, `lodash`, `axios`, `debounced`, the decorator family
+(`@Input`/`@Output`/query/host), `.mutate()`, `provideZoneChangeDetection`, structural directives, and
+the `Eager`/`Default` opt-out.
+*You check:* the rest of the table by hand. `luxon` outside `ui/helm/`, `::ng-deep`,
+`withIncrementalHydration()`, `$safeNavigationMigration(` and `NgZone` have **no rule** — they are
+banned in prose only. Grep for them explicitly; nothing will tell you otherwise.
 
 ### `Eager` arrives by migration, not by hand
 
@@ -88,7 +95,7 @@ expressions whose left-hand side was never nullable. That is the same informatio
 direction — a `?.` or `??` that was always dead code. Delete the operator; do not silence the
 diagnostic.
 
-**Audit:** Flag any surviving `$safeNavigationMigration(` in a template. An upgrade PR may introduce
+**Audit (review):** Flag any surviving `$safeNavigationMigration(` in a template. An upgrade PR may introduce
 them; it must not merge with them.
 
 ### "Superseded" vs "deprecated"
@@ -169,7 +176,7 @@ compatibility issue upstream, or invoke the exit-cost answer you gave when the d
 adopted. A dependency that blocks two consecutive majors has failed question 3 of the dependency
 policy and should be replaced.
 
-**Audit:** Flag a dependency whose Angular peer ceiling is below the current major with no tracking
+**Audit (review):** Flag a dependency whose Angular peer ceiling is below the current major with no tracking
 issue linked in `AGENTS.local.md`.
 
 ### Check the toolchain too, not just the libraries
@@ -194,7 +201,7 @@ own LTS window when v22 shipped — is not one of them, while 24 and 26 are. Com
 
 CI images, `.nvmrc` and any `engines` field are part of the upgrade PR, not a follow-up.
 
-**Audit:** Flag a CI image, `.nvmrc` or `engines` field naming a Node or TypeScript version outside
+**Audit (review):** Flag a CI image, `.nvmrc` or `engines` field naming a Node or TypeScript version outside
 the published range for the Angular major in `package.json`.
 
 ### Upgrade procedure
@@ -222,7 +229,7 @@ Then, in the same PR:
 4. Update the agent skills: `npx skills update` — upstream guidance changes with the framework and
    with Spartan, and a stale skill will have agents writing last year's code.
 
-**Audit:** If `package.json` pins an Angular major that is no longer in its active window, that is
+**Audit (review):** If `package.json` pins an Angular major that is no longer in its active window, that is
 the highest-priority finding in the repo.
 
 ---
@@ -260,7 +267,7 @@ Before adding one, answer in the PR description:
 | Utility library (lodash etc.) | Banned | Write the three functions you actually need into `src/app/util/`. |
 | Component library other than Spartan | Banned | Two design systems is the most expensive mistake available here. Spartan is a structural bet, not a preference: Helm source lives in our repo, so the component layer survives upstream going quiet. Swapping it is a fork of these standards, not an `AGENTS.local.md` override. |
 
-**Audit:** Flag any new entry in `package.json` `dependencies` whose PR description does not answer
+**Audit (review):** Flag any new entry in `package.json` `dependencies` whose PR description does not answer
 the four questions above.
 
 ### The luxon exception
@@ -278,7 +285,7 @@ The reason for the split: a transitive peer we never import costs one line in `p
 disappears the day Spartan drops it. A date library woven through our own domain code is a
 migration. Same package, completely different exit cost.
 
-**Audit:** Flag any `import ... from 'luxon'` outside `src/app/ui/helm/`.
+**Audit (review):** Flag any `import ... from 'luxon'` outside `src/app/ui/helm/`.
 
 ### Isolate what you cannot avoid
 
@@ -299,7 +306,7 @@ there is a choice at equal cost:
 - CSS custom properties and logical properties over preprocessor features.
 - Standard `<dialog>`, `popover`, `:has()`, container queries over JS reimplementations.
 
-**Audit:** Flag JS implementations of behaviour the platform now provides natively.
+**Audit (review):** Flag JS implementations of behaviour the platform now provides natively.
 
 ---
 
@@ -351,7 +358,7 @@ replaced, and the exit cost should be one file.
 Both branches of a release or experiment flag need tests. A flag with one tested branch is an
 untested code path scheduled to become the only code path.
 
-**Audit:** Flag a definition with no owner, or with no removal condition (release/experiment) or
+**Audit (review):** Flag a definition with no owner, or with no removal condition (release/experiment) or
 review date (kill switch). Flag direct flag-SDK or raw flag-config access outside the adapter. Flag
 a release/experiment flag whose tests cover only one branch. Flag a permission check implemented as
 a client-side flag.

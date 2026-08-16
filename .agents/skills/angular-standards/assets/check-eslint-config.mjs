@@ -51,6 +51,7 @@ const GLOBAL_PACKAGES = [
   'moment',
   'lodash',
   'axios',
+  '@angular/core', // the debounced() ban; scoped resource() bans add a second entry, both apply
 ];
 
 /** Minimum selector count in EVERY block that defines no-restricted-syntax. */
@@ -136,9 +137,21 @@ function resolve(file) {
   }
   const onPushSeverity = Array.isArray(onPush) ? onPush[0] : onPush;
   const groups = (imports?.[1]?.patterns ?? []).flatMap((p) => p.group);
-  const paths = (imports?.[1]?.paths ?? []).map((p) => p.name);
+  const pathEntries = imports?.[1]?.paths ?? [];
+  const paths = pathEntries.map((p) => p.name);
+  // Probed by module AND importName together. Neither half is sufficient: '@angular/core' is
+  // present in every block via the global debounced() ban, so the module name alone proves
+  // nothing; and the importName alone would accept `rxResource` restricted from the wrong module,
+  // which lints clean against the real import from '@angular/core/rxjs-interop'. That mismatch is
+  // the exact defect this pair of bans was added to fix — the checker must not be blind to it.
+  const bansImportFrom = (mod, n) =>
+    pathEntries.some((p) => p.name === mod && p.importNames?.includes(n));
   return {
     globals: GLOBAL_PACKAGES.every((p) => paths.includes(p)),
+    banDebounced: bansImportFrom('@angular/core', 'debounced'),
+    banResource:
+      bansImportFrom('@angular/core', 'resource') &&
+      bansImportFrom('@angular/core/rxjs-interop', 'rxResource'),
     banInject: (syntax ?? []).some((s) => s.selector?.includes('"inject"')),
     banFeatures: groups.some((g) => g.includes('features')),
     banApiSvc: groups.some((g) => g.includes('-api.service')),
@@ -152,31 +165,40 @@ const EXPECTATIONS = {
   // ui/ components: full layer boundaries, no injection, no I/O.
   'src/app/ui/card/card.ts': {
     globals: true, banInject: true, banFeatures: true, banApiSvc: true, banEagerCD: true,
+    banResource: true, banDebounced: true,
   },
   // ui/ specs: keep the layer boundaries, lose the inject ban (TestBed.inject is legitimate).
   'src/app/ui/card/card.spec.ts': {
     globals: true, banInject: false, banFeatures: true, banApiSvc: true, banFakeAsync: true,
+    banResource: true, banDebounced: true,
   },
   // Generated Helm code: globals only — we did not author it and it legitimately injects.
   // The OnPush opt-out ban is global and does apply here: it stays silent on the explicit `OnPush`
   // a generated component may carry, and only fires on a value that opts out of it.
+  // banDebounced is global too; banResource is not, so generated code is not held to it.
   'src/app/ui/helm/button/button.ts': {
     globals: true, banInject: false, banFeatures: false, banApiSvc: false, banEagerCD: true,
+    banResource: false, banDebounced: true,
   },
-  // Feature components: no cross-feature imports, no direct API service.
+  // Feature components: no cross-feature imports, no direct API service, no resource primitives.
   'src/app/features/inv/list.ts': {
     globals: true, banInject: false, banFeatures: true, banApiSvc: true, banEagerCD: true,
+    banResource: true, banDebounced: true,
   },
-  // Feature services/stores: may use an API service; still no cross-feature imports.
+  // Feature services/stores: may use an API service AND the resource primitives — this is the
+  // layer that owns I/O. banResource:false here is the whole point of scoping the ban; if this
+  // ever flips to true the standard has started banning the correct way to fetch data.
   'src/app/features/inv/inv.service.ts': {
     globals: true, banInject: false, banFeatures: true, banApiSvc: false,
+    banResource: false, banDebounced: true,
   },
   // Feature specs: layer boundaries kept, zone-era helpers banned.
   'src/app/features/inv/list.spec.ts': {
     globals: true, banFeatures: true, banApiSvc: false, banFakeAsync: true,
+    banResource: false, banDebounced: true,
   },
   // util/ is pure.
-  'src/app/util/money.ts': { globals: true, banFeatures: true },
+  'src/app/util/money.ts': { globals: true, banFeatures: true, banDebounced: true },
 };
 
 for (const [file, expected] of Object.entries(EXPECTATIONS)) {

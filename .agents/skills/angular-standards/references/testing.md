@@ -15,7 +15,7 @@ that can prove the behaviour; most changes do not need an E2E test.
 A documentation-only change or behaviour-preserving refactor does not need a new test, but the
 existing suite must still pass.
 
-**Audit:** Flag behaviour changes with no added or updated test, and bug fixes with no regression
+**Audit (review):** Flag behaviour changes with no added or updated test, and bug fixes with no regression
 test. Do not demand a new test for documentation-only changes or behaviour-preserving refactors.
 
 ## What to test, in priority order
@@ -55,7 +55,7 @@ Angular Testing Library gives you `screen.getByRole(...)` and reads better than 
 dependency policy in [longevity.md](longevity.md#3-dependency-policy) and adopt it deliberately.
 Until then, the examples here use native queries and component harnesses.
 
-**Audit:** Flag tests reading private members, and queries by CSS class or test-id where a role
+**Audit (review):** Flag tests reading private members, and queries by CSS class or test-id where a role
 query would work.
 
 ## Zoneless testing
@@ -67,7 +67,10 @@ The app is zoneless. `fakeAsync`/`tick` were built around Zone.js and are the wr
 - Use `afterNextRender` for DOM-dependent assertions.
 - Never `setTimeout` to "wait for" something — that is a flaky test with a delay.
 
-**Audit:** Flag `fakeAsync`, `tick`, and `setTimeout` used for sequencing in tests.
+**Audit (partial):** Flag `fakeAsync`, `tick`, and `setTimeout` used for sequencing in tests.
+*Lint covers:* `fakeAsync` and `tick`, in `*.spec.ts` files only.
+*You check:* `setTimeout` used for sequencing — it has no rule, because a `setTimeout` in a test is not
+wrong on its face; using one to wait for change detection is. That judgement is yours.
 
 ## Dependency substitution
 
@@ -112,7 +115,7 @@ service), testing it by consuming that Observable is correct. Prefer `await firs
 over a manual `subscribe` with assertions in the callback, because a failed expectation inside a
 subscribe callback can pass silently.
 
-**Audit:** Flag `.subscribe(` used to read signal-backed state, and any `subscribe` whose
+**Audit (review):** Flag `.subscribe(` used to read signal-backed state, and any `subscribe` whose
 assertions could be missed because the callback never runs.
 
 ## Component tests
@@ -145,7 +148,7 @@ The rules that do apply everywhere:
   the filter changes')`.
 - No tests against real network, real time, or real randomness. Inject a clock.
 
-**Audit:** Flag tests containing `if`/`try`, module-level mutable state shared across tests, and
+**Audit (review):** Flag tests containing `if`/`try`, module-level mutable state shared across tests, and
 any real network call.
 
 ## E2E

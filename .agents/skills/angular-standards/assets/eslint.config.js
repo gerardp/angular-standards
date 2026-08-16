@@ -49,6 +49,15 @@ const BANNED_PACKAGES = [
     message: 'Write the function you need into src/app/util/. angular-standards/references/longevity.md',
   },
   { name: 'axios', message: 'Use provideHttpClient(). angular-standards/references/longevity.md' },
+  {
+    // Experimental in v22 — the tier below Developer Preview, no stability promise at all.
+    // Banned everywhere, not just in components: the ban is about the API's maturity, not about
+    // which layer calls it. angular-standards/references/reactivity-and-state.md
+    name: '@angular/core',
+    importNames: ['debounced'],
+    message:
+      'debounced() is experimental in v22. debounceTime into toSignal() in a service instead. Adopting it early needs an AGENTS.local.md entry with a removal condition. angular-standards/references/reactivity-and-state.md#debouncing-stays-in-rxjs-for-now',
+  },
 ];
 
 /** angular-standards/references/longevity.md#banned-apis — decorators and APIs superseded by signals. */
@@ -95,7 +104,38 @@ const IO_PATHS = [
     message:
       'Components never perform I/O. Call a service or store method. angular-standards/references/architecture.md#the-one-rule',
   },
+  // The reactive resource primitives live in @angular/core, not in @angular/common/http, so the
+  // entry above never saw them — a component could call resource() and lint clean while breaking
+  // the one rule everything else hangs off. Scoped like httpResource: banned in components,
+  // allowed in the service layer. `@angular/core` deliberately appears here AND in
+  // BANNED_PACKAGES; ESLint applies both entries, each with its own message.
+  {
+    name: '@angular/core',
+    importNames: ['resource'],
+    message:
+      'Components never perform I/O. resource() belongs in a service; the component reads the signal back. angular-standards/references/architecture.md#the-one-rule',
+  },
+  {
+    // A separate entry because `paths` matches the module string exactly — restricting
+    // '@angular/core' does not reach '@angular/core/rxjs-interop'.
+    name: '@angular/core/rxjs-interop',
+    importNames: ['rxResource'],
+    message:
+      'Components never perform I/O. rxResource() belongs in a service; the component reads the signal back. angular-standards/references/architecture.md#the-one-rule',
+  },
 ];
+
+/**
+ * angular-standards/references/components.md#presentational-components-ui — ui/ injects nothing.
+ * Scoped to the same files as the `inject(` selector: not helm (generated, legitimately injects),
+ * not specs (TestBed.runInInjectionContext is legitimate).
+ */
+const UI_INJECT_PATH = {
+  name: '@angular/core',
+  importNames: ['inject'],
+  message:
+    'Components in ui/ must inject nothing. Move it to a feature. angular-standards/references/components.md#presentational-components-ui',
+};
 
 const IO_PATTERNS = [
   {
@@ -262,10 +302,20 @@ module.exports = tseslint.config(
   {
     // ui/ components inject nothing. Specs are exempt: a test legitimately calls
     // TestBed.inject() to get the thing under test.
+    //
+    // Banned twice, deliberately: the selector below catches the call, UI_INJECT_PATH catches the
+    // import. The selector alone matches on `callee.name`, so `import { inject as di }` and then
+    // `di(Service)` walks straight past it. Restricting the import closes that, because
+    // `importNames` matches the IMPORTED name regardless of the local alias. Neither half is
+    // redundant: the import ban misses nothing, and the call ban still gives the precise
+    // "move it to a feature" message at the offending line.
     files: ['src/app/ui/**/*.ts'],
     ignores: ['src/app/ui/helm/**', '**/*.spec.ts'],
     rules: {
-      'no-restricted-imports': restrictImports([...LAYER_PATTERNS.ui, ...IO_PATTERNS], IO_PATHS),
+      'no-restricted-imports': restrictImports(
+        [...LAYER_PATTERNS.ui, ...IO_PATTERNS],
+        [...IO_PATHS, UI_INJECT_PATH],
+      ),
       'no-restricted-syntax': restrictSyntax([
         {
           selector: 'CallExpression[callee.name="inject"]',

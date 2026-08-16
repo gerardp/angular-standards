@@ -47,7 +47,7 @@ takes `unknown` and must validate, exactly as the boundary rule requires.
 Returning `undefined` from the request function is the idiomatic way to say "do not fetch yet" —
 use it instead of a separate `enabled` flag.
 
-**Audit:** Flag `httpResource` used for a `POST`/`PUT`/`PATCH`/`DELETE`. Flag `HttpClient.get`
+**Audit (review):** Flag `httpResource` used for a `POST`/`PUT`/`PATCH`/`DELETE`. Flag `HttpClient.get`
 where a reactive `httpResource` is what was wanted (i.e. the result is re-fetched manually when
 some signal changes).
 
@@ -85,7 +85,7 @@ Rules:
 - **Server enum strings are narrowed to a union type** at the boundary, not checked with `string`
   comparisons in templates.
 
-**Audit:** Flag any `Dto`-suffixed type imported outside `src/app/data-access/`. Flag `new Date(...)`
+**Audit (review):** Flag any `Dto`-suffixed type imported outside `src/app/data-access/`. Flag `new Date(...)`
 on a server value anywhere except a mapping function.
 
 ## Validate what the server sends
@@ -116,7 +116,7 @@ to `data-access/`.
   "currently selected" fields. It maps and transports. `httpResource` already carries
   `isLoading`/`error`/`value` for the caller to read.
 
-**Audit:** Flag a writable `signal` field on any `*-api.service.ts`. Flag a service named exactly
+**Audit (review):** Flag a writable `signal` field on any `*-api.service.ts`. Flag a service named exactly
 `ApiService` or with a `getData`-style method name.
 
 ## HTTP configuration
@@ -193,7 +193,7 @@ So treat it as a decision with a cost, not a convenience:
   the interceptor chain, so `errorInterceptor`, auth and XSRF stop applying to exactly the requests
   that carry user file uploads. See [security.md](security.md).
 
-**Audit:** Flag `reportProgress`. Flag `reportUploadProgress` in a project with no `withXhr()` —
+**Audit (review):** Flag `reportProgress`. Flag `reportUploadProgress` in a project with no `withXhr()` —
 that request throws against the default backend. Flag `withXhr()` with no `AGENTS.local.md` entry,
 or reachable from the server config. Flag a manually constructed `HttpClient`.
 
@@ -222,7 +222,7 @@ Where each layer handles what:
 `httpResource` exposes `error()` directly — read that signal rather than inventing a parallel error
 field.
 
-**Audit:** Flag `HttpErrorResponse` or `error.status` referenced outside `core/` and
+**Audit (review):** Flag `HttpErrorResponse` or `error.status` referenced outside `core/` and
 `data-access/`.
 
 ## Caching

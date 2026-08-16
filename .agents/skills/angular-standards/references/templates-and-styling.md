@@ -28,7 +28,7 @@ CSS custom properties.
 }
 ```
 
-**Audit:** Flag the creation of a `tailwind.config.js`/`.ts`. In v4 that is a sign someone is
+**Audit (review):** Flag the creation of a `tailwind.config.js`/`.ts`. In v4 that is a sign someone is
 following a v3 tutorial.
 
 ## Utilities first, semantic tokens always
@@ -46,7 +46,7 @@ Use **semantic** classes backed by the theme variables, never raw palette colour
 <div class="rounded-lg border border-gray-200 bg-white p-4 text-slate-900">
 ```
 
-**Audit:** Flag `bg-slate-*`, `text-gray-*`, `border-zinc-*`, hex colours, and `rgb()` outside
+**Audit (review):** Flag `bg-slate-*`, `text-gray-*`, `border-zinc-*`, hex colours, and `rgb()` outside
 `styles.css`.
 
 ## When utilities are not enough
@@ -62,7 +62,7 @@ Reach for these in order:
 Never a global stylesheet rule targeting a component's internals. Global CSS is the least
 maintainable thing in a long-lived app because nothing tells you what depends on it.
 
-**Audit:** Flag `::ng-deep` (deprecated and leaky), `!important`, and global selectors in
+**Audit (review):** Flag `::ng-deep` (deprecated and leaky), `!important`, and global selectors in
 `styles.css` that target application markup rather than defining tokens or resets.
 
 ## Long class lists
@@ -103,7 +103,7 @@ For variant-driven combinations, use the helm component's `variant` input.
   `@container` support.
 - Mobile-first: unprefixed utilities are the small screen, `md:`/`lg:` widen from there.
 
-**Audit:** Flag `ml-*`, `mr-*`, `pl-*`, `pr-*`, `text-left`, `text-right`, `left-*`, `right-*` in
+**Audit (review):** Flag `ml-*`, `mr-*`, `pl-*`, `pr-*`, `text-left`, `text-right`, `left-*`, `right-*` in
 new templates.
 
 ## Motion
@@ -147,8 +147,11 @@ For state transitions, toggle a class and let CSS `transition` handle it. For au
 Animate only `transform` and `opacity` where possible — they are the properties the compositor can
 handle without layout or paint.
 
-**Audit:** Flag any import from `@angular/animations`. Flag animations of `width`, `height`, `top`,
+**Audit (partial):** Flag any import from `@angular/animations`. Flag animations of `width`, `height`, `top`,
 or `left` where `transform` would work. Flag a codebase with no `prefers-reduced-motion` handling.
+*Lint covers:* the `@angular/animations` import — it is in the global banned-package list.
+*You check:* which properties are animated, and whether `prefers-reduced-motion` is handled anywhere.
+Both live in CSS, which ESLint does not read.
 
 ## Images and assets
 
@@ -158,5 +161,5 @@ or `left` where `transform` would work. Flag a codebase with no `prefers-reduced
 - Always set `width` and `height` (or `fill` with a sized container) so the layout does not shift.
 - SVG icons inline or as components, never an icon font.
 
-**Audit:** Flag `<img src>` for content images where `ngSrc` should be used, and any `<img>`
+**Audit (review):** Flag `<img src>` for content images where `ngSrc` should be used, and any `<img>`
 without dimensions.

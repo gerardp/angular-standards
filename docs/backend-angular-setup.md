@@ -59,7 +59,8 @@ started from that root discover both the backend and frontend guidance.
 npx skills add gerardp/angular-standards -a codex -a claude-code -y
 npx skills add angular/skills -s angular-developer -a codex -a claude-code -y
 npx skills add https://github.com/spartan-ng/spartan --skill spartan -a codex -a claude-code -y
-curl -fsSLo AGENTS.local.md https://raw.githubusercontent.com/gerardp/angular-standards/main/AGENTS.local.md
+# Template only — never clobber an existing AGENTS.local.md; it holds this repo's overrides.
+[ -f AGENTS.local.md ] || curl -fsSLo AGENTS.local.md https://raw.githubusercontent.com/gerardp/angular-standards/main/AGENTS.local.md
 
 npx @angular/cli@latest new frontend --style css --strict --no-ssr --skip-git --ai-config none --interactive=false
 cd frontend

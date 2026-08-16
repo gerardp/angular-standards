@@ -34,6 +34,7 @@ npx skills add https://github.com/spartan-ng/spartan --skill spartan
 ```
 .agents/skills/angular-standards/
   SKILL.md                   Entry point. Six non-negotiable rules + topic routing.
+  CHANGELOG.md               Semver policy + what every rule change invalidated.
   references/
     architecture.md          Layers, folders, dependency direction. The one rule.
     longevity.md             Banned APIs, upgrade cadence, dependency policy.  ← start here
@@ -70,13 +71,24 @@ Angular lives in a `frontend/` sub-folder. See the
 Run skill updates from the full-stack repository root:
 
 ```bash
-# during the Angular upgrade PR, and quarterly
+# during the Angular upgrade PR, and quarterly — on a branch, never on main
+git switch -c chore/update-skills
 npx skills update angular-standards angular-developer spartan
+git diff .agents/skills/          # ← this step is not optional
 ```
 
 Name them. A bare `npx skills update` updates every skill you have installed globally and locally,
 which is a separate decision each time — and it pulls upstream's latest, which is not the same as
 "whatever matches the version in your `package.json`".
+
+**Read the diff.** The `skills` CLI has no pinning: `add` takes no ref or tag, and `update` always
+resolves the repository's default branch, so an update can change the rules your agents follow
+without you noticing. The defence is that `.agents/skills/` is committed in your project — so the
+update lands as a reviewable diff, and
+[the skill's `CHANGELOG.md`](.agents/skills/angular-standards/CHANGELOG.md) lands inside that same
+diff with the reasoning. A **major** bump means a rule got stricter and code that passed review
+before this update may not now; the entry names what it invalidates. If an update is not something
+you want yet, `git restore .agents/skills/angular-standards` puts it back.
 
 Do not gate your CI on skill freshness. Failing a build because upstream shipped a doc change
 blocks work that has nothing to do with it — it is a scheduled task, not a build gate.
@@ -94,6 +106,12 @@ A rule that lives only in someone's head gets violated by the next agent and by 
   PR, while you are already looking at the release notes.
 - Rule turned out to be wrong? Change it. These are versioned files, not scripture — but they change
   by proposal, not by drift.
+- Changed a rule? Bump `metadata.version` in `SKILL.md` and add the entry to
+  [the skill's CHANGELOG](.agents/skills/angular-standards/CHANGELOG.md) **in the same commit**, then
+  tag `v<version>`. The versioning policy — what counts as major, minor and patch for a rule rather
+  than for code — is at the top of that file. A standard that demands a removal condition on every
+  override owes its own consumers the same: a rule change is only legible if it says what it
+  invalidates.
 
 ## Provenance
 

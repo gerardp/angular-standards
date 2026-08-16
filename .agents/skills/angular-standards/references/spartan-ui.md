@@ -126,7 +126,7 @@ create it. An interactive first `ui` run can create it, but this skill writes it
 This repo's convention is `src/app/ui/helm/`, recorded in `components.json`. If you change it,
 update the `Audit:` globs in this file and the `ignores` in `eslint.config.js` to match.
 
-**Audit:** Flag any doc, script, or lint glob that assumes a helm path without deriving it from
+**Audit (review):** Flag any doc, script, or lint glob that assumes a helm path without deriving it from
 `components.json`.
 
 ## Setup
@@ -196,7 +196,7 @@ ng g @spartan-ng/cli:healthcheck --autoFix   # apply
 
 Do not invoke `migrate-*` generators individually unless you are targeting one known migration.
 
-**Audit:** Flag a `@spartan-ng/*` version bump in `package.json` whose PR shows no healthcheck run.
+**Audit (review):** Flag a `@spartan-ng/*` version bump in `package.json` whose PR shows no healthcheck run.
 
 ## Usage
 
@@ -225,7 +225,7 @@ import { HlmButtonImports } from '@spartan-ng/helm/button';
 If a needed variant does not exist, **add it to the Helm component's CVA config** so it is
 available everywhere. One-off overrides at call sites are how a design system dies.
 
-**Audit:** Flag colour, border-radius, padding, or typography utilities applied directly to a
+**Audit (review):** Flag colour, border-radius, padding, or typography utilities applied directly to a
 `hlm*` component in a feature template. That styling belongs in the Helm component's variants.
 
 ## Editing helm components
@@ -242,7 +242,7 @@ attribute or a keyboard handler, you are almost certainly introducing a bug.
 **Record every non-trivial edit** in `AGENTS.local.md` under "Active overrides". Otherwise a future
 `ng g @spartan-ng/cli:ui` re-run silently reverts your fix and nobody knows why the bug came back.
 
-**Audit:** Flag Helm components whose git history shows edits with no corresponding
+**Audit (review):** Flag Helm components whose git history shows edits with no corresponding
 `AGENTS.local.md` entry.
 
 ## Composite widgets: use brain
@@ -259,7 +259,7 @@ This is also why we prefer Spartan Brain over **Angular Aria**: as of v22 Aria i
 Preview and carries no deprecation guarantee, while Spartan is 1.x stable. Revisit when Aria ships
 stable, and record the decision in `AGENTS.local.md` if it changes.
 
-**Audit:** Flag hand-rolled dropdowns, modals, tabs, or comboboxes built from `div`s and click
+**Audit (review):** Flag hand-rolled dropdowns, modals, tabs, or comboboxes built from `div`s and click
 handlers where a Helm component or Brain primitive exists.
 
 ## Theming
@@ -277,7 +277,7 @@ Theme through the CSS custom properties Spartan emits (`--background`, `--foregr
 day someone rebrands. `bg-background` does not. Dark mode then comes free: the variables are
 redefined under the dark selector and everything follows.
 
-**Audit:** Flag literal Tailwind palette colours (`bg-slate-*`, `text-gray-*`, `border-zinc-*`,
+**Audit (review):** Flag literal Tailwind palette colours (`bg-slate-*`, `text-gray-*`, `border-zinc-*`,
 `#hex`, `rgb()`) in any template or component style. Raw colours are allowed only where the theme
 variables are defined, in `styles.css`.
 
@@ -305,7 +305,7 @@ your base classes to the host and merges the caller's `class` over them, with th
 conflicts. Never concatenate class strings by hand; `hlm()` (clsx + tailwind-merge) exists for the
 computed case. Both patterns are written out in `spartan/rules/styling.md`.
 
-**Audit:** Flag template-literal or `+` class concatenation in a component under `ui/`. It produces
+**Audit (review):** Flag template-literal or `+` class concatenation in a component under `ui/`. It produces
 duplicate, mutually-overriding Tailwind classes whose winner depends on stylesheet order.
 
 ## Upgrading Spartan

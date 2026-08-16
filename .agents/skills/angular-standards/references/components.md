@@ -113,7 +113,7 @@ Event handlers are 1–3 lines: call a method, emit an output, set a local signa
 `try/catch`, loading flags, or sequencing, that logic belongs in the service or store — the
 component is doing someone else's job.
 
-**Audit:** Flag handlers longer than ~5 lines, and any handler containing `await` of an I/O call.
+**Audit (review):** Flag handlers longer than ~5 lines, and any handler containing `await` of an I/O call.
 
 ## Presentational components (`ui/`)
 
@@ -127,7 +127,11 @@ Components under `ui/` are pure projection:
 This is what makes them reusable and trivially testable. A component in `ui/` that injects
 something has failed the definition and belongs in a feature instead.
 
-**Audit:** Flag any `inject()` call inside `src/app/ui/`.
+**Audit (lint):** Flag any `inject()` call inside `src/app/ui/`, **except under `src/app/ui/helm/`** —
+generated Helm code legitimately injects (it composes Brain primitives via `hostDirectives` and uses
+CDK services) and we did not author it. `eslint.config.js` carries the same exemption; keep the two
+in step, and keep both in step with `componentsPath` in `components.json`. See
+[spartan-ui.md](spartan-ui.md#where-helm-code-lives).
 
 ## Splitting
 
@@ -135,7 +139,7 @@ Split a component when it has more than one reason to change — typically when 
 two independent interactions (a filter bar and a results table), not when the file crosses a line
 count. A long file holding one coherent view is fine.
 
-**Audit:** Flag components whose template contains two or more `@if` branches switching between
+**Audit (review):** Flag components whose template contains two or more `@if` branches switching between
 what are effectively different screens.
 
 ## Inheritance
@@ -200,7 +204,7 @@ an abstract base cannot be composed, and an input is only exposed if the directi
 This is the same move Spartan makes: Helm composes Brain by applying its directives, never by
 extending them — see [spartan-ui.md](spartan-ui.md).
 
-**Audit:** Flag `extends` on any class decorated with `@Component` or `@Directive`, and any
+**Audit (review):** Flag `extends` on any class decorated with `@Component` or `@Directive`, and any
 `@Directive()`-decorated abstract base class in app code. Generated Helm code is exempt.
 
 ## Deferred loading
@@ -232,5 +236,15 @@ Non-negotiable, and cheaper to do now than to retrofit:
 Spartan brain primitives handle keyboard interaction and ARIA wiring for composite widgets — use
 them rather than hand-rolling a listbox. See [spartan-ui.md](spartan-ui.md).
 
-**Audit:** Flag `(click)` on a non-interactive element, inputs without labels, and `outline: none`
+**Audit (partial):** Flag `(click)` on a non-interactive element, inputs without labels, and `outline: none`
 without a replacement focus style.
+*Lint covers:* only `(click)` on an element with **no** keyboard handler and **no** way to focus it
+— `click-events-have-key-events` and `interactive-supports-focus`.
+*You check:* everything else, and it is more than it looks.
+- **An input with no label at all.** `label-has-associated-control` inspects `<label>` elements to
+  see they wrap or reference a control; a bare `<input>` with no label anywhere is not a `<label>`,
+  so nothing fires. Verified against this config.
+- **A `<div tabindex="0" (click) (keydown)>`** satisfies both rules above and still lints clean
+  while being a button that is not a `<button>`. Semantics are not checkable; ask for the real
+  element.
+- **`outline: none` and focus styling**, which live in CSS — ESLint does not read it.
