@@ -50,7 +50,7 @@ npx skills add https://github.com/spartan-ng/spartan --skill spartan
     security.md              Tokens, XSS, CSP, secrets.
     observability.md         Error reporting, correlation, field metrics.
     testing.md               Vitest, zoneless testing, what to test.
-    anti-patterns.md         68-item review checklist, ordered by cost.
+    anti-patterns.md         72-item review checklist, ordered by cost.
     code-review.md           The audit process. Reads the Audit: lines above.
 
 AGENTS.md                    Pointer to the skill, for tools that read AGENTS.md.

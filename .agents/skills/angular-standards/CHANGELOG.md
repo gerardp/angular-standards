@@ -30,6 +30,31 @@ defect this file exists to prevent.
 
 ---
 
+## 4.0.0 — 2026-08-29
+
+### Breaking
+
+- **Icon-only controls and user-relevant async status changes must be accessible.** Icon-only
+  buttons and links need an accessible name, and loading/save/failure/result-count updates need a
+  status or live-region announcement. *Invalidates:* templates where the icon is the only label, or
+  where visible async feedback is silent to screen readers. *To comply:* add visible or
+  screen-reader-only text (or `aria-label`) and use `role="status"` or an appropriate live region.
+- **Frontend N+1 request fan-out is banned.** A list response may not trigger one detail request per
+  row. *Invalidates:* screens whose network work grows by one request for every returned item. *To
+  comply:* return the view fields in the list response or use one batch request; a detail request
+  caused by an explicit user action remains valid.
+- **Error reporting must contain its own failures.** A reporter or global `ErrorHandler` may not
+  throw, reject, or recurse while handling the original failure. *Invalidates:* reporter adapters
+  that let synchronous SDK errors or rejected reporting promises escape. *To comply:* contain the
+  failure once inside the owned adapter.
+
+### Changed
+
+- The audit inventory is now accurate and includes the three rules above: 87 tagged `Audit:` lines
+  — 3 `lint`, 11 `partial`, 73 `review`. The anti-pattern checklist now has 72 entries.
+- Review routing now loads `components.md` for template changes and `performance.md` for list or
+  batch I/O, so the new rules are actually checked in the diffs where they can be violated.
+
 ## 3.0.0 — 2026-08-16
 
 Two kinds of change are folded into this release, and the difference matters when you read the

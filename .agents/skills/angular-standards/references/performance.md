@@ -264,6 +264,16 @@ measurement is most of the cost of the alternative.
 **Audit (review):** Flag a `@for` rendering an unbounded collection — anything backed by a paginated or
 user-filtered endpoint with no page size cap. Flag `*cdkVirtualFor` without `trackBy`.
 
+## Request fan-out
+
+A list must not trigger one detail request per row. That N+1 shape grows network work with customer
+data and turns a single render into dozens of independently failing operations. Ask the list endpoint
+for the fields the view needs, or use one batch request. Loading details after an explicit user action
+— expanding one row, for example — is not N+1.
+
+**Audit (review):** Flag code that iterates a response collection and starts a separate read for every
+item. Replace it with one list or batch request; do not hide the fan-out behind a store or helper.
+
 ## Web workers
 
 For computation that blocks the frame — large parses, crypto, spreadsheet-scale aggregation — move

@@ -45,7 +45,8 @@ Load only the standards relevant to the diff. Do not read all of `references/` e
 | Any `.ts` file | `core-engineering.md` |
 | Any `.ts` under `features/` | `architecture.md`, `components.md`, `reactivity-and-state.md` |
 | `data-access/**` | `data-access.md`, `security.md` |
-| `*.html`, `*.css` | `templates-and-styling.md`, `spartan-ui.md` |
+| `*.html` | `components.md`, `templates-and-styling.md`, `spartan-ui.md` |
+| `*.css` | `templates-and-styling.md`, `spartan-ui.md` |
 | Generated Helm code (see `components.json`) | `spartan-ui.md` — check for an `AGENTS.local.md` entry |
 | Spartan component usage | `spartan-ui.md`, then `spartan/rules/composition.md` and `spartan/rules/styling.md` |
 | `@spartan-ng/*` version bump | `spartan-ui.md` — was `healthcheck` run? |
@@ -57,6 +58,7 @@ Load only the standards relevant to the diff. Do not read all of `references/` e
 | `eslint.config.js`, `nx.json`, `project.json`, `ng-package.json`, or any other module-boundary configuration | `architecture.md` — the graduation and migration rules |
 | `extends` on a class decorated `@Component`/`@Directive`, or a new `hostDirectives` entry | `components.md` |
 | `NgZone`, `ChangeDetectorRef`, `changeDetection:`, `*cdkVirtualFor`, a `@for` over a large list, a pipe that caches rather than formats | `performance.md` |
+| A list load, batch load, or loop that starts I/O | `performance.md` — check for request fan-out |
 | Auth, interceptors, storage | `security.md` |
 | A global `ErrorHandler`, error-reporter setup, breadcrumb or analytics instrumentation, a trace/correlation header | `observability.md` |
 | A feature-flag definition, the flag service/adapter, or any new flag read | `longevity.md` — the flag lifecycle rules |
@@ -80,7 +82,7 @@ rules and review rules cannot drift apart — each one names a specific, checkab
 | `**Audit (partial):**` | The tool catches some of the condition | Check **only the remainder**. Every `partial` line carries a `*Lint covers:*` / `*You check:*` pair naming both halves — do not re-derive the split. |
 | `**Audit (review):**` | No mechanical guardian exists | **All of it by hand.** This is where review earns its keep. |
 
-Today that is 2 `lint`, 10 `partial`, 69 `review` out of 81. That ratio is not a defect — the lint
+Today that is 3 `lint`, 11 `partial`, 73 `review` out of 87. That ratio is not a defect — the lint
 owns a large set of rules (type strictness, a11y, template hygiene, banned decorators) that never
 needed an `Audit:` line because the tool covers them completely. The `Audit:` lines are the residue
 that requires judgement, which is why most of them are `review`.

@@ -134,6 +134,42 @@ rather than treating the rejection as self-evident.
 **Audit (review):** Flag field metrics collected without a route and build dimension. Flag a second metrics
 collector added to a project already shipping an APM SDK that reports the same values.
 
+## Reporting must not become a second failure
+
+The reporting boundary never throws or rejects back into the application. A global `ErrorHandler`
+must not recurse because the vendor SDK failed while reporting the original error, and a fire-and-
+forget reporting promise must not become an unhandled rejection. Contain that failure once inside
+the owned reporter service — not with defensive `try`/`catch` repeated at every call site.
+
+```ts
+@Injectable({ providedIn: 'root' })
+export class ErrorReporter {
+  async capture(error: unknown): Promise<void> {
+    try {
+      await vendorSdk.captureException(error);
+    } catch {
+      // Reporting is best-effort; never replace the original failure.
+    }
+  }
+}
+
+@Injectable()
+export class GlobalErrorHandler implements ErrorHandler {
+  private readonly reporter = inject(ErrorReporter);
+
+  handleError(error: unknown): void {
+    void this.reporter.capture(error);
+  }
+}
+```
+
+The `await` inside the adapter contains both a synchronous SDK throw and a rejected promise, so the
+handler does not repeat the guard.
+
+**Audit (review):** Flag an unguarded reporter call inside a global `ErrorHandler`, an unguarded vendor
+SDK call inside the reporter adapter, or a fire-and-forget reporting promise with no rejection
+handling inside the adapter.
+
 ## Keeping the provider swappable
 
 Everything above is specified without naming a product, on purpose. Whatever you choose enters the

@@ -229,9 +229,26 @@ Non-negotiable, and cheaper to do now than to retrofit:
 - Every interactive element is a real `<button>`, `<a>`, or `<input>` — never a `<div>` with a
   click handler.
 - Every form control has an associated `<label>`.
+- Every icon-only button or link has an accessible name. Prefer visible or screen-reader-only text;
+  use `aria-label` when no DOM label fits. An icon by itself is not a name.
 - Every image has `alt`. Decorative images get `alt=""`.
 - Focus is visible. Never remove the focus ring without providing a replacement.
 - State conveyed by colour is also conveyed by text or icon.
+- Async status changes the user needs to know about — loading, saved, failed, result counts — are
+  announced through `role="status"` or an appropriate live region. Visible text that appears
+  silently is not enough for a screen-reader user.
+
+```html
+<button type="button">
+  <span aria-hidden="true">×</span>
+  <span class="sr-only">Close panel</span>
+</button>
+
+<p role="status">{{ saveMessage() }}</p>
+```
+
+Keep the status element mounted and update its signal-backed text; assistive technology can then
+announce each change.
 
 Spartan brain primitives handle keyboard interaction and ARIA wiring for composite widgets — use
 them rather than hand-rolling a listbox. See [spartan-ui.md](spartan-ui.md).
@@ -248,3 +265,6 @@ without a replacement focus style.
   while being a button that is not a `<button>`. Semantics are not checkable; ask for the real
   element.
 - **`outline: none` and focus styling**, which live in CSS — ESLint does not read it.
+
+**Audit (review):** Flag an icon-only button or link with no accessible name. Flag a user-relevant async
+status change with no `role="status"`, live region, or equivalent announcement.

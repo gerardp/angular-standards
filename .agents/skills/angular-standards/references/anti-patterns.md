@@ -90,25 +90,34 @@ Ordered by how expensive each one is to unwind later.
 | 54 | Input without an associated label | `<label for>` | [forms](forms.md#accessibility) |
 | 55 | `outline: none` with no replacement | A visible focus style | [core-engineering](core-engineering.md#accessibility-baseline) |
 | 56 | State conveyed by colour alone | Add text or an icon | [core-engineering](core-engineering.md#accessibility-baseline) |
-| 57 | Concatenated user-facing sentence | One parameterised message | [core-engineering](core-engineering.md#internationalisation-readiness) |
+| 57 | Icon-only button or link with no accessible name | Visible or screen-reader-only text, or `aria-label` | [components](components.md#accessibility) |
+| 58 | Loading, save, failure, or result-count update silent to screen readers | `role="status"` or an appropriate live region | [components](components.md#accessibility) |
+| 59 | Concatenated user-facing sentence | One parameterised message | [core-engineering](core-engineering.md#internationalisation-readiness) |
 
 ## Performance
 
 | # | Anti-pattern | Instead | Rule |
 | --- | --- | --- | --- |
-| 58 | No `budgets` in the production build config, or a budget raised to make a build pass | Set it; shrink the artefact that failed — the fix differs per budget type | [performance](performance.md#budgets-the-only-rule-here-the-build-can-enforce) |
-| 59 | `NgZone` / `runOutsideAngular()` / any zone-based optimisation | Nothing — the app is zoneless, there is no zone | [performance](performance.md#stale-advice) |
-| 60 | `ChangeDetectorRef` injected, or a `changeDetection:` line on a component (`Eager`, `Default` or `OnPush`) | Put the state in a signal; delete the line — OnPush is the v22 default | [performance](performance.md#stale-advice) |
-| 61 | Heavy computation cached in a pure pipe | `computed()` — already lazy and memoised | [performance](performance.md#slow-computations) |
-| 62 | `@for` over an unbounded list; `*cdkVirtualFor` without `trackBy` | Virtual scrolling, with a track function | [performance](performance.md#long-lists) |
+| 60 | No `budgets` in the production build config, or a budget raised to make a build pass | Set it; shrink the artefact that failed — the fix differs per budget type | [performance](performance.md#budgets-the-only-rule-here-the-build-can-enforce) |
+| 61 | `NgZone` / `runOutsideAngular()` / any zone-based optimisation | Nothing — the app is zoneless, there is no zone | [performance](performance.md#stale-advice) |
+| 62 | `ChangeDetectorRef` injected, or a `changeDetection:` line on a component (`Eager`, `Default` or `OnPush`) | Put the state in a signal; delete the line — OnPush is the v22 default | [performance](performance.md#stale-advice) |
+| 63 | Heavy computation cached in a pure pipe | `computed()` — already lazy and memoised | [performance](performance.md#slow-computations) |
+| 64 | `@for` over an unbounded list; `*cdkVirtualFor` without `trackBy` | Virtual scrolling, with a track function | [performance](performance.md#long-lists) |
+| 65 | List response followed by one detail request per row | One list or batch request containing the fields the view needs | [performance](performance.md#request-fan-out) |
+
+## Observability
+
+| # | Anti-pattern | Instead | Rule |
+| --- | --- | --- | --- |
+| 66 | Error reporter throws while handling the original failure | Contain reporter failures inside the owned adapter | [observability](observability.md#reporting-must-not-become-a-second-failure) |
 
 ## Process
 
 | # | Anti-pattern | Instead | Rule |
 | --- | --- | --- | --- |
-| 63 | Angular major sitting past its active window | Upgrade within 9 months of release; never enter LTS | [longevity](longevity.md#2-upgrade-on-a-schedule-not-on-demand) |
-| 64 | `tsconfig` strictness flag weakened | Restore it, or record it in `AGENTS.local.md` | [core-engineering](core-engineering.md#typescript-configuration) |
-| 65 | Deviation from a standard with no `AGENTS.local.md` entry | Record it with a removal condition | `AGENTS.local.md` |
-| 66 | Upstream skill (`angular-developer`, `spartan`) edited by hand | Edit this skill's `references/`; upstream skills are re-synced | [SKILL.md](../SKILL.md) |
-| 67 | Commented-out code | Delete it; git remembers | [core-engineering](core-engineering.md#comments) |
-| 68 | Feature flag with no owner, or no removal condition / review date | Both, required and validated at the flag's authoritative source | [longevity](longevity.md#5-feature-flags-carry-an-owner-and-an-end-state) |
+| 67 | Angular major sitting past its active window | Upgrade within 9 months of release; never enter LTS | [longevity](longevity.md#2-upgrade-on-a-schedule-not-on-demand) |
+| 68 | `tsconfig` strictness flag weakened | Restore it, or record it in `AGENTS.local.md` | [core-engineering](core-engineering.md#typescript-configuration) |
+| 69 | Deviation from a standard with no `AGENTS.local.md` entry | Record it with a removal condition | `AGENTS.local.md` |
+| 70 | Upstream skill (`angular-developer`, `spartan`) edited by hand | Edit this skill's `references/`; upstream skills are re-synced | [SKILL.md](../SKILL.md) |
+| 71 | Commented-out code | Delete it; git remembers | [core-engineering](core-engineering.md#comments) |
+| 72 | Feature flag with no owner, or no removal condition / review date | Both, required and validated at the flag's authoritative source | [longevity](longevity.md#5-feature-flags-carry-an-owner-and-an-end-state) |

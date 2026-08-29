@@ -3,7 +3,7 @@ name: angular-standards
 description: House coding standards for a long-lived Angular 22+ application — layer architecture and dependency direction, signals and state, data access, Signal Forms, Tailwind v4, Spartan NG, routing, security, testing, and the banned-API list — plus the review process that audits changes against them. Use when writing, refactoring or reviewing Angular code, when deciding where a file goes, when adding a dependency, when upgrading Angular, or when asked to review a diff, branch or PR against project conventions.
 license: MIT
 metadata:
-  version: 3.0.0
+  version: 4.0.0
 ---
 
 # Angular standards
