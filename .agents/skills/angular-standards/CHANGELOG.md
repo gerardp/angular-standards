@@ -30,6 +30,45 @@ defect this file exists to prevent.
 
 ---
 
+## 5.0.0 — 2026-08-30
+
+### Breaking
+
+- **Zoneless component tests must trigger the same notification surface as production.**
+  *Invalidates:* tests that mutate component state and force the result with `detectChanges()`, or
+  use fake timers for generic Promise, Observable or change-detection sequencing. *To comply:* use
+  signals, `componentRef.setInput()` or real DOM events, then native `await`, `firstValueFrom()` or
+  `whenStable()`; reserve fake timers for behaviour whose contract is elapsed time and restore them.
+- **Smoke and shallow-test boilerplate no longer counts as coverage.** *Invalidates:* smoke-only
+  `should create` specs, `compileComponents()` without `@defer`, `NO_ERRORS_SCHEMA` shortcuts,
+  DOM-affecting directive tests with no host, and one-off component harnesses. *To comply:* assert a
+  public behaviour through the rendered DOM, use a minimal host for directives, and add a harness
+  only for a shared interactive widget.
+- **Test doubles are reserved for real seams and must fully contain side effects.** *Invalidates:*
+  unnecessary fakes for simple deterministic local dependencies, untyped/auto-generated fakes, and
+  partial spies or subclasses that can execute the real network, storage or clock dependency. *To
+  comply:* keep deterministic dependencies real, or replace the boundary completely with a small
+  `satisfies Pick<...>` fake.
+- **Angular test infrastructure stays on the supported path.** *Invalidates:* a `jsdom` test claimed
+  as proof of layout/browser behaviour, custom Vitest configuration with no documented Angular CLI
+  limitation and removal condition, mocked Angular routers, and redundant or reversed HTTP test
+  providers. *To comply:* use the existing Playwright suite for browser guarantees, configure
+  ordinary test options in `angular.json`, use `provideRouter()` with `RouterTestingHarness`, and
+  put `provideHttpClientTesting()` last (with no `provideHttpClient()` unless configuring a feature).
+
+### Changed
+
+- [testing.md](references/testing.md) now distinguishes `jsdom` from a real browser, defines the
+  production-faithful zoneless interaction path, limits fake timers and custom Vitest config,
+  tightens component/fake/HTTP hygiene, and adds router and directive testing rules.
+- The durable guidance taken from [*Testing Angular*](https://testing-angular.com/) is deliberately
+  tool-neutral: full fake replacement, real deterministic collaborators, and host-component tests
+  for DOM directives. Its Jasmine/Karma, Cypress, Spectator, `ng-mocks`, test-id and
+  manual-change-detection conventions do not enter this Angular 22 standard.
+- Review routing now sends test-target and Vitest configuration changes to `testing.md`. The audit
+  inventory is 92 tagged `Audit:` lines — 3 `lint`, 11 `partial`, 78 `review` — and the consolidated
+  anti-pattern checklist has 78 entries.
+
 ## 4.0.0 — 2026-08-29
 
 ### Breaking

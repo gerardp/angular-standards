@@ -81,43 +81,49 @@ Ordered by how expensive each one is to unwind later.
 | 50 | Module-level mutable state shared across tests | Set it up inside `beforeEach` | [testing](testing.md#hygiene) |
 | 51 | Flaky test retried until green | Fix it or delete it | [testing](testing.md#ci-gate) |
 | 52 | Auto-mock, or a fake with no compile-time anchor to the real service | `satisfies Pick<Service, …>` over the surface the test consumes | [testing](testing.md#dependency-substitution) |
+| 53 | `jsdom` test claimed as browser/layout proof, or unsupported Vitest config with no current builder gap | Existing Playwright suite; standard options in `angular.json` | [testing](testing.md#test-environment) |
+| 54 | `detectChanges()` after an interaction, or fake timers for generic async work | Production notification surface plus `whenStable()` / native `await` | [testing](testing.md#zoneless-testing) |
+| 55 | Smoke-only `should create`, or `compileComponents()` with no `@defer` | A behavioural assertion; delete the unused setup | [testing](testing.md#component-tests) |
+| 56 | Simple deterministic dependency faked, or a side-effecting real instance partially spied | Keep the real dependency, or replace the boundary completely | [testing](testing.md#dependency-substitution) |
+| 57 | Angular `Router` mocked | `provideRouter()` plus `RouterTestingHarness` | [testing](testing.md#router-tests) |
+| 58 | Redundant/reversed HTTP test providers, or no outstanding-request verification | Testing provider alone by default; testing provider last; `verify()` | [testing](testing.md#http-tests) |
 
 ## Accessibility
 
 | # | Anti-pattern | Instead | Rule |
 | --- | --- | --- | --- |
-| 53 | `(click)` on a `<div>` or `<span>` | A real `<button>` | [components](components.md#accessibility) |
-| 54 | Input without an associated label | `<label for>` | [forms](forms.md#accessibility) |
-| 55 | `outline: none` with no replacement | A visible focus style | [core-engineering](core-engineering.md#accessibility-baseline) |
-| 56 | State conveyed by colour alone | Add text or an icon | [core-engineering](core-engineering.md#accessibility-baseline) |
-| 57 | Icon-only button or link with no accessible name | Visible or screen-reader-only text, or `aria-label` | [components](components.md#accessibility) |
-| 58 | Loading, save, failure, or result-count update silent to screen readers | `role="status"` or an appropriate live region | [components](components.md#accessibility) |
-| 59 | Concatenated user-facing sentence | One parameterised message | [core-engineering](core-engineering.md#internationalisation-readiness) |
+| 59 | `(click)` on a `<div>` or `<span>` | A real `<button>` | [components](components.md#accessibility) |
+| 60 | Input without an associated label | `<label for>` | [forms](forms.md#accessibility) |
+| 61 | `outline: none` with no replacement | A visible focus style | [core-engineering](core-engineering.md#accessibility-baseline) |
+| 62 | State conveyed by colour alone | Add text or an icon | [core-engineering](core-engineering.md#accessibility-baseline) |
+| 63 | Icon-only button or link with no accessible name | Visible or screen-reader-only text, or `aria-label` | [components](components.md#accessibility) |
+| 64 | Loading, save, failure, or result-count update silent to screen readers | `role="status"` or an appropriate live region | [components](components.md#accessibility) |
+| 65 | Concatenated user-facing sentence | One parameterised message | [core-engineering](core-engineering.md#internationalisation-readiness) |
 
 ## Performance
 
 | # | Anti-pattern | Instead | Rule |
 | --- | --- | --- | --- |
-| 60 | No `budgets` in the production build config, or a budget raised to make a build pass | Set it; shrink the artefact that failed — the fix differs per budget type | [performance](performance.md#budgets-the-only-rule-here-the-build-can-enforce) |
-| 61 | `NgZone` / `runOutsideAngular()` / any zone-based optimisation | Nothing — the app is zoneless, there is no zone | [performance](performance.md#stale-advice) |
-| 62 | `ChangeDetectorRef` injected, or a `changeDetection:` line on a component (`Eager`, `Default` or `OnPush`) | Put the state in a signal; delete the line — OnPush is the v22 default | [performance](performance.md#stale-advice) |
-| 63 | Heavy computation cached in a pure pipe | `computed()` — already lazy and memoised | [performance](performance.md#slow-computations) |
-| 64 | `@for` over an unbounded list; `*cdkVirtualFor` without `trackBy` | Virtual scrolling, with a track function | [performance](performance.md#long-lists) |
-| 65 | List response followed by one detail request per row | One list or batch request containing the fields the view needs | [performance](performance.md#request-fan-out) |
+| 66 | No `budgets` in the production build config, or a budget raised to make a build pass | Set it; shrink the artefact that failed — the fix differs per budget type | [performance](performance.md#budgets-the-only-rule-here-the-build-can-enforce) |
+| 67 | `NgZone` / `runOutsideAngular()` / any zone-based optimisation | Nothing — the app is zoneless, there is no zone | [performance](performance.md#stale-advice) |
+| 68 | `ChangeDetectorRef` injected, or a `changeDetection:` line on a component (`Eager`, `Default` or `OnPush`) | Put the state in a signal; delete the line — OnPush is the v22 default | [performance](performance.md#stale-advice) |
+| 69 | Heavy computation cached in a pure pipe | `computed()` — already lazy and memoised | [performance](performance.md#slow-computations) |
+| 70 | `@for` over an unbounded list; `*cdkVirtualFor` without `trackBy` | Virtual scrolling, with a track function | [performance](performance.md#long-lists) |
+| 71 | List response followed by one detail request per row | One list or batch request containing the fields the view needs | [performance](performance.md#request-fan-out) |
 
 ## Observability
 
 | # | Anti-pattern | Instead | Rule |
 | --- | --- | --- | --- |
-| 66 | Error reporter throws while handling the original failure | Contain reporter failures inside the owned adapter | [observability](observability.md#reporting-must-not-become-a-second-failure) |
+| 72 | Error reporter throws while handling the original failure | Contain reporter failures inside the owned adapter | [observability](observability.md#reporting-must-not-become-a-second-failure) |
 
 ## Process
 
 | # | Anti-pattern | Instead | Rule |
 | --- | --- | --- | --- |
-| 67 | Angular major sitting past its active window | Upgrade within 9 months of release; never enter LTS | [longevity](longevity.md#2-upgrade-on-a-schedule-not-on-demand) |
-| 68 | `tsconfig` strictness flag weakened | Restore it, or record it in `AGENTS.local.md` | [core-engineering](core-engineering.md#typescript-configuration) |
-| 69 | Deviation from a standard with no `AGENTS.local.md` entry | Record it with a removal condition | `AGENTS.local.md` |
-| 70 | Upstream skill (`angular-developer`, `spartan`) edited by hand | Edit this skill's `references/`; upstream skills are re-synced | [SKILL.md](../SKILL.md) |
-| 71 | Commented-out code | Delete it; git remembers | [core-engineering](core-engineering.md#comments) |
-| 72 | Feature flag with no owner, or no removal condition / review date | Both, required and validated at the flag's authoritative source | [longevity](longevity.md#5-feature-flags-carry-an-owner-and-an-end-state) |
+| 73 | Angular major sitting past its active window | Upgrade within 9 months of release; never enter LTS | [longevity](longevity.md#2-upgrade-on-a-schedule-not-on-demand) |
+| 74 | `tsconfig` strictness flag weakened | Restore it, or record it in `AGENTS.local.md` | [core-engineering](core-engineering.md#typescript-configuration) |
+| 75 | Deviation from a standard with no `AGENTS.local.md` entry | Record it with a removal condition | `AGENTS.local.md` |
+| 76 | Upstream skill (`angular-developer`, `spartan`) edited by hand | Edit this skill's `references/`; upstream skills are re-synced | [SKILL.md](../SKILL.md) |
+| 77 | Commented-out code | Delete it; git remembers | [core-engineering](core-engineering.md#comments) |
+| 78 | Feature flag with no owner, or no removal condition / review date | Both, required and validated at the flag's authoritative source | [longevity](longevity.md#5-feature-flags-carry-an-owner-and-an-end-state) |

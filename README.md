@@ -31,32 +31,32 @@ npx skills add https://github.com/spartan-ng/spartan --skill spartan
 
 ## Layout
 
-```
+<pre>
 .agents/skills/angular-standards/
-  SKILL.md                   Entry point. Six non-negotiable rules + topic routing.
-  CHANGELOG.md               Semver policy + what every rule change invalidated.
+  <a href=".agents/skills/angular-standards/SKILL.md">SKILL.md</a>                   Entry point. Six non-negotiable rules + topic routing.
+  <a href=".agents/skills/angular-standards/CHANGELOG.md">CHANGELOG.md</a>               Semver policy + what every rule change invalidated.
   references/
-    architecture.md          Layers, folders, dependency direction. The one rule.
-    longevity.md             Banned APIs, upgrade cadence, dependency policy.  ← start here
-    core-engineering.md      TypeScript strictness, naming, a11y, i18n readiness.
-    components.md            Signal inputs/outputs, host bindings, templates.
-    reactivity-and-state.md  Signals decision table, when to add a store.
-    data-access.md           httpResource vs HttpClient, DTO boundary, errors.
-    forms.md                 Signal Forms.
-    templates-and-styling.md Tailwind v4, control flow, motion.
-    spartan-ui.md            brain/helm, theming, upgrade rules.
-    routing.md               Lazy loading, guards, route-scoped state, SSR.
-    performance.md           Budgets, profiling, lazy services, long lists.
-    security.md              Tokens, XSS, CSP, secrets.
-    observability.md         Error reporting, correlation, field metrics.
-    testing.md               Vitest, zoneless testing, what to test.
-    anti-patterns.md         72-item review checklist, ordered by cost.
-    code-review.md           The audit process. Reads the Audit: lines above.
+    <a href=".agents/skills/angular-standards/references/architecture.md">architecture.md</a>          Layers, folders, dependency direction. The one rule.
+    <a href=".agents/skills/angular-standards/references/longevity.md">longevity.md</a>             Banned APIs, upgrade cadence, dependency policy.  ← start here
+    <a href=".agents/skills/angular-standards/references/core-engineering.md">core-engineering.md</a>      TypeScript strictness, naming, a11y, i18n readiness.
+    <a href=".agents/skills/angular-standards/references/components.md">components.md</a>            Signal inputs/outputs, host bindings, templates.
+    <a href=".agents/skills/angular-standards/references/reactivity-and-state.md">reactivity-and-state.md</a>  Signals decision table, when to add a store.
+    <a href=".agents/skills/angular-standards/references/data-access.md">data-access.md</a>           httpResource vs HttpClient, DTO boundary, errors.
+    <a href=".agents/skills/angular-standards/references/forms.md">forms.md</a>                 Signal Forms.
+    <a href=".agents/skills/angular-standards/references/templates-and-styling.md">templates-and-styling.md</a> Tailwind v4, control flow, motion.
+    <a href=".agents/skills/angular-standards/references/spartan-ui.md">spartan-ui.md</a>            brain/helm, theming, upgrade rules.
+    <a href=".agents/skills/angular-standards/references/routing.md">routing.md</a>               Lazy loading, guards, route-scoped state, SSR.
+    <a href=".agents/skills/angular-standards/references/performance.md">performance.md</a>           Budgets, profiling, lazy services, long lists.
+    <a href=".agents/skills/angular-standards/references/security.md">security.md</a>              Tokens, XSS, CSP, secrets.
+    <a href=".agents/skills/angular-standards/references/observability.md">observability.md</a>         Error reporting, correlation, field metrics.
+    <a href=".agents/skills/angular-standards/references/testing.md">testing.md</a>               Vitest, zoneless testing, what to test.
+    <a href=".agents/skills/angular-standards/references/anti-patterns.md">anti-patterns.md</a>         78-item review checklist, ordered by cost.
+    <a href=".agents/skills/angular-standards/references/code-review.md">code-review.md</a>           The audit process. Reads the Audit: lines above.
 
-AGENTS.md                    Pointer to the skill, for tools that read AGENTS.md.
-CLAUDE.md                    Pointer so Claude Code auto-loads AGENTS.md.
-AGENTS.local.md              Your overrides + project facts. Fill this in.
-```
+<a href="AGENTS.md">AGENTS.md</a>                    Pointer to the skill, for tools that read AGENTS.md.
+<a href="CLAUDE.md">CLAUDE.md</a>                    Pointer so Claude Code auto-loads AGENTS.md.
+<a href="AGENTS.local.md">AGENTS.local.md</a>              Your overrides + project facts. Fill this in.
+</pre>
 
 ## Using it
 

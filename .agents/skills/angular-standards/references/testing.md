@@ -6,6 +6,22 @@ E2E. Karma, Jasmine, and Protractor are banned.
 Framework detail: `angular-developer/references/testing-fundamentals.md`,
 `component-harnesses.md`, `router-testing.md`, `e2e-testing.md`.
 
+## Test environment
+
+The default `ng test` environment is Node.js plus `jsdom`. It proves DOM structure, events and
+Angular behaviour; it does **not** prove layout, painting or a browser-only API. Keep those tests in
+the existing Playwright suite. Do not add Vitest browser mode for a single case — it adds another
+provider and another test environment for Playwright to cover twice.
+
+Keep normal test configuration in the `angular.json` test target. A custom `runnerConfig`, Vitest
+plugin or `vitest.config.ts` is allowed only when a documented, current limitation of the Angular
+builder blocks the test. Record that limitation and the condition for deleting the custom config.
+Angular does not support the contents of a custom runner config or its third-party plugins.
+
+**Audit (review):** Flag tests that claim to verify layout, rendering or browser-only APIs under
+`jsdom`, and custom Vitest configuration with no documented Angular CLI limitation and removal
+condition.
+
 ## Tests are part of the change
 
 Every behaviour change must add or update the smallest test that proves the new promise. Every bug
@@ -62,15 +78,24 @@ query would work.
 
 The app is zoneless. `fakeAsync`/`tick` were built around Zone.js and are the wrong tool here.
 
-- Await real promises.
-- Use `await fixture.whenStable()` after triggering async work.
+- Trigger changes through the same public notification surface production uses: `.set()` a signal,
+  call `fixture.componentRef.setInput(...)` for an input, or set a DOM control value and dispatch its
+  real event.
+- Await real promises and use `await fixture.whenStable()` after triggering the work.
 - Use `afterNextRender` for DOM-dependent assertions.
 - Never `setTimeout` to "wait for" something — that is a flaky test with a delay.
+- Do not use `fixture.detectChanges()` as a waiting primitive after an interaction. It forces a
+  render and can hide a missing production notification. It remains valid for an explicit initial
+  render or a test whose subject is change detection itself.
+- Use `vi.useFakeTimers()` only when elapsed time is the behaviour — debounce, retry, interval or
+  expiry — and restore real timers after the test. Promises, Observables and change detection use
+  native `await`, `firstValueFrom()` and `whenStable()` instead.
 
 **Audit (partial):** Flag `fakeAsync`, `tick`, and `setTimeout` used for sequencing in tests.
 *Lint covers:* `fakeAsync` and `tick`, in `*.spec.ts` files only.
-*You check:* `setTimeout` used for sequencing — it has no rule, because a `setTimeout` in a test is not
-wrong on its face; using one to wait for change detection is. That judgement is yours.
+*You check:* `setTimeout` used for sequencing; `detectChanges()` used to force an update after an
+interaction; fake timers used when time is not the behaviour, or not restored. These calls are not
+wrong on their face, so the intent needs review.
 
 ## Dependency substitution
 
@@ -81,11 +106,14 @@ TestBed.configureTestingModule({
   providers: [
     InvoicesStore,
     { provide: InvoiceApiService, useValue: fakeInvoiceApi },
-    provideHttpClient(),
     provideHttpClientTesting(),
   ],
 });
 ```
+
+Keep simple, local, deterministic dependencies real. Substitute boundaries with side effects or
+unpredictable behaviour: network, storage, time, randomness, authentication SDKs and slow external
+systems. Every fake makes the test less like production, so isolation needs a reason.
 
 Prefer a small hand-written fake over a mocking framework. Anchor it to the surface the test
 consumes — `satisfies Pick<InvoiceApiService, 'create'>` — so it fails to compile when the service
@@ -94,6 +122,14 @@ changes, which is exactly the signal you want. The provider line will not do thi
 ([architecture.md](architecture.md#abstractions-are-for-real-seams-not-for-testability)).
 Auto-mocks silently keep passing while the real code has moved on. Over ten years this difference
 compounds enormously.
+
+When substitution exists to stop a side effect, replace the provider completely. Do not subclass
+the real service or partially spy on its instance: an unoverridden method can execute production
+code and turn a unit test into an accidental network, storage or clock test.
+
+**Audit (review):** Flag an auto-mock or fake with no `satisfies Pick<...>` compile-time anchor;
+unnecessary substitution of a simple deterministic local dependency; and partial
+spies/subclasses that can still execute the real side effect.
 
 ## Service and store tests
 
@@ -126,12 +162,56 @@ they are stable against markup changes in a way that raw DOM queries are not.
 Presentational components in `ui/` are the easiest thing in the codebase to test: set inputs, read
 the DOM, assert outputs emitted. There is no reason for them to be untested.
 
+The generated `should create` assertion only proves that Angular constructed the component. Replace
+or delete it once the component has a real behaviour test; it does not satisfy the requirement to
+test a behaviour change. Do not call `TestBed.compileComponents()` unless the tested tree contains
+an `@defer` block.
+
+Do not use `NO_ERRORS_SCHEMA` to make a shallow test compile: it also hides misspelled or forgotten
+elements and attributes. Render deterministic children normally; replace only a child with an
+actual side effect, using a minimal typed fake component.
+
+A DOM-affecting directive is tested through a minimal host component, a real host element and real
+events. Calling the directive class or its handler directly does not prove that Angular attached
+the directive, bound its inputs or updated the host.
+
+Create a component harness only for a shared interactive widget exercised by several tests. A
+one-off page component does not need its own abstraction over the DOM.
+
+**Audit (review):** Flag smoke-only `should create` specs, `compileComponents()` with no `@defer`,
+`NO_ERRORS_SCHEMA`, DOM directive tests with no host component, and a new harness used by only one
+test/component.
+
+## Router tests
+
+Use real route definitions with `provideRouter(...)` and `RouterTestingHarness`. Do not mock
+Angular's `Router`; exercising the real router is both smaller and more faithful than reproducing
+its behaviour in a fake.
+
+**Audit (review):** Flag a mocked `Router` where `provideRouter` and `RouterTestingHarness` can prove
+the route, guard, redirect or navigation behaviour.
+
 ## HTTP tests
 
 Use `provideHttpClientTesting` and `HttpTestingController`. Assert the request as well as the
 response — URL, method, and params are part of the contract.
 
+`provideHttpClientTesting()` is sufficient by default. Add `provideHttpClient(...)` only when the
+test configures a feature such as an interceptor, and put it first so the testing provider replaces
+the backend last:
+
+```ts
+providers: [
+  provideHttpClient(withInterceptors([authInterceptor])),
+  provideHttpClientTesting(),
+]
+```
+
 Always `httpMock.verify()` in `afterEach` so unexpected requests fail the test.
+
+**Audit (review):** Flag `provideHttpClient()` added with no feature configuration, either HTTP
+provider in the wrong order, request tests that omit the method and full URL (including params when
+present), and suites that do not call `verify()`.
 
 ## Hygiene
 

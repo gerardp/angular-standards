@@ -52,7 +52,8 @@ Load only the standards relevant to the diff. Do not read all of `references/` e
 | `@spartan-ng/*` version bump | `spartan-ui.md` — was `healthcheck` run? |
 | Forms | `forms.md` |
 | `*.routes.ts`, `app.config.ts` | `routing.md` |
-| `angular.json`, budget thresholds | `performance.md` |
+| `angular.json`, budget thresholds | `performance.md`; also `testing.md` when the test target changed |
+| `vitest*.config.ts`, test setup or test-provider files | `testing.md` |
 | `injectAsync`, or a service newly declared `providedIn: 'root'` | `performance.md`, `routing.md` |
 | A DI contract or provider anywhere — `InjectionToken`, an `abstract class` used as a token, `provide:`/`useClass`/`useValue`/`useFactory`, or a second implementation of an existing contract | `architecture.md` |
 | `eslint.config.js`, `nx.json`, `project.json`, `ng-package.json`, or any other module-boundary configuration | `architecture.md` — the graduation and migration rules |
@@ -82,7 +83,7 @@ rules and review rules cannot drift apart — each one names a specific, checkab
 | `**Audit (partial):**` | The tool catches some of the condition | Check **only the remainder**. Every `partial` line carries a `*Lint covers:*` / `*You check:*` pair naming both halves — do not re-derive the split. |
 | `**Audit (review):**` | No mechanical guardian exists | **All of it by hand.** This is where review earns its keep. |
 
-Today that is 3 `lint`, 11 `partial`, 73 `review` out of 87. That ratio is not a defect — the lint
+Today that is 3 `lint`, 11 `partial`, 78 `review` out of 92. That ratio is not a defect — the lint
 owns a large set of rules (type strictness, a11y, template hygiene, banned decorators) that never
 needed an `Audit:` line because the tool covers them completely. The `Audit:` lines are the residue
 that requires judgement, which is why most of them are `review`.
