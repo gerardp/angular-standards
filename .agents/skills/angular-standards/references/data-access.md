@@ -137,6 +137,11 @@ required, to configure interceptors and XSRF.
 Interceptors are **functional** (`HttpInterceptorFn`). Class-based interceptors and
 `HttpClientModule` are banned — see [longevity.md](longevity.md).
 
+**This chain runs on every request, including ones to other origins.** If this application ever
+calls a second backend, the auth interceptor must be scoped to your own origin before that call
+ships — [security.md](security.md#the-auth-interceptor-is-scoped-to-your-own-origin--default-deny).
+It is a credential leak, and the request that causes it succeeds silently.
+
 ## Progress events
 
 `reportProgress` is deprecated in v22. Ask for the direction you actually want:

@@ -82,7 +82,53 @@ with cookies.
 
 The auth interceptor attaches credentials centrally. No service builds its own auth header.
 
-**Audit (review):** Flag manual `Authorization` headers constructed outside the auth interceptor.
+### The auth interceptor is scoped to your own origin — default deny
+
+**Central attachment plus a second backend is how a bearer token reaches a third party.** The
+interceptor chain in `provideHttpClient()` is global: it runs on *every* `HttpClient` request, not
+just the ones going to your API. The day someone adds a call to a maps provider, a payment SDK's
+REST endpoint or an analytics collector, your access token goes with it — in a header the receiving
+company logs.
+
+Nothing warns you. The request succeeds, the feature works, and the token is now in someone else's
+log retention.
+
+```ts
+const API_ORIGINS = new Set([new URL(environment.apiUrl).origin]);
+
+export const authInterceptor: HttpInterceptorFn = (req, next) => {
+  // Default deny: no token leaves for an origin that is not ours.
+  if (!API_ORIGINS.has(new URL(req.url, location.origin).origin)) {
+    return next(req);
+  }
+  const token = inject(SessionService).accessToken();
+  return next(token ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } }) : req);
+};
+```
+
+**Compare parsed origins, never string prefixes.** `req.url.startsWith('https://api.example.com')`
+also matches `https://api.example.com.attacker.tld` — an attacker-controlled host that your own
+check waves through. `new URL(...).origin` compares scheme, host and port as the browser does.
+
+**Default deny, not opt-out.** A `SKIP_AUTH` `HttpContextToken` that callers set on third-party
+requests is the tempting shape and it fails open: the next third-party call added by someone who
+has not read this file leaks by default. An allowlist fails closed — a new *own* backend fails
+loudly with a 401 and gets added deliberately.
+
+`HttpContext`/`HttpContextToken` is still the right tool for per-request decisions **within** your
+own origin — skipping the error interceptor's toast on a call that handles its own failures, say.
+Use it for that, not for the credential boundary.
+
+**A genuinely separate backend gets its own client, not a shared chain.** Provide
+`provideHttpClient(withInterceptors([otherAuthInterceptor]))` in the child injector that owns it. A
+child injector's chain replaces the parent's; add `withRequestsMadeViaParent()` if it must also run
+the global ones. Do not merge two credential schemes into one interceptor that branches on the URL —
+that puts both secrets in one function and makes the branch the only thing standing between them.
+
+**Audit (review):** Flag manual `Authorization` headers constructed outside the auth interceptor. Flag
+an auth interceptor with no origin check, or one whose check uses `startsWith`/`includes` on a URL
+string rather than a parsed origin. Flag a `SKIP_AUTH`-style opt-out used as the credential
+boundary.
 
 ## XSS
 
@@ -106,8 +152,8 @@ Set a CSP header at the server or CDN. Target:
 
 ```
 default-src 'self';
-script-src 'self';
-style-src 'self' 'unsafe-inline';
+script-src 'self' 'nonce-{{nonce}}';
+style-src 'self' 'nonce-{{nonce}}';
 img-src 'self' data: https:;
 connect-src 'self' <api-origin>;
 frame-ancestors 'none';
@@ -118,10 +164,45 @@ object-src 'none';
 `script-src` must not include `'unsafe-inline'` or `'unsafe-eval'`. If a bootstrap inline script is
 unavoidable, use a per-response nonce.
 
+### `style-src` and `ngCspNonce`
+
+**`'unsafe-inline'` in `style-src` is not the price of using Angular.** It is the directive most
+projects ship and never revisit, because removing it looks like it breaks the app: Angular injects
+component styles as inline `<style>` elements at runtime, and a policy without `'unsafe-inline'`
+drops them — the app loads unstyled, the value goes back, and nobody returns to it. So the weakest
+directive in the policy is the one with the strongest story for staying weak, which over ten years
+is how it survives every security review.
+
+The framework's own answer is `ngCspNonce`. Angular stamps that nonce onto every style element it
+injects, so the policy can name a nonce instead of blanket-allowing inline styles:
+
+```html
+<!-- index.html, interpolated per response by the server or CDN -->
+<app-root ngCspNonce="{{ nonce }}"></app-root>
+```
+
+Use the `CSP_NONCE` injection token instead when the value is only known at runtime — a
+programmatic bootstrap, or a shell that receives the nonce from the host page. Same guarantee, same
+rules; pick whichever the deployment can actually supply.
+
+**The nonce must be new on every response.** A constant baked into a static `index.html` is
+`'unsafe-inline'` with extra steps: an attacker who can read the page can read the nonce, so the
+policy grants exactly what it appears to withhold while costing the deployment complexity anyway.
+That failure mode is worse than the honest `'unsafe-inline'` it replaced, because the header now
+*reads* as strict.
+
+If the deployment genuinely cannot generate a per-response value — a pure static host with no
+edge function — keep `'unsafe-inline'` on `style-src` only, never on `script-src`, and record it in
+`AGENTS.local.md` with a removal condition naming what would have to change. Which is the same rule
+every other deviation obeys: the exception is allowed, the silence is not.
+
 For a decade-long app, also consider a **Trusted Types** policy — it turns DOM XSS sinks into
 runtime errors rather than vulnerabilities.
 
-**Audit (review):** Flag `'unsafe-inline'` or `'unsafe-eval'` in `script-src`.
+**Audit (review):** Flag `'unsafe-inline'` or `'unsafe-eval'` in `script-src`. Flag `'unsafe-inline'`
+in `style-src` with no `AGENTS.local.md` entry and removal condition. Flag a nonce that is a literal
+in a committed `index.html`, or otherwise identical across two responses — that is the failure that
+looks like compliance.
 
 ## Input validation
 

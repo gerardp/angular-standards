@@ -182,6 +182,49 @@ one-off page component does not need its own abstraction over the DOM.
 `NO_ERRORS_SCHEMA`, DOM directive tests with no host component, and a new harness used by only one
 test/component.
 
+### Testing an `@defer` block
+
+[components.md](components.md#deferred-loading) makes `@defer` mandatory below the fold, so its
+states are behaviour like any other and need the same proof. Angular provides the seam:
+`deferBlockBehavior` on `TestBed`, `fixture.getDeferBlocks()`, and `DeferBlockFixture.render()`.
+
+**Default to `DeferBlockBehavior.Manual`.** Render the state you want to assert and skip the trigger
+entirely:
+
+```ts
+import { DeferBlockBehavior, DeferBlockState, TestBed } from '@angular/core/testing';
+
+TestBed.configureTestingModule({ deferBlockBehavior: DeferBlockBehavior.Manual });
+const fixture = TestBed.createComponent(InvoiceDetail);
+await fixture.whenStable();
+
+const [chart] = await fixture.getDeferBlocks();
+await chart.render(DeferBlockState.Complete);
+
+expect(fixture.nativeElement.textContent).toContain('Revenue');
+```
+
+`Placeholder`, `Loading`, `Complete` and `Error` are all reachable this way, and the error branch is
+the one that never gets tested otherwise. Nested blocks work the same: render the outer, then call
+`getDeferBlocks()` on it.
+
+Manual is the default here for the same reason the rest of this file bans fake timers for
+sequencing. `on viewport` needs `IntersectionObserver` and `on idle` needs `requestIdleCallback`;
+under `Playthrough` you would mock both, and the `@placeholder (minimum 300ms)` this project
+mandates turns every assertion into a timer question. `render()` answers it directly instead.
+
+Use `DeferBlockBehavior.Playthrough` only when the trigger *is* the behaviour under test — an
+`on interaction` block where the point is that clicking the placeholder loads the content. Then
+drive it with a real DOM event and `await fixture.whenStable()`, not `tick()`.
+
+**Import `DeferBlockState` from `@angular/core/testing`.** Circulating examples use
+`ɵDeferBlockState`, because it was private when they were written and is public now. The `ɵ` form
+is banned — see [longevity.md](longevity.md#banned-apis).
+
+**Audit (review):** Flag an `@defer` block whose `@error` or `@loading` branch has no test. Flag
+`IntersectionObserver` or `requestIdleCallback` mocked in a spec where `DeferBlockBehavior.Manual`
+removes the need. Flag `Playthrough` used where no trigger is being asserted.
+
 ## Router tests
 
 Use real route definitions with `provideRouter(...)` and `RouterTestingHarness`. Do not mock

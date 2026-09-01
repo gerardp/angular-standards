@@ -56,7 +56,7 @@ const BANNED_PACKAGES = [
     name: '@angular/core',
     importNames: ['debounced'],
     message:
-      'debounced() is experimental in v22. debounceTime into toSignal() in a service instead. Adopting it early needs an AGENTS.local.md entry with a removal condition. angular-standards/references/reactivity-and-state.md#debouncing-stays-in-rxjs-for-now',
+      'debounced() is experimental in v22. For a Signal Forms field use debounce() from @angular/forms/signals (stable) — angular-standards/references/forms.md#debouncing-input. Otherwise debounceTime into toSignal() in a service. Adopting debounced() early needs an AGENTS.local.md entry with a removal condition. angular-standards/references/reactivity-and-state.md#debouncing-stays-in-rxjs-for-now',
   },
 ];
 
@@ -90,6 +90,14 @@ const BANNED_SYNTAX = [
   {
     selector: 'CallExpression[callee.name="provideZoneChangeDetection"]',
     message: 'This app is zoneless. angular-standards/references/longevity.md',
+  },
+  {
+    // ɵ means private: no deprecation cycle, no changelog, free to vanish in a patch release.
+    // Several have since gone public under the unprefixed name (ɵDeferBlockState ->
+    // DeferBlockState), so check the package's public API before assuming there is no equivalent.
+    selector: 'ImportSpecifier[imported.name=/^\u0275/]',
+    message:
+      'ɵ-prefixed imports are private Angular API. Use the public equivalent — check the package public API first. angular-standards/references/longevity.md#banned-apis',
   },
 ];
 

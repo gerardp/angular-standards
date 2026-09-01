@@ -30,6 +30,7 @@ Do not write these. If you find them, migrate them.
 | `NgModule` for app code | standalone components, `bootstrapApplication` | Legacy |
 | `HttpClientModule` | `provideHttpClient()` | Deprecated |
 | `withFetch()` | nothing — `FetchBackend` is the default since v22 | Deprecated v22 |
+| `APP_INITIALIZER` | `provideAppInitializer(() => …)` | Deprecated — carried by most runtime-config tutorials, which predate the replacement |
 | `reportProgress` request option | `reportUploadProgress` / `reportDownloadProgress` — [data-access.md](data-access.md#progress-events) | Deprecated v22 |
 | `withIncrementalHydration()` | nothing — on by default with `provideClientHydration()` — [routing.md](routing.md#incremental-hydration-is-on-by-default) | Deprecated v22; removal intended v24 |
 | `$safeNavigationMigration(…)` in a template | fix the type or the condition, then delete the wrapper | Migration aid, documented as temporary — see below |
@@ -47,13 +48,14 @@ Do not write these. If you find them, migrate them.
 | Protractor | Playwright | Removed years ago |
 | `signal.mutate()` | `.set()` / `.update()` with a new reference | Never shipped as stable; does not exist |
 | `entryComponents`, `ViewEncapsulation.Native` | — | Already removed |
+| Any `ɵ`-prefixed import from an `@angular/*` package | the public equivalent — check the package's public API before assuming there is none | **Project policy.** `ɵ` means private: no deprecation cycle, no changelog entry, free to vanish in a patch. Several have since gone public under the unprefixed name (`ɵDeferBlockState` → `DeferBlockState`) |
 
 **Audit (partial):** Flag any occurrence of a banned API. Every one is a build failure waiting for a future
 major.
 *Lint covers:* the entries backed by a rule — `@angular/animations`, `HttpClientModule`,
-`platform-browser-dynamic`, `moment`, `lodash`, `axios`, `debounced`, the decorator family
-(`@Input`/`@Output`/query/host), `.mutate()`, `provideZoneChangeDetection`, structural directives, and
-the `Eager`/`Default` opt-out.
+`platform-browser-dynamic`, `moment`, `lodash`, `axios`, `debounced`, `ɵ`-prefixed imports, the
+decorator family (`@Input`/`@Output`/query/host), `.mutate()`, `provideZoneChangeDetection`,
+structural directives, and the `Eager`/`Default` opt-out.
 *You check:* the rest of the table by hand. `luxon` outside `ui/helm/`, `::ng-deep`,
 `withIncrementalHydration()`, `$safeNavigationMigration(` and `NgZone` have **no rule** — they are
 banned in prose only. Grep for them explicitly; nothing will tell you otherwise.

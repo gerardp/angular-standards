@@ -3,7 +3,7 @@ name: angular-standards
 description: House coding standards for a long-lived Angular 22+ application — layer architecture and dependency direction, signals and state, data access, Signal Forms, Tailwind v4, Spartan NG, routing, security, testing, and the banned-API list — plus the review process that audits changes against them. Use when writing, refactoring or reviewing Angular code, when deciding where a file goes, when adding a dependency, when upgrading Angular, or when asked to review a diff, branch or PR against project conventions.
 license: MIT
 metadata:
-  version: 5.0.0
+  version: 6.0.0
 ---
 
 # Angular standards
@@ -99,12 +99,18 @@ standards. The ones you are most likely to be offered:
 | `spartan-ng-developer` | The per-component catalogue that would fill the gap above — but its worked examples teach patterns these standards ban — [spartan-ui.md](references/spartan-ui.md#community-spartan-skills-and-snippets) |
 | `ui-craft` | Contradicts itself on the rule that matters most here: its top-level principles say to reach for theme tokens so dark mode comes free, then its reference files work in raw palette shades with hand-written `dark:` overrides. See [spartan-ui.md](references/spartan-ui.md#theming) |
 | `angular-new-app` | Scaffolds a new app. The app already exists by the time it is installed, and its `ng new --ai-config` step generates an `AGENTS.md` that collides with this project's. Its "generate everything with `ng generate`" step ignores [architecture.md](references/architecture.md) on file placement. |
+| `angular-architecture` (`KylerJohnsonDev/angular-architecture-skill`) | The source these standards are partly derived from, now shipped as a Claude Code plugin. Installed alongside this skill it gives an agent two answers to the question with the widest blast radius: it mandates an NgRx Signal Store per feature, `rxMethod` for every fetch and `withCallState` for loading state, where [reactivity-and-state.md](references/reactivity-and-state.md#when-to-add-a-store) says the default is **no store** and reads go through `httpResource`. Read the article for the reasoning behind the layer model; do not install the skill on top of this one. |
 
-The pattern is the same in all four: they are written for a generic Angular project, and this one
-has a design system. A skill that reaches for `bg-emerald-500` is not neutral advice here — it is a
-worked example of the rule these standards spend the most effort enforcing. And a document that
+The pattern is the same in the first four: they are written for a generic Angular project, and this
+one has a design system. A skill that reaches for `bg-emerald-500` is not neutral advice here — it
+is a worked example of the rule these standards spend the most effort enforcing. And a document that
 contradicts *itself* is worse than one that is simply wrong: you cannot predict which half an agent
 copies.
+
+The fifth is a different failure and the more tempting one, because it is the closest neighbour: it
+agrees with this skill on the layer model and disagrees on the state model, which is precisely the
+mix that produces confident, plausible, wrong code. Two skills that contradict each other are worse
+than either alone — an agent reads both as house rules and picks per file.
 
 These are assessments of third-party documents made when this list was written, not permanent
 facts — upstream can fix any of them. They are reasons to exclude by default, not verdicts. If you

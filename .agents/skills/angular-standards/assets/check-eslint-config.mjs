@@ -54,8 +54,9 @@ const GLOBAL_PACKAGES = [
   '@angular/core', // the debounced() ban; scoped resource() bans add a second entry, both apply
 ];
 
-/** Minimum selector count in EVERY block that defines no-restricted-syntax. */
-const GLOBAL_SYNTAX_COUNT = 6;
+/** Minimum selector count in EVERY block that defines no-restricted-syntax. Bump it whenever
+ *  BANNED_SYNTAX grows, or the new selector has no composition guard. */
+const GLOBAL_SYNTAX_COUNT = 7;
 
 /** The OnPush opt-out ban. A named rule, not a selector — see the note in eslint.config.js. */
 const ON_PUSH_RULE = '@angular-eslint/prefer-on-push-component-change-detection';
@@ -153,6 +154,9 @@ function resolve(file) {
       bansImportFrom('@angular/core', 'resource') &&
       bansImportFrom('@angular/core/rxjs-interop', 'rxResource'),
     banInject: (syntax ?? []).some((s) => s.selector?.includes('"inject"')),
+    // Global like banDebounced, so every expectation below asserts it. The realistic violation is
+    // ɵDeferBlockState in a spec, and spec files resolve through different blocks.
+    banPrivateApi: (syntax ?? []).some((s) => s.selector?.includes('\u0275')),
     banFeatures: groups.some((g) => g.includes('features')),
     banApiSvc: groups.some((g) => g.includes('-api.service')),
     banFakeAsync: (syntax ?? []).some((s) => s.selector?.includes('fakeAsync')),
@@ -165,12 +169,12 @@ const EXPECTATIONS = {
   // ui/ components: full layer boundaries, no injection, no I/O.
   'src/app/ui/card/card.ts': {
     globals: true, banInject: true, banFeatures: true, banApiSvc: true, banEagerCD: true,
-    banResource: true, banDebounced: true,
+    banResource: true, banDebounced: true, banPrivateApi: true,
   },
   // ui/ specs: keep the layer boundaries, lose the inject ban (TestBed.inject is legitimate).
   'src/app/ui/card/card.spec.ts': {
     globals: true, banInject: false, banFeatures: true, banApiSvc: true, banFakeAsync: true,
-    banResource: true, banDebounced: true,
+    banResource: true, banDebounced: true, banPrivateApi: true,
   },
   // Generated Helm code: globals only — we did not author it and it legitimately injects.
   // The OnPush opt-out ban is global and does apply here: it stays silent on the explicit `OnPush`
@@ -178,27 +182,27 @@ const EXPECTATIONS = {
   // banDebounced is global too; banResource is not, so generated code is not held to it.
   'src/app/ui/helm/button/button.ts': {
     globals: true, banInject: false, banFeatures: false, banApiSvc: false, banEagerCD: true,
-    banResource: false, banDebounced: true,
+    banResource: false, banDebounced: true, banPrivateApi: true,
   },
   // Feature components: no cross-feature imports, no direct API service, no resource primitives.
   'src/app/features/inv/list.ts': {
     globals: true, banInject: false, banFeatures: true, banApiSvc: true, banEagerCD: true,
-    banResource: true, banDebounced: true,
+    banResource: true, banDebounced: true, banPrivateApi: true,
   },
   // Feature services/stores: may use an API service AND the resource primitives — this is the
   // layer that owns I/O. banResource:false here is the whole point of scoping the ban; if this
   // ever flips to true the standard has started banning the correct way to fetch data.
   'src/app/features/inv/inv.service.ts': {
     globals: true, banInject: false, banFeatures: true, banApiSvc: false,
-    banResource: false, banDebounced: true,
+    banResource: false, banDebounced: true, banPrivateApi: true,
   },
   // Feature specs: layer boundaries kept, zone-era helpers banned.
   'src/app/features/inv/list.spec.ts': {
     globals: true, banFeatures: true, banApiSvc: false, banFakeAsync: true,
-    banResource: false, banDebounced: true,
+    banResource: false, banDebounced: true, banPrivateApi: true,
   },
   // util/ is pure.
-  'src/app/util/money.ts': { globals: true, banFeatures: true, banDebounced: true },
+  'src/app/util/money.ts': { globals: true, banFeatures: true, banDebounced: true, banPrivateApi: true  },
 };
 
 for (const [file, expected] of Object.entries(EXPECTATIONS)) {

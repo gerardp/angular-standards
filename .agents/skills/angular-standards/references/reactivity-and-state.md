@@ -55,6 +55,35 @@ readonly total = computed(() => this.items().reduce((n, i) => n + i.price, 0));
 **3. Keep state flat.** Deeply nested state objects make every update a spread cascade. Prefer
 several signals, or normalise by id, over one deep tree.
 
+**4. A new reference is a change, even when the contents are identical.** This is rule 1 read
+backwards, and it is the half people miss. Signals compare with `Object.is`, so `[]` is never equal
+to `[]`. Rule 1 depends on that — replacing the reference is what makes the signal notify. The cost
+is that a reference you created for no reason notifies just as loudly:
+
+```ts
+// Every recomputation hands consumers a brand-new [] — they re-render on a change that isn't one
+readonly pills = computed(() => this.state.pills() ?? []);
+
+// A stable reference for the empty case. Same value, one identity.
+const NO_PILLS: readonly Pill[] = Object.freeze([]);
+readonly pills = computed(() => this.state.pills() ?? NO_PILLS);
+```
+
+The same applies to a `?? []` or an object literal written inline in a template: it is rebuilt on
+every check.
+
+**Fix the identity, not the comparison.** `signal`, `computed`, `linkedSignal`, `resource` and
+`httpResource` all accept `{ equal: ValueEqualityFn<T> }`, and reaching for it here is the wrong
+instinct: a deep-equality `equal` runs on **every write**, so you have moved work off change
+detection and onto the hot path, permanently, to fix a case a frozen constant fixes for free. Use
+`equal` for a genuine domain equality that `Object.is` cannot express — a value object compared by
+id — and only with a profile behind it, per
+[performance.md](performance.md#measure-before-you-change-anything).
+
+**Audit (review):** Flag a `computed` whose fallback is an inline `[]`, `{}` or object literal, and any
+object or array literal built inline in a template binding. Flag a custom `equal` added for
+performance with no profile in the PR — especially a deep-equality one.
+
 ## `effect()` is a last resort
 
 `effect()` exists to push values into systems that do not understand signals. That is all.
@@ -196,6 +225,11 @@ Rules when you do:
 subscribe without `takeUntilDestroyed()`.
 
 ### Debouncing stays in RxJS for now
+
+**First, check you need this section at all.** If the value being debounced is a Signal Forms
+field, the answer is `debounce()` from `@angular/forms/signals` — a stable schema rule, covered in
+[forms.md](forms.md#debouncing-input). Nothing below applies to it. The API banned here is
+`debounced()`, one letter away and from a different package.
 
 v22 ships `debounced()` in `@angular/core` — `debounced(this.query, 300)` — which covers the
 typeahead case with no RxJS import at all. **Do not adopt it yet.** It is *experimental*, a tier

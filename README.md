@@ -122,11 +122,16 @@ These standards are partly based on Kyler Johnson's
 and its companion article,
 [Angular + NgRx Architecture for Agents](https://www.kylerjohnson.dev/blog/angular-ngrx-architecture-for-agents).
 What carried over: the layered model and its dependency direction, the rule that a component never
-performs I/O, and the format of rules paired with mechanical enforcement. The specifics diverge —
-this repository targets Angular 22+, reads through `httpResource` rather than services returning
-Observables, and does not adopt a store by default — so read it as the origin of the approach, not
-as a source that is compatible rule by rule. Notice in
-[THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+performs I/O, and the format of rules paired with mechanical enforcement.
+
+Past that the two are incompatible, and on the decision with the widest blast radius. That source
+mandates an NgRx Signal Store per feature, with `rxMethod` for every fetch and `withCallState` for
+loading state; these standards default to **no store** and read through `httpResource`. Both now
+target Angular 22, so the framework version is no longer what separates them — the state model is.
+Read it as the origin of the approach, not as a source that is compatible rule by rule. It is now
+also distributed as a Claude Code plugin, which
+[SKILL.md](.agents/skills/angular-standards/SKILL.md) tells agents not to install alongside this
+skill for exactly that reason. Notice in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
 
 The skills under `vendor/skills/` are copied verbatim from other MIT projects and keep their own
 copyright: [`angular/angular`](https://github.com/angular/angular/tree/main/skills/dev-skills)

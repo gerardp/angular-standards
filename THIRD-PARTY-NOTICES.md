@@ -89,7 +89,9 @@ Unlike the two entries above, no file here is a copy of the source and nothing i
 This notice is recorded because the debt is structural rather than incidental: the layered model and
 its dependency direction, the rule that a component never performs I/O, and the format of rules
 paired with mechanical enforcement all originate in this project. The rules themselves diverge on
-specifics — see [README.md](README.md#provenance).
+specifics — see [README.md](README.md#provenance) — and since that project began shipping its own
+installable skill, [SKILL.md](.agents/skills/angular-standards/SKILL.md) also records why the two
+are not installed together.
 
 - **Source:** [KylerJohnsonDev/angular-architecture-skills](https://github.com/KylerJohnsonDev/angular-architecture-skills)
 - **Licence:** MIT

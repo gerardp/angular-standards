@@ -83,7 +83,7 @@ rules and review rules cannot drift apart — each one names a specific, checkab
 | `**Audit (partial):**` | The tool catches some of the condition | Check **only the remainder**. Every `partial` line carries a `*Lint covers:*` / `*You check:*` pair naming both halves — do not re-derive the split. |
 | `**Audit (review):**` | No mechanical guardian exists | **All of it by hand.** This is where review earns its keep. |
 
-Today that is 3 `lint`, 11 `partial`, 78 `review` out of 92. That ratio is not a defect — the lint
+Today that is 3 `lint`, 11 `partial`, 81 `review` out of 95. That ratio is not a defect — the lint
 owns a large set of rules (type strictness, a11y, template hygiene, banned decorators) that never
 needed an `Audit:` line because the tool covers them completely. The `Audit:` lines are the residue
 that requires judgement, which is why most of them are `review`.

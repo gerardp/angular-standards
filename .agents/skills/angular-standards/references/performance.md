@@ -186,19 +186,53 @@ Three things about this:
   ships `@Service()` as a shorthand for the same thing, but **this project has not adopted it**: the
   decorator is new, the codebase is consistent on `@Injectable()`, and a codebase that mixes both is
   worse than one that picks either. Revisit at v23/v24, once its adoption pattern has settled.
+- **`injectAsync` goes in a field initializer; only the `await` goes in the method.** It needs an
+  injection context exactly as `inject()` does, so calling it inside the handler throws at runtime.
+  The example above splits it that way on purpose — the field holds the injector, the method awaits
+  it.
 - **`prefetch` is opportunistic.** `onIdle` warms the chunk when the browser is idle; calling the
-  injector before that resolves simply loads it immediately. Custom triggers implement
-  `PrefetchTrigger` — a function returning a promise — which is how you get `on hover` parity with
-  `@defer (prefetch on hover)`.
+  injector before that resolves simply loads it immediately. `onIdle({ timeout: 1_000 })` caps the
+  wait for a browser that never goes idle — pass it wrapped, `{ prefetch: () => onIdle({ timeout: 1_000 }) }`.
+  Custom triggers implement `PrefetchTrigger` — a function returning a promise — which is how you
+  get `on hover` parity with `@defer (prefetch on hover)`.
 - **Failure is a real case.** A chunk fetch can reject. Handle it where the service handles every
   other failure — never let a rejected injector surface as an unhandled promise.
+
+### One static import anywhere defeats the whole thing
+
+**This is the failure mode to design against, because nothing reports it.** The bundler splits a
+chunk only if the dynamic `import()` is the *only* path to that module. A single ordinary import
+somewhere else in the project — a barrel file re-exporting it, a sibling service that needed one
+constant, a test helper imported by production code — pulls it straight back into the eager graph.
+
+Nothing breaks. There is no error, no warning, no lint failure. `injectAsync` still resolves, the
+`await` still works, the feature behaves correctly. You simply paid for the promise, the error
+handling and the prefetch trigger, and shipped the bytes anyway.
+
+Two defences, and use both:
+
+- **Import the type, not the module.** A consumer that needs only the shape writes
+  `import type { InvoiceExporter } from './invoice-exporter'`. `import type` is erased at compile
+  time, so it creates no runtime edge and the split survives. A plain `import` used only for a type
+  does not — it looks identical in review and is the likeliest way this regresses.
+- **Verify it split, once, when you add it.** The metafile from
+  [Reading the bundle](#reading-the-bundle) answers this directly: the lazy service should appear
+  in a chunk of its own, not in the route's. The browser Network tab shows the same thing at
+  runtime — the chunk is requested when the user acts, not on navigation.
+
+The verification is not ceremony. Every reason to reach for `injectAsync` is a bundle-size reason,
+so an unverified split is an optimisation with no evidence it happened — which
+[Measure before you change anything](#measure-before-you-change-anything) already rules out.
 
 This is worth doing for a genuinely heavy, genuinely optional dependency. It is not worth doing for
 an ordinary feature service — you would be adding a promise to every call site to save two
 kilobytes.
 
 **Audit (review):** Flag a component that eagerly injects a service whose only consumer is one rarely-used
-handler, where that service pulls in a large third-party dependency.
+handler, where that service pulls in a large third-party dependency. Flag any plain `import` of an
+`injectAsync` target from a second file — it silently undoes the split, so grep for the class name
+across the project rather than trusting the dynamic import to be the only path. Flag an
+`injectAsync` added with no metafile or Network-tab evidence that a separate chunk exists.
 
 ## Slow computations
 
